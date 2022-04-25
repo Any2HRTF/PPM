@@ -1,0 +1,145 @@
+function [ppm,val] = ppm_get_values(ppm,varargin)
+%ppm_get_values - Obtain the parameters values from the blender file to be modified,
+%                 as specified in the parametric pinna model (PPM) structure array
+%
+% Usage: 
+%   ppm = ppm_get_values(ppm)
+%
+% Input parameters:
+%
+%   Required
+%     ppm    : PPM structure array, initialized as per ppm_initialize.
+%   
+%   Optional (to fetch a subset of the current parameter values)
+%     'type' : Parameter type [string]
+%     'name' : Parameter name [string]
+%     'axis' : Displacement/rotation axis [string], 
+%              'W' (only for rotation)/'X'/'Y'/'Z' (default: []), 
+%              (not relevant if parameter is of type "Shape_key")
+%
+% Output parameters:
+%
+%   ppm  : updated PPM structure array [struct]
+%          .parameters : parameter values as obtained from the
+%                       specified blender file, i.e.
+%                       fullfile(path_blender_file,name_blender_file) [cell]
+%    val : subset of queried parameters with current values [cell] 
+%
+% Related functions : ppm_initialize, ppm_set_values, ppm_evaluate
+
+% #Author: Florian Pausch (2022)
+
+%% parse input arguments
+p = inputParser;
+
+addOptional(p,'type',[]);
+addOptional(p,'name',[]);
+addOptional(p,'axis',[]);
+
+parse(p,varargin{:});
+
+%% check for input errors
+if ~isempty(p.Results.type)
+    if ~ismember(p.Results.type,ppm.parameters(:,1))
+        error('Input error: Unknown parameter type.')
+    end
+end
+
+if ~isempty(p.Results.name)
+    if ~ismember(p.Results.name,ppm.parameters(:,2))
+        error('Input error: Unknown parameter name.')
+    end
+end
+
+if strcmp(p.Results.type,'Location') && strcmp(p.Results.axis,'W')
+    error('Input error. Axis does not exist for type ''Location''.')
+end
+
+if ~isempty(p.Results.axis)
+    if ~ismember(p.Results.axis,ppm.parameters(:,3))
+        error('Input error: Unknown displacement/rotation axis.')
+    end
+end
+
+if ~isempty(p.Results.type) && ~isempty(p.Results.name)
+    if ~sum(strcmp(p.Results.type,ppm.parameters(:,1)) & strcmp(p.Results.name,ppm.parameters(:,2)))
+        error('Input error. Unknown combination of parameter ''type'' and ''name''.')
+    end
+end
+
+%% create .txt file containing the current parameter values
+writecell(ppm.parameters, fullfile(ppm.ini.path.result,'1.txt'));
+
+%% fetch parameter values from the specified blender project
+switch ppm.ini.verbose_level
+    case 0
+        args = [ppm.ini.path.blender_exe, ' -b ', ppm.ini.blender_file,...
+            ' -P ' fullfile(ppm.ini.path.python,'get_values_and_export_mesh_v1.py'),' -- ',...
+            [ppm.ini.path.result,'\'], ' -a > nul 2>&1'];
+        stat = system(args);
+        if stat
+            error('Parameters could not be obtained from blender file. Check ''args''. Aborted.') 
+        end
+    case 1
+        disp([mfilename,': Obtaining parameter values from specified blender file...'])
+        args = [ppm.ini.path.blender_exe, ' -b ', ppm.ini.blender_file,...
+            ' -P ' fullfile(ppm.ini.path.python,'get_values_and_export_mesh_v1.py'),' -- ',...
+            [ppm.ini.path.result,'\'], ' -a > nul 2>&1'];
+        stat = system(args);
+        if stat
+            error('Parameters could not be obtained from blender file. Check ''args''. Aborted.')
+        else
+            disp([mfilename,': Parameter values successfully obtained.'])
+        end
+    case 2
+        disp([mfilename,': Obtaining parameter values from specified blender file...'])
+        args = [ppm.ini.path.blender_exe, ' -b ', ppm.ini.blender_file,...
+            ' -P ' fullfile(ppm.ini.path.python,'get_values_and_export_mesh_v1.py'),' -- ',...
+            [ppm.ini.path.result,'\']];
+        stat = system(args);
+        if stat
+            error('Parameters could not be obtained from blender file. Check ''args''. Aborted.')
+        else
+            disp([mfilename,': Parameter values successfully obtained.'])
+        end
+end
+
+parameters = importdata(fullfile(ppm.ini.path.result,'blender_bones_data.txt'));
+ppm.parameters(:,4) = num2cell(parameters.data);
+
+%% return selected parameters
+if ~isempty(p.Results.type) || ~isempty(p.Results.name) || ~isempty(p.Results.axis)
+
+    if isempty(p.Results.type)
+        type = ppm.parameters(:,1);
+    else
+        type = p.Results.type;
+    end
+
+    if isempty(p.Results.name)
+        name = ppm.parameters(:,2);
+    else
+        name = p.Results.name;
+    end
+
+    if isempty(p.Results.axis)
+        axis = ppm.parameters(:,3);
+    else
+        if strcmp(p.Results.type,'Shape_key')
+            axis = '#';
+        else
+            axis = p.Results.axis;
+        end
+    end
+
+    val = ppm.parameters(strcmp(type,ppm.parameters(:,1)) & ...
+        strcmp(name,ppm.parameters(:,2)) & ...
+        strcmp(axis,ppm.parameters(:,3)),:);
+
+else 
+
+    val = [];
+
+end
+
+% delete(fullfile(config.path.result,'blender_bones_data.txt'))

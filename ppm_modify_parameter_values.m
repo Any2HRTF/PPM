@@ -1,0 +1,120 @@
+function ppm = ppm_modify_parameter_values(ppm)
+%ppm_modify_parameter_values - Change the value of the parameter to be modified. 
+%                    Depending on the instruction mode, the specified value 
+%                    is either added to the existing value of, or directly assigned 
+%                    to the selected parameter. The parametric pinna model 
+%                    (PPM) structure array is updated accordingly.
+%
+% Usage: 
+%   ppm = ppm_modify_parameter_values(ppm)
+%
+% Input parameters:
+%
+%   ppm : PPM structure array [struct]. Initialized as per ppm_initialize().
+%
+% Output parameters:
+%
+%   ppm : updated PPM structure array [struct]
+%
+% Note: This function is called within ppm_set_values().
+
+% #Author: Mantas Tamulionis (2021)
+% Modifications by Florian Pausch (2022)
+
+%% determine ppm.modify.idx
+if strcmp(ppm.modify.type,"Shape_key")
+    ppm.modify.idx = find(strcmp(ppm.modify.type,ppm.parameters(:,1)) & ...
+        strcmp(ppm.modify.name,ppm.parameters(:,2)));
+else % additionally check axis
+    ppm.modify.idx = find(strcmp(ppm.modify.type,ppm.parameters(:,1)) & ...
+        strcmp(ppm.modify.name,ppm.parameters(:,2)) & ...
+        strcmp(ppm.modify.axis,ppm.parameters(:,3)));
+end
+
+%% store original parameter value before modifications
+ppm.modify.val_orig = ppm.parameters{ppm.modify.idx,4};
+
+%% check if set value is within limits
+if strcmp(ppm.modify.type,"Shape_key")
+    
+    lim_low = ppm.ini.shape_key_limits{ppm.modify.idx-9,2};
+    lim_up = ppm.ini.shape_key_limits{ppm.modify.idx-9,3};
+    if ppm.modify.val > lim_up
+
+        if ppm.modify.val > lim_up
+            if ppm.ini.verbose_level>0
+                warning([mfilename,': The value of the Shape_key parameter you selected exceeds the upper limit of ',...
+                    num2str(lim_up),'. Upper limit was assigned to the value.']);
+            end
+            ppm.modify.val = lim_up;
+        end
+
+        if  ppm.modify.val < lim_low
+            if ppm.ini.verbose_level>0
+                warning([mfilename,': The value of the Shape_key parameter you selected exceeds the lower limit of ',...
+                    num2str(lim_low),'. Lower limit was assigned to the value.']);
+            end
+            ppm.modify.val = lim_low;
+        end
+    
+    end
+end
+
+%% modify the instruction file
+if ppm.modify.itr == 1
+    
+    ppm = ppm_add_or_assign(ppm);
+    writecell(ppm.parameters, fullfile(ppm.ini.path.result, '1.txt'));
+    
+else % ppm.modify.itr > 1
+    
+    ppm.modify.stp = ppm.modify.range/(ppm.modify.itr-1); % calculate step size for the parameter values to be tested
+    
+    if strcmp(ppm.modify.instruction_mode,'rel')
+        ppm.modify.val_vec = ((ppm.modify.val+ppm.modify.val_orig)-ppm.modify.range/2:...
+            ppm.modify.stp:...
+            (ppm.modify.val+ppm.modify.val_orig)+ppm.modify.range/2); % create a vector of values to be tested
+    else
+        ppm.modify.val_vec = (ppm.modify.val-ppm.modify.range/2:...
+            ppm.modify.stp:...
+            ppm.modify.val+ppm.modify.range/2); % create a vector of values to be tested
+    end
+
+    if strcmp(ppm.modify.type,"Shape_key")
+        if ppm.ini.verbose_level>0 && (any(ppm.modify.val_vec(ppm.modify.val_vec<lim_low)) || ...
+                any(ppm.modify.val_vec(ppm.modify.val_vec>lim_up)))
+            warning([mfilename,': Range of values of the Shape_key parameter selected exceeds the limits. ',...
+                'Select a value from ', num2str(lim_low), ' to ',num2str(lim_up),...
+                ' (set was limited to parameter limits).']);
+            ppm.modify.val_vec(ppm.modify.val_vec<lim_low) = lim_low;
+            ppm.modify.val_vec(ppm.modify.val_vec>lim_up) = lim_up;
+        end
+    end
+    
+    % create different blender instruction files that contain the range of
+    % values to be tested
+    for idx = 1:ppm.modify.itr
+        ppm.modify.val = ppm.modify.val_vec(idx);
+        
+        ppm = ppm_add_or_assign(ppm);
+        writecell(ppm.parameters, fullfile(ppm.ini.path.result,[num2str(idx), '.txt']));
+    end
+    
+end
+
+end
+
+%% add or assign value to parameter depending on ppm.modify.instruction_mode
+function ppm = ppm_add_or_assign(ppm)
+
+% execute depending on specified instruction mode
+switch ppm.modify.instruction_mode
+    case 'rel'
+        ppm.parameters{ppm.modify.idx,4} = ppm.modify.val_orig + ppm.modify.val;
+    case 'abs'
+        ppm.parameters{ppm.modify.idx,4} = ppm.modify.val;
+    otherwise
+        error('Unknown instruction mode.')
+end
+
+end
