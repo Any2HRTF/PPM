@@ -27,11 +27,11 @@ FUNCTION OVERVIEW
 		-> independent parameter selection via 'type'/'name'/'axis'
 		-> itr=1: change the selected parameter values only once as per ppm.modify.instruction_mode
 	    -> itr>1: test itr neigboring values in steps of range/itr in a range of (+/- range/2) symmetric around val
-	- ppm_evaluate(): Evaluate the PPM template mesh against a target mesh in terms of the Hausdorff distance
+	- ppm_evaluate(): Evaluate the PPM mesh against a target mesh in terms of the Hausdorff distance
 		-> plot histogram of Hausdorff values
 		-> if ppm.modify > 1 the parameter value is set to the one resulting in the minimum mean minimum Hausdorff distance across iterations
 		
-+ ppm_evaluate_multiple_meshes: MATLAB script to compare multiple template meshes to the corresponding reference meshes and evaluate their geometric fit in terms of the Hausdorff distance
++ ppm_evaluate_multiple_meshes: MATLAB script to compare multiple PPM meshes to the corresponding reference meshes and evaluate their geometric fit in terms of the Hausdorff distance
 
 		
 COMPATIBILITY
@@ -42,7 +42,7 @@ VERSIONS
 
 1.1.0 (release)
 + blender model: renamed ARI_PPM_v0_3 to ARI_PPM_v1
-+ get_existing_values_v0_3.py: renamed to get_values_and_export_mesh_v1.py, now additionally exports PPM template mesh as .ply file
++ get_existing_values_v0_3.py: renamed to get_values_and_export_mesh_v1.py, now additionally exports PPM mesh as .ply file
 + modify_and_export_mesh_v0_3.py: renamed to set_values_and_export_mesh_v1.py
 + parameter_defaults_v0_3.mat: renamed to parameter_defaults_v1.mat
 + ppm_evaluate: added option to load other than default result mesh
@@ -55,7 +55,7 @@ VERSIONS
 + improved function descriptions
 
 1.0.1:
-+ ppm_evaluate_multiple_meshes: new MATLAB script to compare multiple PPM template meshes to the corresponding reference meshes and evaluate their geometric fit in terms of the Hausdorff distance
++ ppm_evaluate_multiple_meshes: new MATLAB script to compare multiple PPM meshes to the corresponding reference meshes and evaluate their geometric fit in terms of the Hausdorff distance
 
 1.0.0:
 + blender model ARI_PPM_v0_2: renamed and updated to ARI_PPM_v1, new armature, object, and shape key definitions (not backward compatible, i.e. for versions below 1.0.0), 
@@ -65,8 +65,8 @@ naming conventions: Start with upper-case letter, continue in lower-case, string
 + config folder: added new default blender file (PPM_default_v1.blend) 
 
 0.9.3:
-+ get_existing_values.py: added W component when fetching the parameter values from specified blender file (extension of the parameter set of type 'Rotation'). The previously ignored W-component of the orientation quaternion is now included and can be queried and set via ppm_get_values() and ppm_set_values(), respectively. The corresponding Python scripts python/get_existing_values.py and python/modify_and_export.py have been updated. 
-+ modify_and_export_mesh.py: added W-component when setting the parameter values in the specified blender file
++ get_existing_values.py: added W-component (quaternion) when fetching the parameter values from specified blender file (extension of the parameter set of type 'Rotation'). The previously ignored W-component of the orientation quaternion is now included and can be queried and set via ppm_get_values() and ppm_set_values(), respectively. The corresponding Python scripts python/get_existing_values.py and python/modify_and_export.py have been updated. 
++ modify_and_export_mesh.py: added W-component (quaternion) when setting the parameter values in the specified blender file
 + ppm_initialize: updated initialization
 + parameter_defaults.mat: updated
 
@@ -86,7 +86,7 @@ naming conventions: Start with upper-case letter, continue in lower-case, string
 + ppm_initialize: new MATLAB function to initialize the PPM structure array
 + ppm_get_values: new MATLAB function to obtain the parameter values from the blender file to be modified
 + ppm_set_values: new MATLAB function to set the PPM parameter values of the blender file to be modified
-+ ppm_evaluate: new MATLAB function to evaluate the PPM template mesh against a target mesh in terms of the Hausdorff distance
++ ppm_evaluate: new MATLAB function to evaluate the PPM mesh against a target mesh in terms of the Hausdorff distance
 + added function descriptions
 
 0.8:
