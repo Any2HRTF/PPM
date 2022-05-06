@@ -86,7 +86,7 @@ ptCloud_result = pointCloud(ppm.evaluate.mesh_result(:,:,hd_mean_min_itr), ...
     'Color',cmatrix);
 pcshow(ptCloud_result,'MarkerSize', 20);
 
-hl = legend('Target mesh','Result mesh');
+hl = legend('Target mesh','Modelled mesh');
 set(hl,'color','white','location','southwestoutside');
 
 if ~all(range(hd_c)==0)
