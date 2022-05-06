@@ -92,7 +92,7 @@ set(hl,'color','white','location','southwestoutside');
 if ~all(range(hd_c)==0)
     c=colorbar;
 end
-c.Label.String = 'Hausdorff distance';
+c.Label.String = 'Hausdorff distance (mm)';
 set(gcf,'color','w');
 set(gca,'color','w');
 
@@ -103,7 +103,7 @@ view([180 0])
 
 nexttile
 histogram(ppm.evaluate.hd(:,hd_mean_min_itr),'EdgeColor','black','FaceColor',[.5 .5 .5]);
-xlabel('Hausdorff distance')
+xlabel('Hausdorff distance (mm)')
 ylabel('Count')
 axis square
 grid on
