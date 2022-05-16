@@ -107,14 +107,41 @@ end
 %% add or assign value to parameter depending on ppm.modify.instruction_mode
 function ppm = ppm_add_or_assign(ppm)
 
-% execute depending on specified instruction mode
-switch ppm.modify.instruction_mode
-    case 'rel'
-        ppm.parameters{ppm.modify.idx,4} = ppm.modify.val_orig + ppm.modify.val;
-    case 'abs'
-        ppm.parameters{ppm.modify.idx,4} = ppm.modify.val;
-    otherwise
-        error('Unknown instruction mode.')
+% transform quaternions to Euler angles as per ppm.modify.rotation_mode and
+% reconstruct quaternion from modified Euler angle component
+if ~strcmp(ppm.modify.rotation_mode,'quaternion') && strcmp(ppm.modify.type,'Rotation')
+
+    idx = find( strcmp(ppm.modify.type,ppm.parameters(:,1)) & ...
+        strcmp(ppm.modify.name,ppm.parameters(:,2)) );
+    val_orig = cell2mat( ppm.parameters(idx,4) );
+
+    q = quaternion(val_orig);
+    angles_Eul = EulerAngles(q,lower(ppm.modify.rotation_mode));
+
+    str_idx = strfind(ppm.modify.rotation_mode,ppm.modify.axis);
+
+    % execute depending on specified instruction mode
+    switch ppm.modify.instruction_mode
+        case 'rel'
+            angles_Eul(str_idx) = angles_Eul(str_idx) + ppm.modify.val;
+        case 'abs'
+            angles_Eul(str_idx) = ppm.modify.val;
+    end
+
+    % reconstruct quaternion from modified Euler angles
+    q_rec = quaternion.eulerangles(lower(ppm.modify.rotation_mode),angles_Eul);
+    ppm.parameters(idx,4) = num2cell(q_rec.e);
+
+else
+
+    % execute depending on specified instruction mode
+    switch ppm.modify.instruction_mode
+        case 'rel'
+            ppm.parameters{ppm.modify.idx,4} = ppm.modify.val_orig + ppm.modify.val;
+        case 'abs'
+            ppm.parameters{ppm.modify.idx,4} = ppm.modify.val;
+    end
+
 end
 
 end
