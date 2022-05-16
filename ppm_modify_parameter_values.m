@@ -123,9 +123,9 @@ if ~strcmp(ppm.modify.rotation_mode,'quaternion') && strcmp(ppm.modify.type,'Rot
     % execute depending on specified instruction mode
     switch ppm.modify.instruction_mode
         case 'rel'
-            angles_Eul(str_idx) = angles_Eul(str_idx) + ppm.modify.val;
+            angles_Eul(str_idx) = angles_Eul(str_idx) + deg2rad(ppm.modify.val);
         case 'abs'
-            angles_Eul(str_idx) = ppm.modify.val;
+            angles_Eul(str_idx) = deg2rad(ppm.modify.val);
     end
 
     % reconstruct quaternion from modified Euler angles
