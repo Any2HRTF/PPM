@@ -17,8 +17,8 @@ function ppm = ppm_set_values(ppm,varargin)
 %              otherwise optional)
 %     'val'  : Value to be assigned to the selected parameter [double].
 %              For parameter type 'Rotation', 'val' sets the values of
-%              the orientation quaternion or the Euler-angle component as per
-%              ppm.modify.rotation_mode. The general behavior depends on 
+%              the orientation quaternion or the Euler-angle component in deg 
+%              as per ppm.modify.rotation_mode. The general behavior depends on 
 %              ppm.modify.instruction_mode. 
 %
 %   Optional (key/value pairs):
