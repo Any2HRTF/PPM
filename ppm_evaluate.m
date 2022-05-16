@@ -160,7 +160,7 @@ else % itr > 1
         hold on
         plot(ppm.modify.val_vec(ppm.evaluate.hd_mean_min_itr), ...
             min(ppm.evaluate.hd_mean),'r.','markersize',20);
-        set(gca,'xtick',round(ppm.modify.val_vec*100)/100)
+        set(gca,'xtick',round(ppm.modify.val_vec*1000)/1000)
         xlabel('Parameter value per iteration')
         ylabel ('Mean minimum Hausdorff distance')
         grid minor
