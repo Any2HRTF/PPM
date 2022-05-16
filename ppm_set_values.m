@@ -1,5 +1,5 @@
 function ppm = ppm_set_values(ppm,varargin)
-%ppm_set_values - Set the parameters values of the blender file to be modified, 
+%ppm_set_values - Set the parameters values of the Blender file to be modified, 
 %                 as specified in the parametric pinna model (PPM) structure array
 %
 % Usage: 
@@ -16,28 +16,39 @@ function ppm = ppm_set_values(ppm,varargin)
 %              (only required if parameter is not of type 'Shape_key', 
 %              otherwise optional)
 %     'val'  : Value to be assigned to the selected parameter [double].
-%              For parameter type 'Rotation', val sets the values of
-%              the orientation quaternion. General behavior depends on 
-%              ppm.ini.instruction_mode. 
+%              For parameter type 'Rotation', 'val' sets the values of
+%              the orientation quaternion or the Euler-angle component as per
+%              ppm.modify.rotation_mode. The general behavior depends on 
+%              ppm.modify.instruction_mode. 
 %
 %   Optional (key/value pairs):
+%     'rotation_mode'    : Rotation mode [string]. Possible rotation modes 
+%                          include 'quaternion': W,X,Y,Z (default)
+%                          'XYZ': XYZ Euler rotation
+%                          'XZY': XZY Euler rotation
+%                          'YXZ': YXZ Euler rotation
+%                          'YZX': YZX Euler rotation
+%                          'ZXY': ZXY Euler rotation
+%                          'ZYX': ZYX Euler rotation
+%                          Note: Manipulations of Euler-angle components will 
+%                                result in an correspondingly updated quaternion.
+%     'instruction_mode' : Instruction mode [string]
+%                           'rel': val is added to val_orig and subsequently 
+%                                  assigned to the parameter (default)
+%                           'abs': val is directly assigned to the parameter
 %     'itr'              : Number of iterations. Test itr neigboring values in steps 
 %                          of range/itr, symmetrically around val [double] 
 %                          (default: 1). 
 %     'range'            : Range of values to be tested, in a range of 
 %                          (+/-range/2) symmetric around val [double] 
 %                          (default: 1).
-%     'instruction_mode' : Instruction mode [string]
-%                           'rel': val is added to val_orig and subsequently 
-%                                  assigned to the parameter (default)
-%                           'abs': val is directly assigned to the parameter
 %
 %   For ppm_blender_execute()
-%     'mesh'      : Export updated blender mesh [logical], default: true 
+%     'mesh'      : Render updated PPM mesh [logical], default: true 
 %     'remesh'    : Disable/enable modififiers in blender [logical], default: false
-%     'image'     : Export image [logical], default: false
+%     'image'     : Render PPM mesh as image [logical], default: false
 %     'image_res' : Image resolution (image_res x image_res) of the
-%                   exported image [double], default: 1024
+%                   rendered image [double], default: 1024
 %
 % Output parameters:
 %
@@ -53,8 +64,9 @@ function ppm = ppm_set_values(ppm,varargin)
 %             .itr [double]
 %             .range [double]
 %             .idx [double]   : row in ppm.parameters [double]
-%             .stp            : step size between parameter values (if itr>1) [double]
 %             .instruction_mode [string]
+%             .rotation_mode [string]
+%             .stp            : step size between parameter values (if itr>1) [double]
 %
 % Definition of parameter limits and conventions in ppm.parameters:
 % (Row)   .type     .name           .axis    (Limits)        (Description) 
@@ -79,7 +91,7 @@ function ppm = ppm_set_values(ppm,varargin)
 % 136-162 Scale     Bendy_bones     X/Y/Z    [0 +2]          Scaling in global x/y/z-axis direction
 %
 % NOTE: All changes of parameter values are non-destructive and only
-%       contained in the exported meshes. The blender file itself, specified  
+%       contained in the exported meshes. The Blender file itself, specified  
 %       in ppm_initialize, is not modified.
 %
 % Related functions : ppm_initialize, ppm_get_values, ppm_evaluate
@@ -96,6 +108,7 @@ addOptional(p,'val',[]);
 addOptional(p,'itr',1);
 addOptional(p,'range',1);
 addOptional(p,'instruction_mode','rel');
+addOptional(p,'rotation_mode','quaternion');
 
 % input arguments for ppm_blender_execute()
 addOptional(p,'mesh',true);
@@ -115,11 +128,15 @@ if ~sum(strcmp(p.Results.name,ppm.parameters(:,2)))
 end
 
 if ~sum(strcmp(p.Results.axis,ppm.parameters(:,3))) && ~strcmp(p.Results.type,'Shape_key')
-    error('Input error. Unknown displacement/rotation axis.')
+    error('Input error. Unknown displacement/rotation axis. Must be one of ''X'', ''Y'', or ''Z''.')
 end
 
 if strcmp(p.Results.type,'Location') && strcmp(p.Results.axis,'W')
     error('Input error. Axis does not exist for type ''Location''.')
+end
+
+if strcmp(p.Results.type,'Rotation') && ~strcmp(p.Results.rotation_mode,'quaternion') && strcmp(p.Results.axis,'W')
+    error('Input error. W-component is not relevant for manipulation of Euler angle components.')
 end
 
 if (isempty(p.Results.type) || isempty(p.Results.name) || isempty(p.Results.val))
@@ -138,6 +155,14 @@ if p.Results.itr>1 && isempty(p.Results.range)
     error('Not enough input arguments. Please specify ''range''.')
 end
 
+if ~ismember(p.Results.instruction_mode,{'rel','abs'})
+    error('Instruction mode must be either ''rel'' or ''abs''.')
+end
+
+if ~ismember(p.Results.rotation_mode,{'quaternion','XYZ','XZY','YXZ','YZX','ZXY','ZYX'})
+    error('Rotation mode must be either ''quaternion'',''XYZ'',''XZY'',''YXZ'',''YZX'',''ZXY'', or ''ZYX''.')
+end
+
 %% assign to ppm struct
 ppm.modify.type  = p.Results.type;
 ppm.modify.name  = p.Results.name;
@@ -146,6 +171,7 @@ ppm.modify.val   = p.Results.val;
 ppm.modify.itr   = p.Results.itr;
 ppm.modify.range = p.Results.range;
 ppm.modify.instruction_mode = p.Results.instruction_mode;
+ppm.modify.rotation_mode = p.Results.rotation_mode;
 
 %% assign the specified values to the selected parameter
 ppm = ppm_modify_parameter_values(ppm);
