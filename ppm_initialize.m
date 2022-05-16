@@ -8,8 +8,8 @@ function ppm = ppm_initialize(varargin)
 % Input parameters (key/value pairs):
 %
 %   Required
-%     'path_blender_file'   : Path to blender file to be modified [string]
-%     'name_blender_file'   : Name of blender file to be modified [string] 
+%     'path_blender_file'   : Path to Blender file to be modified [string]
+%     'name_blender_file'   : Name of Blender file to be modified [string] 
 %
 %   Optional
 %     'path_default'        : Path to default folder [string]
@@ -20,6 +20,8 @@ function ppm = ppm_initialize(varargin)
 %                             (default: fullfile(pwd,'python')) 
 %     'path_result'         : Path to result folder [string]
 %                             (default: fullfile(pwd,'result')) 
+%     'path_external'       : Path to folder containing external
+%                             classes, functions, scripts etc. [string]
 %     'name_parameter_file' : Name of file containing default parameter definitions 
 %                             in default folder [string] 
 %                             (default: 'parameter_defaults_v1')
@@ -40,8 +42,8 @@ function ppm = ppm_initialize(varargin)
 %             .blender_file     : fullfile(path_blender_file, ...
 %                                          name_blender_file) [string]
 %             .verbose_level
-%             .path             : paths to default, data, python,
-%                                 result, blender_exe [string]
+%             .path             : paths to default, data, python, result,
+%                                 and external folders, and blender_exe [string]
 %             .sysarch          : automatically determined system [string]
 %                                 architecture (e.g. win64)
 %             .shape_key_limits : limits of PPM parameters of type 
@@ -50,8 +52,8 @@ function ppm = ppm_initialize(varargin)
 %                                 fullfile(ppm.ini.path.default,...
 %                                       'parameter_defaults_v1.mat') [cell]
 %
-% ATTENTION: The blender file to be modified needs to be saved in "Object Mode"
-%            in blender with visible armature and object definitions
+% ATTENTION: The Blender file to be modified needs to be saved in "Object Mode"
+%            in Blender with visible armature and object definitions
 %            in viewport.
 %
 % Related functions : ppm_get_values, ppm_set_values, ppm_evaluate
@@ -67,6 +69,7 @@ addOptional(p,'path_default',fullfile(pwd,'default'));
 addOptional(p,'path_data',fullfile(pwd,'data'));
 addOptional(p,'path_python',fullfile(pwd,'python'));
 addOptional(p,'path_result',fullfile(pwd,'result'));
+addOptional(p,'path_external',fullfile(pwd,'external'));
 addOptional(p,'auto_delete',false);
 addOptional(p,'verbose_level',1);
 addOptional(p,'name_limit_file','shape_key_limits_v1');
@@ -84,7 +87,7 @@ if ~((p.Results.verbose_level>=0) && (p.Results.verbose_level<=2))
 end
 
 %% assign default parameters to ppm
-% set blender project to be modified
+% set Blender project to be modified
 
 ppm.ini.blender_file  = fullfile(p.Results.path_blender_file,...
                                  p.Results.name_blender_file);
@@ -93,9 +96,22 @@ ppm.ini.path.python   = p.Results.path_python;
 ppm.ini.path.default  = p.Results.path_default; 
 ppm.ini.path.data     = p.Results.path_data; 
 ppm.ini.path.result   = p.Results.path_result;
+ppm.ini.path.external = p.Results.path_external;
 if ~exist(ppm.ini.path.result,'dir'); mkdir(ppm.ini.path.result); end
+if ~exist(ppm.ini.path.external,'dir'); mkdir(ppm.ini.path.external); end
+addpath(genpath(ppm.ini.path.external))
 
-% optionally delete all existing txt/ply files in result folder
+%% download quaternion class from MATLAB File Exchange
+if ~exist(fullfile(ppm.ini.path.external,'quaternion'),'dir')
+    mkdir(fullfile(ppm.ini.path.external,'quaternion'))
+    disp([mfilename,': Downloading required class `quaternion` from MATLAB File Exchange...'])
+    websave(fullfile(ppm.ini.path.external,'quaternion','quaternion.zip'),'https://de.mathworks.com/matlabcentral/mlc-downloads/downloads/submissions/33341/versions/9/download/zip');
+    unzip(fullfile(ppm.ini.path.external,'quaternion','quaternion.zip'),fullfile(ppm.ini.path.external,'quaternion'))
+    delete(fullfile(ppm.ini.path.external,'quaternion','quaternion.zip'))
+    disp([mfilename,': Finished downloading required class `quaternion` from MATLAB File Exchange.'])
+end
+
+%% optionally delete all existing txt/ply files in result folder
 filelist = dir(fullfile(ppm.ini.path.result,'*.ply'));
 if ~isempty(filelist) && p.Results.auto_delete==1
     if ppm.ini.verbose_level>0
@@ -127,7 +143,7 @@ elseif ~isempty(filelist) && p.Results.auto_delete==0
     end
 end
 
-%% determine blender location depending on system architecture
+%% determine Blender location depending on system architecture
 ppm.ini.sysarch = computer('arch'); % determines system architecture
 switch ppm.ini.sysarch
     case 'win64'
@@ -136,10 +152,10 @@ switch ppm.ini.sysarch
         ppm.ini.path.blender_exe = temp2{1};
     case 'glnxa64'
         ppm.ini.path.blender = '';
-        error('Please manually set path to blender.')
+        error('Please manually set path to Blender.')
     otherwise % 'MACI64'
-        ppm.ini.path.blender_exe = ''; %'/Users/<user name>/blenderApp/blender/blender.app/Contents/MacOS/Blender';
-        error('Please manually set path to blender.')
+        ppm.ini.path.blender_exe = ''; %'/Users/<user name>/BlenderApp/blender/blender.app/Contents/MacOS/Blender';
+        error('Please manually set path to Blender.')
 end
 
 % load default transformation matrix
