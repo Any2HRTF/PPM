@@ -1,4 +1,4 @@
-function ppm = ppm_modify_parameter_values(ppm)
+function ppm = ppm_modify_parameter_values_v1_2(ppm)
 %ppm_modify_parameter_values - Change the value of the parameter to be modified. 
 %                    Depending on the instruction mode, the specified value 
 %                    is either added to the existing value of, or directly assigned 
@@ -18,8 +18,7 @@ function ppm = ppm_modify_parameter_values(ppm)
 %
 % Note: This function is called within ppm_set_values().
 
-% #Author: Mantas Tamulionis (2021)
-% Modifications by Florian Pausch (2022)
+% #Author: Florian Pausch (2022)
 
 %% determine ppm.modify.idx
 if strcmp(ppm.modify.type,"Shape_key")
@@ -65,6 +64,12 @@ if ppm.modify.itr == 1
     
     ppm = ppm_add_or_assign(ppm);
     writecell(ppm.parameters, fullfile(ppm.ini.path.result, '1.txt'));
+
+    if ppm.modify.set_cam
+        % save camera perspective as txt-file to be loaded by set_values_and_export_mesh.py
+        cam_pose = [ppm.modify.cam_loc; ppm.modify.cam_rot];
+        writematrix(cam_pose,fullfile(ppm.ini.path.result,'1_cam.txt'))
+    end
     
 else % ppm.modify.itr > 1
     
@@ -98,6 +103,13 @@ else % ppm.modify.itr > 1
         
         ppm = ppm_add_or_assign(ppm);
         writecell(ppm.parameters, fullfile(ppm.ini.path.result,[num2str(idx), '.txt']));
+
+        if ppm.modify.set_cam
+            % save camera perspective as txt-file to be loaded by set_values_and_export_mesh.py
+            cam_pose = [ppm.modify.cam_loc; ppm.modify.cam_rot];
+            writematrix(cam_pose,fullfile(ppm.ini.path.result,[num2str(idx),'_cam.txt']))
+        end
+
     end
     
 end
