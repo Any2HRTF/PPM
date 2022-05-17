@@ -120,9 +120,15 @@ if ~isempty(filelist) && p.Results.auto_delete==1
     for idx=1:numel(filelist)-1
         delete(fullfile(p.Results.path_result,filelist(idx).name))
         delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.txt']))
+        if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.png']),'file')
+            delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.png']))
+        end
     end
     delete(fullfile(p.Results.path_result,'blender_bones_data.txt'))
     delete(fullfile(p.Results.path_result,'blender_bones_data.ply'))
+    if exist(fullfile(p.Results.path_result,'blender_bones_data.png'),'file')
+        delete(fullfile(p.Results.path_result,'blender_bones_data.png'))
+    end
     if exist(fullfile(p.Results.path_result,'blender_render.log'),'file')
         delete(fullfile(p.Results.path_result,'blender_render.log'))
     end
@@ -135,6 +141,9 @@ elseif ~isempty(filelist) && p.Results.auto_delete==0
         end
         delete(fullfile(filelist(idx).folder,'blender_bones_data.txt'))
         delete(fullfile(filelist(idx).folder,'blender_bones_data.ply'))
+        if exist(fullfile(p.Results.path_result,'blender_bones_data.png'),'file')
+            delete(fullfile(p.Results.path_result,'blender_bones_data.png'))
+        end
         if exist(fullfile(p.Results.path_result,'blender_render.log'),'file')
             delete(fullfile(p.Results.path_result,'blender_render.log'))
         end
