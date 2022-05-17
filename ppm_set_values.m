@@ -17,21 +17,24 @@ function ppm = ppm_set_values(ppm,varargin)
 %              otherwise optional)
 %     'val'  : Value to be assigned to the selected parameter [double].
 %              For parameter type 'Rotation', 'val' sets the values of
-%              the orientation quaternion or the Euler-angle component in deg 
+%              the orientation quaternion, or the Euler-angle component in deg 
 %              as per ppm.modify.rotation_mode. The general behavior depends on 
 %              ppm.modify.instruction_mode. 
 %
 %   Optional (key/value pairs):
-%     'rotation_mode'    : Rotation mode [string]. Possible rotation modes 
-%                          include 'quaternion': W,X,Y,Z (default)
-%                          'XYZ': XYZ Euler rotation
-%                          'XZY': XZY Euler rotation
-%                          'YXZ': YXZ Euler rotation
-%                          'YZX': YZX Euler rotation
-%                          'ZXY': ZXY Euler rotation
-%                          'ZYX': ZYX Euler rotation
-%                          Note: Manipulations of Euler-angle components will 
-%                                result in an correspondingly updated quaternion.
+%     'rotation_mode'    : Rotation mode [string]. Possible rotation modes include 
+%                          'quaternion': W,X,Y,Z (default)
+%                          'XYZ': XYZ Euler rotation (order: Z -> Y -> X)
+%                          'XZY': XZY Euler rotation (order: Y -> Z -> X)
+%                          'YXZ': YXZ Euler rotation (order: Z -> X -> Y)
+%                          'YZX': YZX Euler rotation (order: X -> Z -> Y)
+%                          'ZXY': ZXY Euler rotation (order: Y -> X -> Z)
+%                          'ZYX': ZYX Euler rotation (order: X -> Y -> Z)
+%
+%                          NOTE: Manipulations of Euler-angle components will 
+%                                result in a correspondingly updated normalized
+%                                quaternion.
+%
 %     'instruction_mode' : Instruction mode [string]
 %                           'rel': val is added to val_orig and subsequently 
 %                                  assigned to the parameter (default)
@@ -42,6 +45,9 @@ function ppm = ppm_set_values(ppm,varargin)
 %     'range'            : Range of values to be tested, in a range of 
 %                          (+/-range/2) symmetric around val [double] 
 %                          (default: 1).
+%     'cam_loc'          : Location vector of the camera [double] (default: [0 10 0])
+%     'cam_rot'          : Rotation vector containing Euler angles in deg
+%                          and mode 'XYZ' [double] (default: [0 0 90])
 %
 %   For ppm_blender_execute()
 %     'mesh'      : Render updated PPM mesh [logical], default: true 
@@ -49,6 +55,8 @@ function ppm = ppm_set_values(ppm,varargin)
 %     'image'     : Render PPM mesh as image [logical], default: false
 %     'image_res' : Image resolution (image_res x image_res) of the
 %                   rendered image [double], default: 1024
+%     'set_cam'   : Set location and rotation of camera as per 'cam_loc' and 
+%                   'cam_rot' in Blender [logical], default: false
 %
 % Output parameters:
 %
@@ -70,25 +78,25 @@ function ppm = ppm_set_values(ppm,varargin)
 %
 % Definition of parameter limits and conventions in ppm.parameters:
 % (Row)   .type     .name           .axis    (Limits)        (Description) 
-%       1 Location  Size-Bendy      X        [-inf +inf]     Displacement in global x-axis direction
-%       2 Location  Size-Bendy      Y        [-inf +inf]     Displacement in global y-axis direction
-%       3 Location  Size-Bendy      Z        [-inf +inf]     Displacement in global z-axis direction
+%       1 Location  Size-Bendy      X        [-inf +inf]     Displacement in global X-axis direction
+%       2 Location  Size-Bendy      Y        [-inf +inf]     Displacement in global Y-axis direction
+%       3 Location  Size-Bendy      Z        [-inf +inf]     Displacement in global Z-axis direction
 %
 %       4 Rotation  Size-Bendy      W        [-inf +inf]     Scalar part of rotation quaternion (real number)
 %       5 Rotation  Size-Bendy      X        [-inf +inf]     Vector part of rotation quaternion (real number of the i-th basic quaternion)
 %       6 Rotation  Size-Bendy      Y        [-inf +inf]     Vector part of rotation quaternion (real number of the j-th basic quaternion)
 %       7 Rotation  Size-Bendy      Z        [-inf +inf]     Vector part of rotation quaternion (real number of the k-th basic quaternion)
 %
-%       7 Scale     Size-Bendy      X        [0 +2]          Scaling in global x-axis direction
-%       8 Scale     Size-Bendy      Y        [0 +2]          Scaling in global y-axis direction
-%       9 Scale     Size-Bendy      Z        [0 +2]          Scaling in global z-axis direction
+%       7 Scale     Size-Bendy      X        [0 +2]          Scaling in global X-axis direction
+%       8 Scale     Size-Bendy      Y        [0 +2]          Scaling in global Y-axis direction
+%       9 Scale     Size-Bendy      Z        [0 +2]          Scaling in global Z-axis direction
 %
 %   10-27 Shape_key                 n/a      cf. ppm.ini.shape_key_limits
 %
-%  28-135 Location  Control_points  X/Y/Z                    Displacement in global x/y/z-axis direction
+%  28-135 Location  Control_points  X/Y/Z                    Displacement in global X/Y/Z-axis direction
 %         Rotation  Control_points  W/X/Y/Z                  Rotation as per rotation quaternion
 %
-% 136-162 Scale     Bendy_bones     X/Y/Z    [0 +2]          Scaling in global x/y/z-axis direction
+% 136-162 Scale     Bendy_bones     X/Y/Z    [0 +2]          Scaling in global X/Y/Z-axis direction
 %
 % NOTE: All changes of parameter values are non-destructive and only
 %       contained in the exported meshes. The Blender file itself, specified  
@@ -109,12 +117,15 @@ addOptional(p,'itr',1);
 addOptional(p,'range',1);
 addOptional(p,'instruction_mode','rel');
 addOptional(p,'rotation_mode','quaternion');
+addOptional(p,'cam_loc',[1,0,0]);
+addOptional(p,'cam_rot',[0,0,90]);
 
 % input arguments for ppm_blender_execute()
 addOptional(p,'mesh',true);
 addOptional(p,'remesh',false);
 addOptional(p,'image',false);
 addOptional(p,'image_res',1024);
+addOptional(p,'set_cam',false);
 
 parse(p,varargin{:});
 
@@ -172,6 +183,9 @@ ppm.modify.itr   = p.Results.itr;
 ppm.modify.range = p.Results.range;
 ppm.modify.instruction_mode = p.Results.instruction_mode;
 ppm.modify.rotation_mode = p.Results.rotation_mode;
+ppm.modify.set_cam = p.Results.set_cam;
+ppm.modify.cam_loc = p.Results.cam_loc;
+ppm.modify.cam_rot = p.Results.cam_rot;
 
 %% assign the specified values to the selected parameter
 ppm = ppm_modify_parameter_values(ppm);
@@ -181,4 +195,5 @@ ppm_blender_execute(ppm,...
     'mesh',p.Results.mesh,...
     'remesh',p.Results.remesh,...
     'image',p.Results.image,...
-    'image_res',p.Results.image_res)
+    'image_res',p.Results.image_res,...
+    'set_cam',p.Results.set_cam)
