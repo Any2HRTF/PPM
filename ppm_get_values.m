@@ -21,7 +21,7 @@ function [ppm,val] = ppm_get_values(ppm,varargin)
 %
 %   ppm  : updated PPM structure array [struct]
 %          .parameters : parameter values as obtained from the
-%                       specified blender file, i.e.
+%                       specified Blender file, i.e.
 %                       fullfile(path_blender_file,name_blender_file) [cell]
 %    val : subset of queried parameters with current values [cell] 
 %
@@ -70,7 +70,7 @@ end
 %% create .txt file containing the current parameter values
 writecell(ppm.parameters, fullfile(ppm.ini.path.result,'1.txt'));
 
-%% fetch parameter values from the specified blender project
+%% fetch parameter values from the specified Blender project
 switch ppm.ini.verbose_level
     case 0
         args = [ppm.ini.path.blender_exe, ' -b ', ppm.ini.blender_file,...
@@ -78,27 +78,27 @@ switch ppm.ini.verbose_level
             [ppm.ini.path.result,'\'], ' -a > nul 2>&1'];
         stat = system(args);
         if stat
-            error('Parameters could not be obtained from blender file. Check ''args''. Aborted.') 
+            error('Parameters could not be obtained from Blender file. Check ''args''. Aborted.') 
         end
     case 1
-        disp([mfilename,': Obtaining parameter values from specified blender file...'])
+        disp([mfilename,': Obtaining parameter values from specified Blender file...'])
         args = [ppm.ini.path.blender_exe, ' -b ', ppm.ini.blender_file,...
             ' -P ' fullfile(ppm.ini.path.python,'get_values_and_export_mesh_v1.py'),' -- ',...
             [ppm.ini.path.result,'\'], ' -a > nul 2>&1'];
         stat = system(args);
         if stat
-            error('Parameters could not be obtained from blender file. Check ''args''. Aborted.')
+            error('Parameters could not be obtained from Blender file. Check ''args''. Aborted.')
         else
             disp([mfilename,': Parameter values successfully obtained.'])
         end
     case 2
-        disp([mfilename,': Obtaining parameter values from specified blender file...'])
+        disp([mfilename,': Obtaining parameter values from specified Blender file...'])
         args = [ppm.ini.path.blender_exe, ' -b ', ppm.ini.blender_file,...
             ' -P ' fullfile(ppm.ini.path.python,'get_values_and_export_mesh_v1.py'),' -- ',...
             [ppm.ini.path.result,'\']];
         stat = system(args);
         if stat
-            error('Parameters could not be obtained from blender file. Check ''args''. Aborted.')
+            error('Parameters could not be obtained from Blender file. Check ''args''. Aborted.')
         else
             disp([mfilename,': Parameter values successfully obtained.'])
         end
