@@ -1,5 +1,6 @@
 print("Blender Loaded")
 #print("Initialising Scripts... ", end="", flush=True)
+from cmath import pi
 import bpy
 import math
 import mathutils
@@ -109,51 +110,52 @@ class Ear():
 
     def export(self, name):
 
-        target_file = setDir(self.path, name, "ply")
-        select('ARI_PPM_v1', True)
-        with redirect_stdout(stdout):
-            bpy.ops.export_mesh.ply(filepath=target_file, use_selection=True, use_normals=False, use_uv_coords=False, use_colors=False)
-        select('ARI_PPM_v1', False)
+        if name.find('_cam')!=1 or name!='blender_bones_data':
+            target_file = setDir(self.path, name, "ply")
+            select('ARI_PPM_v1', True)
+            with redirect_stdout(stdout):
+                bpy.ops.export_mesh.ply(filepath=target_file, use_selection=True, use_normals=False, use_uv_coords=False, use_colors=False)
+            select('ARI_PPM_v1', False)
 
-    def render(self, name, set_cam):
+    def render(self, name):
 
-        if set_cam == 'TRUE':
-            scene = bpy.context.scene
-            #cam_d = bpy.data.cameras.new('camera')
-            #cam = bpy.data.objects.new('camera', cam_d)
-            #scene.camera = cam
+        cam = bpy.data.objects['Camera']
+        bpy.context.scene.camera = cam     
 
-            cam_file = setDir(self.path, name, 'txt')
-            if cam_file.find('_cam')!=-1:
-                cam = bpy.data.objects['Camera']
-                print(cam.location)
-                print(cam.rotation_euler)
+        if arg_cam=='TRUE' and name.find('_cam')!=1:
+       
+            cam_file = setDir(self.path, name + '_cam', 'txt')
+            with open(cam_file,'r') as cam_pose:
+                cam_loc = cam_pose.readline()
+                for cam_rot in cam_pose:
+                    pass
 
-                with open(cam_file,'r') as cam_pose:
-                    cam_loc = cam_pose.readline()
-                    for cam_rot in cam_pose:
-                        pass
+            cam_loc = cam_loc.split(',')
+            cam_loc[-1] = cam_loc[-1].strip()
+            cam_loc = np.asarray(cam_loc)
 
-                cam_loc = cam_loc.split(',')
-                cam_loc[-1] = cam_loc[-1].strip()
-                cam_loc = np.asarray(cam_loc)
-                print(cam_loc)
+            cam_rot = cam_rot.split(',')
+            cam_rot[-1] = cam_rot[-1].strip()
+            cam_rot = np.asarray(cam_rot)
 
-                cam_rot = cam_rot.split(',')
-                cam_rot[-1] = cam_rot[-1].strip()
-                cam_rot = np.asarray(cam_rot)
-                print(cam_rot)
+            cam.location = mathutils.Vector((float(cam_loc[0]),float(cam_loc[1]),float(cam_loc[2])))
+            cam.rotation_euler = mathutils.Euler((math.radians(float(cam_rot[0])),
+                                                  math.radians(float(cam_rot[1])),
+                                                  math.radians(float(cam_rot[2]))),'XYZ')
+        else:
+            cam.location = mathutils.Vector((-20, 180, -70))
+            cam.rotation_euler = mathutils.Euler((math.radians(145), 0, pi),'XYZ')
 
-                cam.location = mathutils.Vector((float(cam_loc[0]),float(cam_loc[1]),float(cam_loc[2])))
-                cam.rotation_euler = mathutils.Euler((math.radians(float(cam_rot[0])),
-                                                      math.radians(float(cam_rot[1])),
-                                                      math.radians(float(cam_rot[2]))),'XYZ')
+            print(cam.location)
+            print(cam.rotation_euler)
 
-        target_file = setDir(self.path, name, "png")
-        bpy.data.scenes["Scene"].render.resolution_x = int(arg_res)
-        bpy.data.scenes["Scene"].render.resolution_y = int(arg_res)
-        bpy.context.scene.render.filepath = target_file
-        bpy.ops.render.render(write_still=True)
+        if arg_mesh=='TRUE' and name.find('_cam')!=1 and name!='blender_bones_data':
+            target_file = setDir(self.path, name, "png")
+            bpy.data.scenes["Scene"].render.resolution_x = int(arg_res)
+            bpy.data.scenes["Scene"].render.resolution_y = int(arg_res)
+            bpy.context.scene.render.filepath = target_file
+            bpy.ops.render.render(write_still=True)
+
 
     def reset(self, name):
 
@@ -224,15 +226,15 @@ class Ear():
             os.close(1)
             os.open(logfile, os.O_WRONLY)
 
-            self.load(name)
-            if arg_mesh == 'TRUE' or arg_image == 'TRUE':
+            if name.find('_cam')!=1 and name!='blender_bones_data':
+                self.load(name)
                 self.modifiers(True)
                 if arg_mesh == 'TRUE':
                     self.export(name)
                 if arg_image == 'TRUE':
-                    self.render(name,arg_cam)
+                    self.render(name)
                 self.modifiers(False)
-            self.reset(name)
+                self.reset(name)
 
             os.close(1)
             os.dup(old)
