@@ -1,4 +1,4 @@
-function ppm = ppm_modify_parameter_values_v1_2(ppm)
+function ppm = ppm_modify_parameter_values(ppm)
 %ppm_modify_parameter_values - Change the value of the parameter to be modified. 
 %                    Depending on the instruction mode, the specified value 
 %                    is either added to the existing value of, or directly assigned 
