@@ -45,9 +45,11 @@ function ppm = ppm_set_values(ppm,varargin)
 %     'range'            : Range of values to be tested, in a range of 
 %                          (+/-range/2) symmetric around val [double] 
 %                          (default: 1).
-%     'cam_loc'          : Location vector of the camera [double] (default: [0 10 0])
-%     'cam_rot'          : Rotation vector containing Euler angles in deg
-%                          and mode 'XYZ' [double] (default: [0 0 90])
+%     'cam_loc'          : Location vector of the camera [double] 
+%                          (default: [-20, 180, -70])
+%     'cam_rot'          : Rotation vector of the camera, containing 
+%                          XYZ Euler angles in deg [double] 
+%                          (default: [145, 0, 180])
 %
 %   For ppm_blender_execute()
 %     'mesh'      : Render updated PPM mesh [logical], default: true 
@@ -117,8 +119,8 @@ addOptional(p,'itr',1);
 addOptional(p,'range',1);
 addOptional(p,'instruction_mode','rel');
 addOptional(p,'rotation_mode','quaternion');
-addOptional(p,'cam_loc',[1,0,0]);
-addOptional(p,'cam_rot',[0,0,90]);
+addOptional(p,'cam_loc',[-20, 180, -70]);
+addOptional(p,'cam_rot',[145, 0, 180]);
 
 % input arguments for ppm_blender_execute()
 addOptional(p,'mesh',true);
