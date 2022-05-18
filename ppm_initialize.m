@@ -117,19 +117,18 @@ if ~isempty(filelist) && p.Results.auto_delete==1
     if ppm.ini.verbose_level>0
         warning([mfilename,': Specified result folder contains previous results, which will be deleted.'])
     end
-    for idx=1:numel(filelist)-1
+    for idx=1:numel(filelist)
         delete(fullfile(p.Results.path_result,filelist(idx).name))
         delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.txt']))
+        if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'_cam.txt']),'file')
+            delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'_cam.txt']))
+        end
         if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.png']),'file')
             delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.png']))
         end
     end
     if exist(fullfile(p.Results.path_result,'blender_bones_data.txt'),'file')
         delete(fullfile(p.Results.path_result,'blender_bones_data.txt'))
-        delete(fullfile(p.Results.path_result,'blender_bones_data.ply'))
-    end
-    if exist(fullfile(p.Results.path_result,'blender_bones_data.png'),'file')
-        delete(fullfile(p.Results.path_result,'blender_bones_data.png'))
     end
     if exist(fullfile(p.Results.path_result,'blender_render.log'),'file')
         delete(fullfile(p.Results.path_result,'blender_render.log'))
@@ -143,10 +142,6 @@ elseif ~isempty(filelist) && p.Results.auto_delete==0
         end
         if exist(fullfile(p.Results.path_result,'blender_bones_data.txt'),'file')
             delete(fullfile(filelist(idx).folder,'blender_bones_data.txt'))
-            delete(fullfile(filelist(idx).folder,'blender_bones_data.ply'))
-        end
-        if exist(fullfile(p.Results.path_result,'blender_bones_data.png'),'file')
-            delete(fullfile(p.Results.path_result,'blender_bones_data.png'))
         end
         if exist(fullfile(p.Results.path_result,'blender_render.log'),'file')
             delete(fullfile(p.Results.path_result,'blender_render.log'))
