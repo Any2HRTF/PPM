@@ -1,6 +1,7 @@
 function [ppm,val] = ppm_get_values(ppm,varargin)
-%ppm_get_values - Obtain the parameters values from the Blender file to be modified,
-%                 as specified in the parametric pinna model (PPM) structure array
+%ppm_get_values - Obtain the parameters values from the parametric pinna 
+%                 model (PPM) in the Blender file specified in the 
+%                 PPM structure array
 %
 % Usage: 
 %   ppm = ppm_get_values(ppm)
