@@ -112,17 +112,19 @@ if ~exist(fullfile(ppm.ini.path.external,'quaternion'),'dir')
 end
 
 %% optionally delete all existing txt/ply files in result folder
-filelist = dir(fullfile(ppm.ini.path.result,'*.ply'));
+filelist = dir(fullfile(ppm.ini.path.result,'*.txt'));
 if ~isempty(filelist) && p.Results.auto_delete==1
     if ppm.ini.verbose_level>0
         warning([mfilename,': Specified result folder contains previous results, which will be deleted.'])
     end
     for idx=1:numel(filelist)
-        if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'_cam.txt']),'file')
-            delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'_cam.txt']))
-        end
+%         if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'_cam.txt']),'file')
+%             delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'_cam.txt']))
+%         end
         delete(fullfile(p.Results.path_result,filelist(idx).name))
-        delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.txt']))
+        if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.ply']),'file')
+            delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.ply']))
+        end
         if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.png']),'file')
             delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.png']))
         end
@@ -137,14 +139,19 @@ elseif ~isempty(filelist) && p.Results.auto_delete==0
     answer = questdlg([mfilename,': Specified result folder contains previous results, which will be deleted. Proceed?'],'Yes','No');
     if strcmp(answer,'Yes')
         for idx=1:numel(filelist)
-            if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'_cam.txt']),'file')
-                delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'_cam.txt']))
+%             if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'_cam.txt']),'file')
+%                 delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'_cam.txt']))
+%             end
+            delete(fullfile(p.Results.path_result,filelist(idx).name))
+            if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.ply']),'file')
+                delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.ply']))
             end
-            delete(fullfile(filelist(idx).folder,filelist(idx).name))
-            delete(fullfile(filelist(idx).folder,[filelist(idx).name(1:end-4),'.txt']))
+            if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.png']),'file')
+                delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.png']))
+            end
         end
         if exist(fullfile(p.Results.path_result,'blender_bones_data.txt'),'file')
-            delete(fullfile(filelist(idx).folder,'blender_bones_data.txt'))
+            delete(fullfile(p.Results.path_result,'blender_bones_data.txt'))
         end
         if exist(fullfile(p.Results.path_result,'blender_render.log'),'file')
             delete(fullfile(p.Results.path_result,'blender_render.log'))
