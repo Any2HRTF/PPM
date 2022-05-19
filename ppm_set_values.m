@@ -50,6 +50,10 @@ function ppm = ppm_set_values(ppm,varargin)
 %     'cam_rot'          : Rotation vector of the camera, containing 
 %                          XYZ Euler angles in deg [double] 
 %                          (default: [90, 0, 180])
+%     'cam_loc_ref'      : Reference position to which the camera is to be 
+%                          pointed [double] (default: [])
+%                          NOTE: If 'cam_loc_ref' is set the values for 
+%                                'cam_rot' will be overwritten.
 %
 %   For ppm_blender_execute()
 %     'mesh'      : Render updated PPM mesh [logical], default: true 
@@ -121,6 +125,7 @@ addOptional(p,'instruction_mode','rel');
 addOptional(p,'rotation_mode','quaternion');
 addOptional(p,'cam_loc',[-10, 200, 5]);
 addOptional(p,'cam_rot',[90, 0, 180]);
+addOptional(p,'cam_loc_ref',[]);
 
 % input arguments for ppm_blender_execute()
 addOptional(p,'mesh',true);
@@ -188,6 +193,7 @@ ppm.modify.rotation_mode = p.Results.rotation_mode;
 ppm.modify.set_cam = p.Results.set_cam;
 ppm.modify.cam_loc = p.Results.cam_loc;
 ppm.modify.cam_rot = p.Results.cam_rot;
+ppm.modify.cam_loc_ref = p.Results.cam_loc_ref;
 
 %% assign the specified values to the selected parameter
 ppm = ppm_modify_parameter_values(ppm);
