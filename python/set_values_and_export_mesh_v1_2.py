@@ -172,7 +172,7 @@ class Ear():
 
         bpy.context.view_layer.update()
 
-        if arg_mesh=='TRUE' and name.find('_cam')==(-1) and name!='blender_bones_data':
+        if arg_image=='TRUE' and name.find('_cam')==(-1) and name!='blender_bones_data':
             target_file = setDir(self.path, name, "png")
             bpy.data.scenes["Scene"].render.resolution_x = int(arg_res)
             bpy.data.scenes["Scene"].render.resolution_y = int(arg_res)
