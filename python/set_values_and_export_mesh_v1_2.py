@@ -110,7 +110,7 @@ class Ear():
 
     def export(self, name):
 
-        if name.find('_cam')!=1 or name!='blender_bones_data':
+        if name.find('_cam')==(-1) or name!='blender_bones_data':
             target_file = setDir(self.path, name, "ply")
             select('ARI_PPM_v1', True)
             with redirect_stdout(stdout):
@@ -122,8 +122,8 @@ class Ear():
         cam = bpy.data.objects['Camera']
         bpy.context.scene.camera = cam   
 
-        if arg_cam=='TRUE' and name.find('_cam')!=1:
-       
+        if arg_cam=='TRUE' and name.find('_cam')==(-1):
+      
             cam_file = setDir(self.path, name + '_cam', 'txt')
             with open(cam_file,'r') as cam_pose:
                 for idx, line in enumerate(cam_pose):
@@ -172,7 +172,7 @@ class Ear():
 
         bpy.context.view_layer.update()
 
-        if arg_mesh=='TRUE' and name.find('_cam')!=1 and name!='blender_bones_data':
+        if arg_mesh=='TRUE' and name.find('_cam')==(-1) and name!='blender_bones_data':
             target_file = setDir(self.path, name, "png")
             bpy.data.scenes["Scene"].render.resolution_x = int(arg_res)
             bpy.data.scenes["Scene"].render.resolution_y = int(arg_res)
@@ -249,7 +249,7 @@ class Ear():
             os.close(1)
             os.open(logfile, os.O_WRONLY)
 
-            if name.find('_cam')!=1 and name!='blender_bones_data':
+            if name.find('_cam')==(-1) and name!='blender_bones_data':
                 self.load(name)
                 self.modifiers(True)
                 if arg_mesh == 'TRUE':
