@@ -118,11 +118,11 @@ if ~isempty(filelist) && p.Results.auto_delete==1
         warning([mfilename,': Specified result folder contains previous results, which will be deleted.'])
     end
     for idx=1:numel(filelist)
-        delete(fullfile(p.Results.path_result,filelist(idx).name))
-        delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.txt']))
         if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'_cam.txt']),'file')
             delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'_cam.txt']))
         end
+        delete(fullfile(p.Results.path_result,filelist(idx).name))
+        delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.txt']))
         if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.png']),'file')
             delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.png']))
         end
@@ -136,7 +136,10 @@ if ~isempty(filelist) && p.Results.auto_delete==1
 elseif ~isempty(filelist) && p.Results.auto_delete==0
     answer = questdlg([mfilename,': Specified result folder contains previous results, which will be deleted. Proceed?'],'Yes','No');
     if strcmp(answer,'Yes')
-        for idx=1:numel(filelist)-1
+        for idx=1:numel(filelist)
+            if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'_cam.txt']),'file')
+                delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'_cam.txt']))
+            end
             delete(fullfile(filelist(idx).folder,filelist(idx).name))
             delete(fullfile(filelist(idx).folder,[filelist(idx).name(1:end-4),'.txt']))
         end
