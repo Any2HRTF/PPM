@@ -67,7 +67,7 @@ if ppm.modify.itr == 1
 
     if ppm.modify.set_cam
         % save camera perspective as txt-file to be loaded by set_values_and_export_mesh.py
-        cam_pose = [ppm.modify.cam_loc; ppm.modify.cam_rot];
+        cam_pose = [ppm.modify.cam_loc; ppm.modify.cam_rot; ppm.modify.cam_loc_ref];
         writematrix(cam_pose,fullfile(ppm.ini.path.result,'1_cam.txt'))
     end
     
@@ -106,7 +106,7 @@ else % ppm.modify.itr > 1
 
         if ppm.modify.set_cam
             % save camera perspective as txt-file to be loaded by set_values_and_export_mesh.py
-            cam_pose = [ppm.modify.cam_loc; ppm.modify.cam_rot];
+            cam_pose = [ppm.modify.cam_loc; ppm.modify.cam_rot; ppm.modify.cam_loc_ref];
             writematrix(cam_pose,fullfile(ppm.ini.path.result,[num2str(idx),'_cam.txt']))
         end
 
