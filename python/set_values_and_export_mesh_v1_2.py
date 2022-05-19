@@ -126,25 +126,51 @@ class Ear():
        
             cam_file = setDir(self.path, name + '_cam', 'txt')
             with open(cam_file,'r') as cam_pose:
-                cam_loc = cam_pose.readline()
-                for cam_rot in cam_pose:
-                    pass
-
+                for idx, line in enumerate(cam_pose):
+                    if idx == 0:
+                        cam_loc = line
+                    elif idx == 1:
+                        cam_rot = line
+                    else:
+                        cam_loc_ref = line
+            
             cam_loc = cam_loc.split(',')
             cam_loc[-1] = cam_loc[-1].strip()
             cam_loc = np.asarray(cam_loc)
 
-            cam_rot = cam_rot.split(',')
-            cam_rot[-1] = cam_rot[-1].strip()
-            cam_rot = np.asarray(cam_rot)
+            cam.location = mathutils.Vector((float(cam_loc[0]),
+                                             float(cam_loc[1]),
+                                             float(cam_loc[2])))
+            bpy.context.view_layer.update()
 
-            cam.location = mathutils.Vector((float(cam_loc[0]),float(cam_loc[1]),float(cam_loc[2])))
-            cam.rotation_euler = mathutils.Euler((math.radians(float(cam_rot[0])),
-                                                  math.radians(float(cam_rot[1])),
-                                                  math.radians(float(cam_rot[2]))),'XYZ')
-        else:
-            cam.location = mathutils.Vector((-20, 180, -70))
-            cam.rotation_euler = mathutils.Euler((math.radians(145), 0, math.pi),'XYZ')
+            if 'cam_loc_ref' not in locals(): # apply custom camera rotation
+                cam_rot = cam_rot.split(',')
+                cam_rot[-1] = cam_rot[-1].strip()
+                cam_rot = np.asarray(cam_rot)
+
+                cam.rotation_euler = mathutils.Euler((math.radians(float(cam_rot[0])),
+                                                      math.radians(float(cam_rot[1])),
+                                                      math.radians(float(cam_rot[2]))),'XYZ')
+            
+            else: # rotate camera to point at cam_loc_ref
+                cam_loc_ref = cam_loc_ref.split(',')
+                cam_loc_ref[-1] = cam_loc_ref[-1].strip()
+                cam_loc_ref = np.asarray(cam_loc_ref)
+
+                cam_loc_mtx = cam.matrix_world.to_translation()
+                cam_rot = mathutils.Vector((float(cam_loc_ref[0]),
+                                            float(cam_loc_ref[1]),
+                                            float(cam_loc_ref[2]))) - cam_loc_mtx
+
+                cam_rot_quat = cam_rot.to_track_quat('-Z','Y')
+
+                cam.rotation_euler = cam_rot_quat.to_euler()
+            
+        else: # set default camera pose
+            cam.location = mathutils.Vector((-10, 200, 5))
+            cam.rotation_euler = mathutils.Euler((math.pi/2, 0, math.pi),'XYZ')
+
+        bpy.context.view_layer.update()
 
         if arg_mesh=='TRUE' and name.find('_cam')!=1 and name!='blender_bones_data':
             target_file = setDir(self.path, name, "png")
