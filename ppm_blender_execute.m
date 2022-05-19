@@ -1,7 +1,7 @@
 function ppm_blender_execute(ppm,varargin)
-%ppm_blender_execute - Send the parameter values to be modified to blender 
-%                      and update the blender file, as specified in the 
-%                      parametric pinna model (PPM) structure array.
+%ppm_blender_execute - Send the parameter values to be modified to Blender 
+%                      and update the parametric pinna model (PPM) as specified 
+%                      in the PPM structure array.
 %
 % Usage: 
 %   ppm = ppm_blender_execute(ppm,varargin)
@@ -13,8 +13,8 @@ function ppm_blender_execute(ppm,varargin)
 %                with parameters set via ppm_set_values(). 
 %
 %   Optional (key/value pairs):
-%     'mesh'      : Export updated blender mesh [logical], default: true 
-%     'remesh'    : Disable/enable modififiers in blender [logical], default: true
+%     'mesh'      : Export updated Blender mesh [logical], default: true 
+%     'remesh'    : Disable/enable modififiers in Blender [logical], default: true
 %     'image'     : Export image [logical], default: false
 %     'image_res' : Image resolution (image_res x image_res) of the
 %                   exported image [int], default: 1024
@@ -40,7 +40,7 @@ parsePool = [p.Results.mesh,p.Results.remesh,p.Results.image,p.Results.set_cam];
 parsePoolString = {'TRUE','FALSE'};
 parsedStrings = parsePoolString((parsePool==0)+1);
 
-%% execute blender via Python scripts
+%% execute Blender via Python scripts
 switch ppm.ini.verbose_level
     
     case 0
