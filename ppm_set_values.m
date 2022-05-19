@@ -1,6 +1,6 @@
 function ppm = ppm_set_values(ppm,varargin)
-%ppm_set_values - Set the parameters values of the Blender file to be modified, 
-%                 as specified in the parametric pinna model (PPM) structure array
+%ppm_set_values - Set the parameters values of the parametric pinna model (PPM)  
+%                 in the Blender file specified in the PPM structure array
 %
 % Usage: 
 %   ppm = ppm_set_values(ppm,varargin)
@@ -74,12 +74,20 @@ function ppm = ppm_set_values(ppm,varargin)
 %             .val / .val_vec : parameter value after modification / 
 %                               (itr>1) vector of parameter values after
 %                               modification [double] 
-%             .val_orig       : original parameter value before modification [double]
 %             .itr [double]
 %             .range [double]
-%             .idx [double]   : row in ppm.parameters [double]
 %             .instruction_mode [string]
 %             .rotation_mode [string]
+%             .cam_loc [double]
+%             .cam_rot [double]
+%             .cam_loc_ref [double]
+%             .set_cam [logical]
+%             .mesh [logical]
+%             .remesh [logical]
+%             .image [logical]
+%             .image_res [logical]
+%             .idx [double]   : row in ppm.parameters [double]
+%             .val_orig       : original parameter value before modification [double]
 %             .stp            : step size between parameter values (if itr>1) [double]
 %
 % Definition of parameter limits and conventions in ppm.parameters:
@@ -181,7 +189,7 @@ if ~ismember(p.Results.rotation_mode,{'quaternion','XYZ','XZY','YXZ','YZX','ZXY'
     error('Rotation mode must be either ''quaternion'',''XYZ'',''XZY'',''YXZ'',''YZX'',''ZXY'', or ''ZYX''.')
 end
 
-%% assign to ppm struct
+%% assign input arguments to ppm struct
 ppm.modify.type  = p.Results.type;
 ppm.modify.name  = p.Results.name;
 ppm.modify.axis  = p.Results.axis;
@@ -190,10 +198,14 @@ ppm.modify.itr   = p.Results.itr;
 ppm.modify.range = p.Results.range;
 ppm.modify.instruction_mode = p.Results.instruction_mode;
 ppm.modify.rotation_mode = p.Results.rotation_mode;
-ppm.modify.set_cam = p.Results.set_cam;
 ppm.modify.cam_loc = p.Results.cam_loc;
 ppm.modify.cam_rot = p.Results.cam_rot;
 ppm.modify.cam_loc_ref = p.Results.cam_loc_ref;
+ppm.modify.set_cam = p.Results.set_cam;
+ppm.modify.mesh = p.Results.mesh;
+ppm.modify.remesh = p.Results.remesh;
+ppm.modify.image = p.Results.image;
+ppm.modify.image_res = p.Results.image_res;
 
 %% assign the specified values to the selected parameter
 ppm = ppm_modify_parameter_values(ppm);
