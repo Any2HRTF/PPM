@@ -1,6 +1,6 @@
 function ppm = ppm_evaluate(ppm,varargin)
-%ppm_evaluate - Evaluate the mesh obtained from the parametric pinna model
-%               (PPM) against a target mesh in terms of the Hausdorff distance
+%ppm_evaluate - Evaluate the parametric-pinna-model (PPM) mesh against a 
+%               target mesh in terms of the Hausdorff distance
 %
 % Usage: 
 %   ppm = ppm_evaluate(ppm,varargin)
@@ -10,7 +10,7 @@ function ppm = ppm_evaluate(ppm,varargin)
 %   Required
 %     ppm                : PPM structure array, initialized as per 
 %                          ppm_initialize() and optionally modified via 
-%                          ppm_set_values. Type 'help ppm_initialize' to 
+%                          ppm_set_values(). Type 'help ppm_initialize' to 
 %                          obtain further information [struct].                          
 %     'path_mesh_target' : Path to target mesh [string]
 %     'name_mesh_target' : File name of target mesh [string]
