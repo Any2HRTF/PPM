@@ -120,7 +120,7 @@ class Ear():
     def render(self, name):
 
         cam = bpy.data.objects['Camera']
-        bpy.context.scene.camera = cam     
+        bpy.context.scene.camera = cam   
 
         if arg_cam=='TRUE' and name.find('_cam')!=1:
        
@@ -144,10 +144,7 @@ class Ear():
                                                   math.radians(float(cam_rot[2]))),'XYZ')
         else:
             cam.location = mathutils.Vector((-20, 180, -70))
-            cam.rotation_euler = mathutils.Euler((math.radians(145), 0, pi),'XYZ')
-
-            print(cam.location)
-            print(cam.rotation_euler)
+            cam.rotation_euler = mathutils.Euler((math.radians(145), 0, math.pi),'XYZ')
 
         if arg_mesh=='TRUE' and name.find('_cam')!=1 and name!='blender_bones_data':
             target_file = setDir(self.path, name, "png")
