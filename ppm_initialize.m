@@ -115,7 +115,7 @@ end
 filelist = dir(fullfile(ppm.ini.path.result,'*.txt'));
 if ~isempty(filelist) && p.Results.auto_delete==1
     if ppm.ini.verbose_level>0
-        warning([mfilename,': Specified result folder contains previous results, which will be deleted.'])
+        warning([mfilename,': Specified result folder contained previous results, which were deleted.'])
     end
     for idx=1:numel(filelist)
 %         if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'_cam.txt']),'file')
@@ -136,7 +136,7 @@ if ~isempty(filelist) && p.Results.auto_delete==1
         delete(fullfile(p.Results.path_result,'blender_render.log'))
     end
 elseif ~isempty(filelist) && p.Results.auto_delete==0
-    answer = questdlg([mfilename,': Specified result folder contains previous results, which will be deleted. Proceed?'],'Yes','No');
+    answer = questdlg([mfilename,': Specified result folder contained previous results, which will be deleted. Proceed?'],'Yes','No');
     if strcmp(answer,'Yes')
         for idx=1:numel(filelist)
 %             if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'_cam.txt']),'file')
