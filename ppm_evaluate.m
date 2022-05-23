@@ -77,6 +77,9 @@ else
     itr = ppm.modify.itr;
 end
 
+%% set default renderer
+set(0, 'DefaultFigureRenderer', 'opengl');
+
 %% load first result mesh and specified target mesh
 mesh_result_temp = pcread(fullfile(p.Results.path_mesh_result,p.Results.name_mesh_result));
 ppm.evaluate.mesh_result = mesh_result_temp.Location;
