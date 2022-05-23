@@ -35,7 +35,7 @@
 % 0.8 and above: Florian Pausch (2022)
 % 0.7 and below: Mantas Tamulionis (2021)
 %
-% Current release version: 1.1.0
+% Current release version: 1.2.0
 
 clear; close all; clc
 
