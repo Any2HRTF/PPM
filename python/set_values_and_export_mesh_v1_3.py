@@ -1,5 +1,4 @@
-print("Blender Loaded")
-#print("Initialising Scripts... ", end="", flush=True)
+print("Blender loaded")
 
 import sys
 import os
@@ -7,12 +6,9 @@ import glob
 import io
 from contextlib import redirect_stdout
 import bpy
-# from cmath import pi
 import math
 import mathutils
 import numpy as np
-# import cv2
-# import scipy.io
 
 stdout = io.StringIO()
 
@@ -23,7 +19,17 @@ arg_mesh = argv[argv.index("--") + 2]
 arg_remesh = argv[argv.index("--") + 3]
 arg_image = argv[argv.index("--") + 4]
 arg_res = argv[argv.index("--") + 5]
-arg_cam = argv[argv.index("--") + 6]
+arg_image_col_dep = argv[argv.index("--") + 6]
+arg_image_comp = argv[argv.index("--") + 7]
+arg_cam = argv[argv.index("--") + 8]
+
+arg_depth = argv[argv.index("--") + 9]
+arg_depth_col_dep_exr = argv[argv.index("--") + 10]
+arg_depth_comp_exr = argv[argv.index("--") + 11]
+arg_depth_codec_exr = argv[argv.index("--") + 12]
+
+arg_depth_col_dep_png = argv[argv.index("--") + 13]
+arg_depth_comp_png = argv[argv.index("--") + 14]
 
 def select(label, action):
     if action:
@@ -155,12 +161,11 @@ class Ear():
         # Create a file-output node, set the path, and file format
         fileOutput = tree.nodes.new(type='CompositorNodeOutputFile')
         fileOutput.base_path = self.path
-        fileOutput.format.file_format = "OPEN_EXR" # "OPEN_EXR", "PNG" # TODO: add input parameter
+        fileOutput.format.file_format = "OPEN_EXR"
         fileOutput.file_slots[0].path = name + "_depth." + fileOutput.format.file_format # file name with appended frame idx
-        fileOutput.format.color_depth = "32" # TODO: add input parameter
-        fileOutput.format.compression = 0 # default is 15 # TODO: add input parameter
-        # TODO: add input parameter
-        fileOutput.format.exr_codec = "NONE" # [‘NONE’, ‘PXR24’, ‘ZIP’, ‘PIZ’, ‘RLE’, ‘ZIPS’, ‘B44’, ‘B44A’, ‘DWAA’, ‘DWAB’], default ‘NONE’
+        fileOutput.format.color_depth = arg_depth_col_dep_exr
+        fileOutput.format.compression = int(arg_depth_comp_exr)
+        fileOutput.format.exr_codec = arg_depth_codec_exr # [‘NONE’, ‘PXR24’, ‘ZIP’, ‘PIZ’, ‘RLE’, ‘ZIPS’, ‘B44’, ‘B44A’, ‘DWAA’, ‘DWAB’], default ‘NONE’
 
         # Link output of render-layers node to input of map node
         links.new(render_layer.outputs['Depth'], map.inputs['Value'])
@@ -170,10 +175,10 @@ class Ear():
 
         fileOutput_png = tree.nodes.new(type='CompositorNodeOutputFile')
         fileOutput_png.base_path = self.path
-        fileOutput_png.format.file_format = "PNG" # "OPEN_EXR", "PNG" # TODO: add input parameter
+        fileOutput_png.format.file_format = "PNG" # "OPEN_EXR", "PNG"
         fileOutput_png.file_slots[0].path = name + "_depth." + fileOutput_png.format.file_format # file name with appended frame idx
-        fileOutput_png.format.color_depth = "16" # TODO: add input parameter
-        fileOutput_png.format.compression = 0 # default is 15 # TODO: add input parameter
+        fileOutput_png.format.color_depth = arg_depth_col_dep_png
+        fileOutput_png.format.compression = int(arg_depth_comp_png)
 
         # Link output of map node to input of compositor-output node (png)
         links.new(map.outputs['Value'], fileOutput_png.inputs['Image'])
@@ -261,13 +266,14 @@ class Ear():
             target_file = setDir(self.path, name, "png")
             bpy.data.scenes["Scene"].render.resolution_x = int(arg_res)
             bpy.data.scenes["Scene"].render.resolution_y = int(arg_res)
-            bpy.data.scenes["Scene"].render.image_settings.color_depth = '16' # TODO: add input parameter
-            bpy.data.scenes["Scene"].render.image_settings.compression = 0 # TODO: add input parameter
+            bpy.data.scenes["Scene"].render.image_settings.color_depth = arg_image_col_dep
+            bpy.data.scenes["Scene"].render.image_settings.compression = int(arg_image_comp)
             bpy.context.scene.render.filepath = target_file
             bpy.ops.render.render(write_still=True)
 
-            # extract depth information and store as exr file
-            self.get_depth(name)  
+        # extract depth information and store as exr and png files
+        if arg_depth=='TRUE' and name.find('_cam')==(-1) and name!='blender_bones_data':
+            self.get_depth(name)
 
     def reset(self, name):
 
@@ -351,7 +357,6 @@ class Ear():
             os.close(1)
             os.dup(old)
             os.close(old)
-            #print("Done")
 
 Ear = Ear("Ear")
 
@@ -366,8 +371,4 @@ Crus_inferius_anthelicis = Bone("Crus_inferius_anthelicis", Ear)
 Crus_superius_anthelicis = Bone("Crus_superius_anthelicis", Ear)
 Size = Bone("Size", Ear)
 
-#print("Done")
-
 Ear.loadAll()
-
-#print("Task Complete")
