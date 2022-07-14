@@ -1,17 +1,18 @@
 print("Blender Loaded")
 #print("Initialising Scripts... ", end="", flush=True)
-from cmath import pi
+
+import sys
+import os
+import glob
+import io
+from contextlib import redirect_stdout
 import bpy
+# from cmath import pi
 import math
 import mathutils
 import numpy as np
-import os
-import glob
-import sys
-import io
-from contextlib import redirect_stdout
-import cv2
-import scipy.io
+# import cv2
+# import scipy.io
 
 stdout = io.StringIO()
 
@@ -120,39 +121,76 @@ class Ear():
             select('ARI_PPM_v1', False)
     
     def get_depth(self, name):
-        # Taken from: http://www.saifkhichi.com/blog/blender-depth-map-surface-normals
-        #"""Obtains depth map from Blender render.
-        #:return: The depth map of the rendered camera view as a numpy array of size (H,W).
-        #"""
-        z = bpy.data.images['Viewer Node']
-        w, h = z.size
-        dmap = np.array(z.pixels[:], dtype=np.float32) # convert to numpy array
-        dmap = np.reshape(dmap, (h, w, 4))[:,:,0]
-        dmap = np.rot90(dmap, k=2)
-        dmap = np.fliplr(dmap)
-        #return dmap
 
-        #def dmap2norm(dmap):
-        # Taken from: http://www.saifkhichi.com/blog/blender-depth-map-surface-normals
-        # """Computes surface normals from a depth map.
-        # :param dmap: A grayscale depth map image as a numpy array of size (H,W).
-        # :return: The corresponding surface normals map as numpy array of size (H,W,3).
-        # """
-        zx = cv2.Sobel(dmap, cv2.CV_64F, 1, 0, ksize=5)
-        zy = cv2.Sobel(dmap, cv2.CV_64F, 0, 1, ksize=5)
+        # Scene-render settings
+        bpy.context.scene.render.engine = 'CYCLES' # BLENDER_EEVEE, CYCLES
+        bpy.context.scene.render.use_compositing = True
+        
+        # Enable nodes
+        bpy.context.scene.use_nodes = True
 
-        # convert to unit vectors
-        normals = np.dstack((-zx, -zy, np.ones_like(dmap)))
-        length = np.linalg.norm(normals, axis=2)
-        normals[:, :, :] /= length
+        tree = bpy.context.scene.node_tree
+        links = tree.links
 
-        # offset and rescale values to be in 0-1
-        normals += 1
-        normals /= 2
-        dep = normals[:, :, ::-1].astype(np.float32)     
+        # Clear default nodes
+        for n in tree.nodes:
+            tree.nodes.remove(n)
 
-        target_file = setDir(self.path, name, "mat")
-        scipy.io.savemat(target_file, dict(x=dep[:,1], y=dep[:,2]))
+        # Create render-layers node
+        render_layer = tree.nodes.new(type='CompositorNodeRLayers')
+
+        # Create map-range node
+        map = tree.nodes.new(type='CompositorNodeMapRange')
+        
+        # Set map maximum to Euclidian distance of camera to origin
+        cam = bpy.data.objects['Camera']
+        dist_l2 = math.sqrt(cam.location.x**2 + cam.location.y**2 + cam.location.z**2)
+        map.inputs[1].default_value = 0 # map minimum in Blender units
+        map.inputs[2].default_value = dist_l2 # map maximum in Blender units
+
+        # Map values between 1 (white) and zero (black)
+        map.inputs[3].default_value = 1 # map minimum in normalised units (linear steps when using OPEN_EXR)
+        map.inputs[4].default_value = 0 # map minimum in normalised units (linear steps when using OPEN_EXR)
+
+        # Create a file-output node, set the path, and file format
+        fileOutput = tree.nodes.new(type='CompositorNodeOutputFile')
+        fileOutput.base_path = self.path
+        fileOutput.format.file_format = "OPEN_EXR" # "OPEN_EXR", "PNG" # TODO: add input parameter
+        fileOutput.file_slots[0].path = name + "_depth." + fileOutput.format.file_format # file name with appended frame idx
+        fileOutput.format.color_depth = "16" # TODO: add input parameter
+        fileOutput.format.compression = 0 # default is 15 # TODO: add input parameter
+
+        # Link output of render-layers node to input of map node
+        links.new(render_layer.outputs['Depth'], map.inputs['Value'])
+
+        # Link output of map node to input of compositor-output node
+        links.new(map.outputs['Value'], fileOutput.inputs['Image'])
+
+        # # Render
+        bpy.ops.render.render(write_still=True)
+
+        # Remove previous results with same file name and extension
+        if (fileOutput.format.file_format == "OPEN_EXR"):
+            if (os.path.exists(setDir(self.path, name + "_depth","EXR"))):
+                os.remove(setDir(self.path, name + "_depth", "exr"))
+
+            # rename current file by removing automatically appended frame index
+            os.rename(setDir(self.path, name + "_depth." + fileOutput.format.file_format + "0000", "exr"), 
+                  setDir(self.path, name + "_depth", "exr"))
+
+        elif (fileOutput.format.file_format == "PNG"):
+            if (os.path.exists(setDir(self.path, name + "_depth", fileOutput.format.file_format))):
+                os.remove(setDir(self.path, name + "_depth", fileOutput.format.file_format))
+
+            # rename current file by removing automatically appended frame index
+            os.rename(setDir(self.path, name + "_depth." + fileOutput.format.file_format
+                + "0000",fileOutput.format.file_format), 
+                setDir(self.path, name + "_depth", fileOutput.format.file_format))
+
+        else:
+            raise Exception("Please choose between OPEN_EXR and PNG as file format.")
+
+        bpy.context.scene.render.use_compositing = False
 
     def render(self, name):
 
@@ -213,13 +251,13 @@ class Ear():
             target_file = setDir(self.path, name, "png")
             bpy.data.scenes["Scene"].render.resolution_x = int(arg_res)
             bpy.data.scenes["Scene"].render.resolution_y = int(arg_res)
+            bpy.data.scenes["Scene"].render.image_settings.color_depth = '16' # TODO: add input parameter
+            bpy.data.scenes["Scene"].render.image_settings.compression = 15 # TODO: add input parameter
             bpy.context.scene.render.filepath = target_file
             bpy.ops.render.render(write_still=True)
 
-            dmap = self.get_depth()
-            nmap = self.dmap2norm(dmap)
-            np.savez_compressed("d.npz", dmap=dmap, nmap=nmap)      
-
+            # extract depth information and store as exr file
+            self.get_depth(name)  
 
     def reset(self, name):
 
