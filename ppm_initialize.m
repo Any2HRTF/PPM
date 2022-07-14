@@ -109,10 +109,11 @@ if ~exist(fullfile(ppm.ini.path.external,'quaternion'),'dir')
     unzip(fullfile(ppm.ini.path.external,'quaternion','quaternion.zip'),fullfile(ppm.ini.path.external,'quaternion'))
     delete(fullfile(ppm.ini.path.external,'quaternion','quaternion.zip'))
     disp([mfilename,': Finished downloading required class `quaternion` from MATLAB File Exchange.'])
+    addpath()
 end
 
 %% optionally delete all existing txt/ply files in result folder
-filelist = dir(fullfile(ppm.ini.path.result,'*.txt'));
+filelist = [dir(fullfile(ppm.ini.path.result,'*.txt')); dir(fullfile(ppm.ini.path.result,'*.exr'))];
 if ~isempty(filelist) && p.Results.auto_delete==1
     if ppm.ini.verbose_level>0
         warning([mfilename,': Specified result folder contained previous results, which were deleted.'])
