@@ -56,13 +56,34 @@ function ppm = ppm_set_values(ppm,varargin)
 %                                'cam_rot' will be overwritten.
 %
 %   For ppm_blender_execute()
-%     'mesh'      : Render updated PPM mesh [logical], default: true 
-%     'remesh'    : Disable/enable modififiers in blender [logical], default: false
-%     'image'     : Render PPM mesh as image [logical], default: false
-%     'image_res' : Image resolution (image_res x image_res) of the
-%                   rendered image [double], default: 1024
-%     'set_cam'   : Set location and rotation of camera as per 'cam_loc' and 
-%                   'cam_rot' in Blender [logical], default: false
+%     'mesh'              : Render updated PPM mesh [logical], default: true 
+%     'remesh'            : Disable/enable modififiers in blender [logical], default: false
+%     'image'             : Render PPM mesh as PNG [logical], default: false
+%     'image_res'         : Resolution (image_res x image_res) of the
+%                           rendered PNG image [double], default: 1024
+%     'image_col_dep'     : Set color depth of PNG file in bit [double], 
+%                           {8, 10, 12, 16, 32}, default: 16
+%     'image_comp'        : Set amount of compression in rendered PNG file [double], 
+%                           [0, 100] = [none, maximum lossless compression], 
+%                           default: 15
+%     'set_cam'           : Set camera position and rotation as per cam_loc, cam_rot 
+%                           and/or cam_loc_ref [logical], default: false
+%     'depth'             : Export image-depth data (z buffer) as EXR and PNG
+%                           files, normalised to values between 1 (black) 
+%                           and (0) white [logical], default: false
+%     'depth_col_dep_exr' : Set color-depth of depth data (z buffer) in OpenEXR file
+%                           [double], {16, 32}, default: 16
+%     'depth_comp_exr'    : Set amount of compression in OpenEXR file [double], 
+%                           [0, 100] = [none, maximum lossless compression], 
+%                           default: 15
+%     'depth_codec_exr'   : Set codec of rendered OpenEXR file [string], 
+%                           {'NONE', 'PXR24', 'ZIP', 'PIZ’, 'RLE’, 'ZIPS’, 
+%                           'B44 , 'B44A', 'DWAA', 'DWAB'}, default: 'NONE'
+%     'depth_col_dep_png' : Set color-depth of depth data (z buffer) in PNG file
+%                           [double], {8, 10, 12, 16, 32}, default: 16
+%     'depth_comp_png'    : Set amount of compression in rendered image-depth PNG 
+%                           file [double], [0, 100] = [none, maximum lossless compression], 
+%                           default: 15
 %
 % Output parameters:
 %
@@ -140,7 +161,15 @@ addOptional(p,'mesh',true);
 addOptional(p,'remesh',false);
 addOptional(p,'image',false);
 addOptional(p,'image_res',1024);
+addOptional(p,'image_col_dep',16);
+addOptional(p,'image_comp',15);
 addOptional(p,'set_cam',false);
+addOptional(p,'depth',false);
+addOptional(p,'depth_col_dep_exr',16);
+addOptional(p,'depth_comp_exr',15);
+addOptional(p,'depth_codec_exr','NONE');
+addOptional(p,'depth_col_dep_png',16);
+addOptional(p,'depth_comp_png',15);
 
 parse(p,varargin{:});
 
@@ -196,16 +225,24 @@ ppm.modify.axis  = p.Results.axis;
 ppm.modify.val   = p.Results.val;
 ppm.modify.itr   = p.Results.itr;
 ppm.modify.range = p.Results.range;
-ppm.modify.instruction_mode = p.Results.instruction_mode;
-ppm.modify.rotation_mode = p.Results.rotation_mode;
-ppm.modify.cam_loc = p.Results.cam_loc;
-ppm.modify.cam_rot = p.Results.cam_rot;
-ppm.modify.cam_loc_ref = p.Results.cam_loc_ref;
-ppm.modify.set_cam = p.Results.set_cam;
-ppm.modify.mesh = p.Results.mesh;
-ppm.modify.remesh = p.Results.remesh;
-ppm.modify.image = p.Results.image;
-ppm.modify.image_res = p.Results.image_res;
+ppm.modify.instruction_mode  = p.Results.instruction_mode;
+ppm.modify.rotation_mode     = p.Results.rotation_mode;
+ppm.modify.cam_loc           = p.Results.cam_loc;
+ppm.modify.cam_rot           = p.Results.cam_rot;
+ppm.modify.cam_loc_ref       = p.Results.cam_loc_ref;
+ppm.modify.set_cam           = p.Results.set_cam;
+ppm.modify.mesh              = p.Results.mesh;
+ppm.modify.remesh            = p.Results.remesh;
+ppm.modify.image             = p.Results.image;
+ppm.modify.image_res         = p.Results.image_res;
+ppm.modify.image_col_depth   = p.Results.image_col_depth;
+ppm.modify.image_comp        = p.Results.image_comp;
+ppm.modify.depth             = p.Results.depth;
+ppm.modify.depth_col_dep_exr = p.Results.depth_col_dep_exr;
+ppm.modify.depth_comp_exr    = p.Results.depth_comp_exr;
+ppm.modify.depth_codec_exr   = p.Results.depth_codec_exr;
+ppm.modify.depth_col_dep_png = p.Results.depth_col_dep_png;
+ppm.modify.depth_comp_png    = p.Results.depth_comp_png;
 
 %% assign the specified values to the selected parameter
 ppm = ppm_modify_parameter_values(ppm);
@@ -216,4 +253,14 @@ ppm_blender_execute(ppm,...
     'remesh',p.Results.remesh,...
     'image',p.Results.image,...
     'image_res',p.Results.image_res,...
-    'set_cam',p.Results.set_cam)
+    'image_col_dep',p.Results.image_col_dep,...
+    'image_comp',p.Results.image_comp,...
+    'set_cam',p.Results.set_cam,...
+    'depth',p.Results.depth,...
+    'depth_col_dep_exr',p.Results.depth_col_dep_exr,...
+    'depth_comp_exr',p.Results.depth_comp_exr,...
+    'depth_codec_exr',p.Results.depth_codec_exr,...
+    'depth_col_dep_png',p.Results.depth_col_dep_png,...
+    'depth_comp_png',p.Results.depth_comp_png)
+
+end
