@@ -123,7 +123,7 @@ class Ear():
     def get_depth(self, name):
 
         # Scene-render settings
-        bpy.context.scene.render.engine = 'CYCLES' # BLENDER_EEVEE, CYCLES
+        bpy.context.scene.render.engine = 'BLENDER_EEVEE' # BLENDER_EEVEE, CYCLES
         bpy.context.scene.render.use_compositing = True
         
         # Enable nodes
@@ -157,38 +157,48 @@ class Ear():
         fileOutput.base_path = self.path
         fileOutput.format.file_format = "OPEN_EXR" # "OPEN_EXR", "PNG" # TODO: add input parameter
         fileOutput.file_slots[0].path = name + "_depth." + fileOutput.format.file_format # file name with appended frame idx
-        fileOutput.format.color_depth = "16" # TODO: add input parameter
+        fileOutput.format.color_depth = "32" # TODO: add input parameter
         fileOutput.format.compression = 0 # default is 15 # TODO: add input parameter
+        # TODO: add input parameter
+        fileOutput.format.exr_codec = "NONE" # [‘NONE’, ‘PXR24’, ‘ZIP’, ‘PIZ’, ‘RLE’, ‘ZIPS’, ‘B44’, ‘B44A’, ‘DWAA’, ‘DWAB’], default ‘NONE’
 
         # Link output of render-layers node to input of map node
         links.new(render_layer.outputs['Depth'], map.inputs['Value'])
 
-        # Link output of map node to input of compositor-output node
+        # Link output of map node to input of compositor-output node (exr)
         links.new(map.outputs['Value'], fileOutput.inputs['Image'])
+
+        fileOutput_png = tree.nodes.new(type='CompositorNodeOutputFile')
+        fileOutput_png.base_path = self.path
+        fileOutput_png.format.file_format = "PNG" # "OPEN_EXR", "PNG" # TODO: add input parameter
+        fileOutput_png.file_slots[0].path = name + "_depth." + fileOutput_png.format.file_format # file name with appended frame idx
+        fileOutput_png.format.color_depth = "16" # TODO: add input parameter
+        fileOutput_png.format.compression = 0 # default is 15 # TODO: add input parameter
+
+        # Link output of map node to input of compositor-output node (png)
+        links.new(map.outputs['Value'], fileOutput_png.inputs['Image'])
 
         # # Render
         bpy.ops.render.render(write_still=True)
 
         # Remove previous results with same file name and extension
-        if (fileOutput.format.file_format == "OPEN_EXR"):
-            if (os.path.exists(setDir(self.path, name + "_depth","EXR"))):
-                os.remove(setDir(self.path, name + "_depth", "exr"))
+        if (os.path.exists(setDir(self.path, name + "_depth","EXR"))):
+            os.remove(setDir(self.path, name + "_depth", "exr"))
 
-            # rename current file by removing automatically appended frame index
-            os.rename(setDir(self.path, name + "_depth." + fileOutput.format.file_format + "0000", "exr"), 
-                  setDir(self.path, name + "_depth", "exr"))
+        if (os.path.exists(setDir(self.path, name + "_depth", fileOutput_png.format.file_format))):
+            os.remove(setDir(self.path, name + "_depth", fileOutput_png.format.file_format))
 
-        elif (fileOutput.format.file_format == "PNG"):
-            if (os.path.exists(setDir(self.path, name + "_depth", fileOutput.format.file_format))):
-                os.remove(setDir(self.path, name + "_depth", fileOutput.format.file_format))
+        # rename current files by removing automatically appended frame index
+        if (os.path.exists(setDir(self.path, name + "_depth." + fileOutput.format.file_format 
+            + "0000", "exr"))):
+            os.rename(setDir(self.path, name + "_depth." + fileOutput.format.file_format 
+                + "0000", "exr"), setDir(self.path, name + "_depth", "exr"))
 
-            # rename current file by removing automatically appended frame index
-            os.rename(setDir(self.path, name + "_depth." + fileOutput.format.file_format
-                + "0000",fileOutput.format.file_format), 
-                setDir(self.path, name + "_depth", fileOutput.format.file_format))
-
-        else:
-            raise Exception("Please choose between OPEN_EXR and PNG as file format.")
+        if (os.path.exists(setDir(self.path, name + "_depth." + fileOutput_png.format.file_format 
+            + "0000", "png"))):
+            os.rename(setDir(self.path, name + "_depth." + fileOutput_png.format.file_format
+                + "0000",fileOutput_png.format.file_format), 
+                setDir(self.path, name + "_depth", "png"))
 
         bpy.context.scene.render.use_compositing = False
 
@@ -252,7 +262,7 @@ class Ear():
             bpy.data.scenes["Scene"].render.resolution_x = int(arg_res)
             bpy.data.scenes["Scene"].render.resolution_y = int(arg_res)
             bpy.data.scenes["Scene"].render.image_settings.color_depth = '16' # TODO: add input parameter
-            bpy.data.scenes["Scene"].render.image_settings.compression = 15 # TODO: add input parameter
+            bpy.data.scenes["Scene"].render.image_settings.compression = 0 # TODO: add input parameter
             bpy.context.scene.render.filepath = target_file
             bpy.ops.render.render(write_still=True)
 
