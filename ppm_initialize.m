@@ -109,7 +109,7 @@ if ~exist(fullfile(ppm.ini.path.external,'quaternion'),'dir')
     unzip(fullfile(ppm.ini.path.external,'quaternion','quaternion.zip'),fullfile(ppm.ini.path.external,'quaternion'))
     delete(fullfile(ppm.ini.path.external,'quaternion','quaternion.zip'))
     disp([mfilename,': Finished downloading required class `quaternion` from MATLAB File Exchange.'])
-    addpath()
+    addpath(genpath(ppm.ini.path.external))
 end
 
 %% optionally delete all existing txt/ply files in result folder
