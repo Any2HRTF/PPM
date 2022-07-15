@@ -241,7 +241,7 @@ class Ear():
 
                 cam.rotation_euler = mathutils.Euler((math.radians(float(cam_rot[0])),
                                                       math.radians(float(cam_rot[1])),
-                                                      math.radians(float(cam_rot[2]))),cam.rotation_mode)
+                                                      math.radians(float(cam_rot[2]))), cam.rotation_mode)
             
             else: # rotate camera to point at cam_loc_ref
                 cam_loc_ref = cam_loc_ref.split(',')
@@ -259,9 +259,7 @@ class Ear():
             
         else: # set default camera pose
             cam.location = mathutils.Vector((-10, 200, 5))
-            cam.rotation_euler = mathutils.Euler((math.pi/2, 0, math.pi),cam.rotation_mode)
-            print(cam.location)
-            print(cam.rotation_euler)
+            cam.rotation_euler = mathutils.Euler((math.pi/2, 0, math.pi), cam.rotation_mode)
 
         bpy.context.view_layer.update()
 
