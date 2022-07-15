@@ -22,14 +22,15 @@ arg_res = argv[argv.index("--") + 5]
 arg_image_col_dep = argv[argv.index("--") + 6]
 arg_image_comp = argv[argv.index("--") + 7]
 arg_cam = argv[argv.index("--") + 8]
+arg_cam_rot_order = argv[argv.index("--") + 9]
 
-arg_depth = argv[argv.index("--") + 9]
-arg_depth_col_dep_exr = argv[argv.index("--") + 10]
-arg_depth_comp_exr = argv[argv.index("--") + 11]
-arg_depth_codec_exr = argv[argv.index("--") + 12]
+arg_depth = argv[argv.index("--") + 10]
+arg_depth_col_dep_exr = argv[argv.index("--") + 11]
+arg_depth_comp_exr = argv[argv.index("--") + 12]
+arg_depth_codec_exr = argv[argv.index("--") + 13]
 
-arg_depth_col_dep_png = argv[argv.index("--") + 13]
-arg_depth_comp_png = argv[argv.index("--") + 14]
+arg_depth_col_dep_png = argv[argv.index("--") + 14]
+arg_depth_comp_png = argv[argv.index("--") + 15]
 
 def select(label, action):
     if action:
@@ -111,8 +112,8 @@ class Ear():
             bpy.data.objects["ARI_PPM_v1"].modifiers["DataTransfer"].show_viewport = state
             bpy.data.objects["ARI_PPM_v1"].modifiers["DataTransfer"].show_in_editmode = state
             bpy.data.objects["ARI_PPM_v1"].modifiers["DataTransfer"].show_on_cage = state
-            #bpy.data.objects["ARI_PPM_v1"].modifiers["Decimate"].show_render = state
-            #bpy.data.objects["ARI_PPM_v1"].modifiers["Decimate"].show_viewport = state
+            bpy.data.objects["ARI_PPM_v1"].modifiers["Decimate"].show_render = state
+            bpy.data.objects["ARI_PPM_v1"].modifiers["Decimate"].show_viewport = state
 
     def shapeKey(self, name, val):
         bpy.data.shape_keys["Key.002"].key_blocks[name].value = float(val)
@@ -210,6 +211,7 @@ class Ear():
     def render(self, name):
 
         cam = bpy.data.objects['Camera']
+        cam.rotation_mode = arg_cam_rot_order
         bpy.context.scene.camera = cam   
 
         if arg_cam=='TRUE' and name.find('_cam')==(-1):
@@ -240,7 +242,7 @@ class Ear():
 
                 cam.rotation_euler = mathutils.Euler((math.radians(float(cam_rot[0])),
                                                       math.radians(float(cam_rot[1])),
-                                                      math.radians(float(cam_rot[2]))),'XYZ')
+                                                      math.radians(float(cam_rot[2]))),cam.rotation_mode)
             
             else: # rotate camera to point at cam_loc_ref
                 cam_loc_ref = cam_loc_ref.split(',')
@@ -258,7 +260,9 @@ class Ear():
             
         else: # set default camera pose
             cam.location = mathutils.Vector((-10, 200, 5))
-            cam.rotation_euler = mathutils.Euler((math.pi/2, 0, math.pi),'XYZ')
+            cam.rotation_euler = mathutils.Euler((math.pi/2, 0, math.pi),cam.rotation_mode)
+            print(cam.location)
+            print(cam.rotation_euler)
 
         bpy.context.view_layer.update()
 
