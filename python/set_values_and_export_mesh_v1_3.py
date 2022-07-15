@@ -22,15 +22,14 @@ arg_res = argv[argv.index("--") + 5]
 arg_image_col_dep = argv[argv.index("--") + 6]
 arg_image_comp = argv[argv.index("--") + 7]
 arg_cam = argv[argv.index("--") + 8]
-arg_cam_rot_order = argv[argv.index("--") + 9]
 
-arg_depth = argv[argv.index("--") + 10]
-arg_depth_col_dep_exr = argv[argv.index("--") + 11]
-arg_depth_comp_exr = argv[argv.index("--") + 12]
-arg_depth_codec_exr = argv[argv.index("--") + 13]
+arg_depth = argv[argv.index("--") + 9]
+arg_depth_col_dep_exr = argv[argv.index("--") + 10]
+arg_depth_comp_exr = argv[argv.index("--") + 11]
+arg_depth_codec_exr = argv[argv.index("--") + 12]
 
-arg_depth_col_dep_png = argv[argv.index("--") + 14]
-arg_depth_comp_png = argv[argv.index("--") + 15]
+arg_depth_col_dep_png = argv[argv.index("--") + 13]
+arg_depth_comp_png = argv[argv.index("--") + 14]
 
 def select(label, action):
     if action:
@@ -184,7 +183,7 @@ class Ear():
         # Link output of map node to input of compositor-output node (png)
         links.new(map.outputs['Value'], fileOutput_png.inputs['Image'])
 
-        # # Render
+        # Render
         bpy.ops.render.render(write_still=True)
 
         # Remove previous results with same file name and extension
@@ -211,7 +210,7 @@ class Ear():
     def render(self, name):
 
         cam = bpy.data.objects['Camera']
-        cam.rotation_mode = arg_cam_rot_order
+        cam.rotation_mode = 'XYZ'
         bpy.context.scene.camera = cam   
 
         if arg_cam=='TRUE' and name.find('_cam')==(-1):
