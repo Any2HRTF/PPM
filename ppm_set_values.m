@@ -68,8 +68,6 @@ function ppm = ppm_set_values(ppm,varargin)
 %                           default: 15
 %     'set_cam'           : Set camera position and rotation as per cam_loc, cam_rot 
 %                           and/or cam_loc_ref [logical], default: false
-%     'cam_rot_order'     : Set axis order of camera rotation [string], applied as 
-%                           Euler angles, default: 'XYZ'
 %     'depth'             : Export image-depth data (z buffer) as EXR and PNG
 %                           files, normalised to values between 1 (black) 
 %                           and (0) white [logical], default: false
@@ -120,7 +118,6 @@ function ppm = ppm_set_values(ppm,varargin)
 %             .idx [double]   : row in ppm.parameters [double]
 %             .val_orig       : original parameter value before modification [double]
 %             .stp            : step size between parameter values (if itr>1) [double]
-%             .cam_rot_order [string]
 %
 % Definition of parameter limits and conventions in ppm.parameters:
 % (Row)   .type     .name           .axis    (Limits)        (Description) 
@@ -175,7 +172,6 @@ addOptional(p,'image_res',1024);
 addOptional(p,'image_col_dep',16);
 addOptional(p,'image_comp',15);
 addOptional(p,'set_cam',false);
-addOptional(p,'cam_rot_order','XYZ');
 addOptional(p,'depth',false);
 addOptional(p,'depth_col_dep_exr',16);
 addOptional(p,'depth_comp_exr',15);
@@ -242,7 +238,6 @@ ppm.modify.rotation_mode     = p.Results.rotation_mode;
 ppm.modify.cam_loc           = p.Results.cam_loc;
 ppm.modify.cam_rot           = p.Results.cam_rot;
 ppm.modify.cam_loc_ref       = p.Results.cam_loc_ref;
-ppm.modify.cam_rot_order     = p.Results.cam_rot_order;
 ppm.modify.set_cam           = p.Results.set_cam;
 ppm.modify.mesh              = p.Results.mesh;
 ppm.modify.remesh            = p.Results.remesh;
@@ -269,7 +264,6 @@ ppm_blender_execute(ppm,...
     'image_col_dep',p.Results.image_col_dep,...
     'image_comp',p.Results.image_comp,...
     'set_cam',p.Results.set_cam,...
-    'cam_rot_order',p.Results.cam_rot_order,...
     'depth',p.Results.depth,...
     'depth_col_dep_exr',p.Results.depth_col_dep_exr,...
     'depth_comp_exr',p.Results.depth_comp_exr,...
