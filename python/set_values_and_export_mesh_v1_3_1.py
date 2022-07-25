@@ -147,13 +147,8 @@ class Ear():
     def render(self, name):
 
         # Scene-render settings
-        bpy.context.scene.render.engine = 'CYCLES' # BLENDER_EEVEE, CYCLES, WORKBENCH
+        bpy.context.scene.render.engine = 'CYCLES' # CYCLES, BLENDER_EEVEE, WORKBENCH
         bpy.context.view_layer.cycles.denoising_store_passes = True
-
-        # if arg_render_engine=='CYCLES':
-        #     bpy.context.scene.view_layers['View Layer'].cycles.use_denoising
-        #     bpy.context.view_layer.update()
-        #     print('CYCLES')
 
         cam = bpy.data.objects['Camera']
         cam.rotation_mode = 'XYZ'
