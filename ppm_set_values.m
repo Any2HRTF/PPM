@@ -71,6 +71,15 @@ function ppm = ppm_set_values(ppm,varargin)
 %     'depth'             : Export image-depth data (z buffer) as EXR and PNG
 %                           files, normalised to values between 1 (black) 
 %                           and (0) white [logical], default: false
+%     'depth_nearest'     : Nearest distance representing the maximum value
+%                           of the normalised image-depth map (white), 
+%                           provided in Blender units [double], default: 
+%                           Euclidian distance of the current camera position 
+%                           to the origin of the global coordinate system
+%     'depth_farthest'    : Farthest distance representing the minimum value
+%                           of the normalised image-depth map (black), 
+%                           provided in Blender units [double], default: 0 
+%                           (origin of the global coordinate system)
 %     'depth_col_dep_exr' : Set color-depth of depth data (z buffer) in OpenEXR file
 %                           [double], {16, 32}, default: 16
 %     'depth_comp_exr'    : Set amount of compression in OpenEXR file [double], 
@@ -110,6 +119,8 @@ function ppm = ppm_set_values(ppm,varargin)
 %             .image_col_dep [double]
 %             .image_comp [double]
 %             .depth [logical]
+%             .depth_nearest [double]
+%             .depth_farthest [double]
 %             .depth_col_dep_exr [double]
 %             .depth_comp_exr [double]
 %             .depth_codec_exr [string]
@@ -173,6 +184,8 @@ addOptional(p,'image_col_dep',16);
 addOptional(p,'image_comp',15);
 addOptional(p,'set_cam',false);
 addOptional(p,'depth',false);
+addOptional(p,'depth_nearest',NaN);
+addOptional(p,'depth_farthest',0);
 addOptional(p,'depth_col_dep_exr',16);
 addOptional(p,'depth_comp_exr',15);
 addOptional(p,'depth_codec_exr','NONE');
@@ -246,11 +259,17 @@ ppm.modify.image_res         = p.Results.image_res;
 ppm.modify.image_col_dep     = p.Results.image_col_dep;
 ppm.modify.image_comp        = p.Results.image_comp;
 ppm.modify.depth             = p.Results.depth;
+ppm.modify.depth_nearest     = p.Results.depth_nearest;
+ppm.modify.depth_farthest    = p.Results.depth_farthest;
 ppm.modify.depth_col_dep_exr = p.Results.depth_col_dep_exr;
 ppm.modify.depth_comp_exr    = p.Results.depth_comp_exr;
 ppm.modify.depth_codec_exr   = p.Results.depth_codec_exr;
 ppm.modify.depth_col_dep_png = p.Results.depth_col_dep_png;
 ppm.modify.depth_comp_png    = p.Results.depth_comp_png;
+
+if isempty(p.Results.depth_nearest) 
+    ppm.modify.depth_nearest = NaN;
+end
 
 %% assign the specified values to the selected parameter
 ppm = ppm_modify_parameter_values(ppm);
