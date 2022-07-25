@@ -49,8 +49,6 @@ arg_depth_codec_exr = argv[argv.index("--") + 12]
 arg_depth_col_dep_png = argv[argv.index("--") + 13]
 arg_depth_comp_png = argv[argv.index("--") + 14]
 
-arg_render_engine = argv[argv.index("--") + 15]
-
 def select(label, action):
     if action:
         bpy.ops.object.select_all(action='DESELECT')
