@@ -49,6 +49,8 @@ arg_depth_codec_exr = argv[argv.index("--") + 12]
 arg_depth_col_dep_png = argv[argv.index("--") + 13]
 arg_depth_comp_png = argv[argv.index("--") + 14]
 
+arg_render_engine = argv[argv.index("--") + 15]
+
 def select(label, action):
     if action:
         bpy.ops.object.select_all(action='DESELECT')
@@ -144,88 +146,16 @@ class Ear():
                 bpy.ops.export_mesh.ply(filepath=target_file, use_selection=True, use_normals=False, use_uv_coords=False, use_colors=False)
             select('ARI_PPM_v1', False)
     
-    def get_depth(self, name):
+    def render(self, name):
 
         # Scene-render settings
-        bpy.context.scene.render.engine = 'BLENDER_EEVEE' # BLENDER_EEVEE, CYCLES
-        bpy.context.scene.render.use_compositing = True
-        
-        # Enable nodes
-        bpy.context.scene.use_nodes = True
+        bpy.context.scene.render.engine = 'CYCLES' # BLENDER_EEVEE, CYCLES, WORKBENCH
+        bpy.context.view_layer.cycles.denoising_store_passes = True
 
-        tree = bpy.context.scene.node_tree
-        links = tree.links
-
-        # Clear default nodes
-        for n in tree.nodes:
-            tree.nodes.remove(n)
-
-        # Create render-layers node
-        render_layer = tree.nodes.new(type='CompositorNodeRLayers')
-
-        # Create map-range node
-        map = tree.nodes.new(type='CompositorNodeMapRange')
-        
-        # Set map maximum to Euclidian distance of camera to origin
-        cam = bpy.data.objects['Camera']
-        dist_l2 = math.sqrt(cam.location.x**2 + cam.location.y**2 + cam.location.z**2)
-        map.inputs[1].default_value = 0 # map minimum in Blender units
-        map.inputs[2].default_value = dist_l2 # map maximum in Blender units
-
-        # Map values between 1 (white) and zero (black)
-        map.inputs[3].default_value = 1 # map minimum in normalised units (linear steps when using OPEN_EXR)
-        map.inputs[4].default_value = 0 # map minimum in normalised units (linear steps when using OPEN_EXR)
-
-        # Create a file-output node, set the path, and file format
-        fileOutput = tree.nodes.new(type='CompositorNodeOutputFile')
-        fileOutput.base_path = self.path
-        fileOutput.format.file_format = "OPEN_EXR"
-        fileOutput.file_slots[0].path = name + "_depth." + fileOutput.format.file_format # file name with appended frame idx
-        fileOutput.format.color_depth = arg_depth_col_dep_exr
-        fileOutput.format.compression = int(arg_depth_comp_exr)
-        fileOutput.format.exr_codec = arg_depth_codec_exr # [‘NONE’, ‘PXR24’, ‘ZIP’, ‘PIZ’, ‘RLE’, ‘ZIPS’, ‘B44’, ‘B44A’, ‘DWAA’, ‘DWAB’], default ‘NONE’
-
-        # Link output of render-layers node to input of map node
-        links.new(render_layer.outputs['Depth'], map.inputs['Value'])
-
-        # Link output of map node to input of compositor-output node (exr)
-        links.new(map.outputs['Value'], fileOutput.inputs['Image'])
-
-        fileOutput_png = tree.nodes.new(type='CompositorNodeOutputFile')
-        fileOutput_png.base_path = self.path
-        fileOutput_png.format.file_format = "PNG" # "OPEN_EXR", "PNG"
-        fileOutput_png.file_slots[0].path = name + "_depth." + fileOutput_png.format.file_format # file name with appended frame idx
-        fileOutput_png.format.color_depth = arg_depth_col_dep_png
-        fileOutput_png.format.compression = int(arg_depth_comp_png)
-
-        # Link output of map node to input of compositor-output node (png)
-        links.new(map.outputs['Value'], fileOutput_png.inputs['Image'])
-
-        # Render
-        bpy.ops.render.render(write_still=True)
-
-        # Remove previous results with same file name and extension
-        if (os.path.exists(setDir(self.path, name + "_depth","EXR"))):
-            os.remove(setDir(self.path, name + "_depth", "exr"))
-
-        if (os.path.exists(setDir(self.path, name + "_depth", fileOutput_png.format.file_format))):
-            os.remove(setDir(self.path, name + "_depth", fileOutput_png.format.file_format))
-
-        # rename current files by removing automatically appended frame index
-        if (os.path.exists(setDir(self.path, name + "_depth." + fileOutput.format.file_format 
-            + "0000", "exr"))):
-            os.rename(setDir(self.path, name + "_depth." + fileOutput.format.file_format 
-                + "0000", "exr"), setDir(self.path, name + "_depth", "exr"))
-
-        if (os.path.exists(setDir(self.path, name + "_depth." + fileOutput_png.format.file_format 
-            + "0000", "png"))):
-            os.rename(setDir(self.path, name + "_depth." + fileOutput_png.format.file_format
-                + "0000",fileOutput_png.format.file_format), 
-                setDir(self.path, name + "_depth", "png"))
-
-        bpy.context.scene.render.use_compositing = False
-
-    def render(self, name):
+        # if arg_render_engine=='CYCLES':
+        #     bpy.context.scene.view_layers['View Layer'].cycles.use_denoising
+        #     bpy.context.view_layer.update()
+        #     print('CYCLES')
 
         cam = bpy.data.objects['Camera']
         cam.rotation_mode = 'XYZ'
@@ -281,18 +211,125 @@ class Ear():
 
         bpy.context.view_layer.update()
 
-        if arg_image=='TRUE' and name.find('_cam')==(-1) and name!='blender_bones_data':
-            target_file = setDir(self.path, name, "png")
+        # render image and depth information, and store as png and exr files
+        if arg_depth=='TRUE' or arg_image=='TRUE' and name.find('_cam')==(-1) and name!='blender_bones_data':
+
+            bpy.context.scene.render.use_compositing = True
+            bpy.context.scene.render.filepath = self.path
+
             bpy.data.scenes["Scene"].render.resolution_x = int(arg_res)
             bpy.data.scenes["Scene"].render.resolution_y = int(arg_res)
             bpy.data.scenes["Scene"].render.image_settings.color_depth = arg_image_col_dep
             bpy.data.scenes["Scene"].render.image_settings.compression = int(arg_image_comp)
-            bpy.context.scene.render.filepath = target_file
+            
+            # Enable nodes
+            bpy.context.scene.use_nodes = True
+
+            tree = bpy.context.scene.node_tree
+            links = tree.links
+
+            # Clear default nodes
+            for n in tree.nodes:
+                tree.nodes.remove(n)
+
+            # Create render-layers node
+            render_layer = tree.nodes.new(type='CompositorNodeRLayers')
+
+            # Create denoising node
+            denoise = tree.nodes.new(type='CompositorNodeDenoise')
+
+            if arg_depth=='TRUE':
+                # Create map-range node
+                map = tree.nodes.new(type='CompositorNodeMapRange')
+                
+                # Set map maximum to Euclidian distance of camera to origin
+                cam = bpy.data.objects['Camera']
+                dist_l2 = math.sqrt(cam.location.x**2 + cam.location.y**2 + cam.location.z**2)
+                map.inputs[1].default_value = 0 # map minimum in Blender units
+                map.inputs[2].default_value = dist_l2 # map maximum in Blender units
+
+                # Map values between 1 (white) and zero (black)
+                map.inputs[3].default_value = 1 # map minimum in normalised units (linear steps when using OPEN_EXR)
+                map.inputs[4].default_value = 0 # map minimum in normalised units (linear steps when using OPEN_EXR)
+
+                # Link output of render-layers node to input of map node (exr depth)
+                links.new(render_layer.outputs['Depth'], map.inputs['Value'])
+
+                # Create a file-output node, set the path, and file format (exr depth)
+                fileOutput = tree.nodes.new(type='CompositorNodeOutputFile')
+                fileOutput.base_path = self.path
+                fileOutput.format.file_format = "OPEN_EXR"
+                fileOutput.file_slots[0].path = name + "_depth." + fileOutput.format.file_format # file name with appended frame idx
+                fileOutput.format.color_depth = arg_depth_col_dep_exr
+                fileOutput.format.compression = int(arg_depth_comp_exr)
+                fileOutput.format.exr_codec = arg_depth_codec_exr # [‘NONE’, ‘PXR24’, ‘ZIP’, ‘PIZ’, ‘RLE’, ‘ZIPS’, ‘B44’, ‘B44A’, ‘DWAA’, ‘DWAB’], default ‘NONE’
+
+                # Link output of map node to input of compositor-output node (exr depth)
+                links.new(map.outputs['Value'], fileOutput.inputs['Image'])
+
+                # Create a file-output node, set the path, and file format (png depth)
+                fileOutput_png_depth = tree.nodes.new(type='CompositorNodeOutputFile')
+                fileOutput_png_depth.base_path = self.path
+                fileOutput_png_depth.format.file_format = "PNG"
+                fileOutput_png_depth.file_slots[0].path = name + "_depth." + fileOutput_png_depth.format.file_format # file name with appended frame idx
+                fileOutput_png_depth.format.color_depth = arg_depth_col_dep_png
+                fileOutput_png_depth.format.compression = int(arg_depth_comp_png)
+
+                # Link output of map node to input of compositor-output node (png depth)
+                links.new(map.outputs['Value'], fileOutput_png_depth.inputs['Image'])
+
+            # Link noisy-image / denoising-normal / denoising-albedo outputs render-layer node 
+            # with input of denoising node (png)
+            links.new(render_layer.outputs['Image'], denoise.inputs['Image'])
+            links.new(render_layer.outputs['Denoising Normal'], denoise.inputs['Normal'])
+            links.new(render_layer.outputs['Denoising Albedo'], denoise.inputs['Albedo'])
+
+            # Create a file-output node, set the path, and file format (png)
+            fileOutput_png = tree.nodes.new(type='CompositorNodeOutputFile')
+            fileOutput_png.base_path = self.path
+            fileOutput_png.format.file_format = "PNG"
+            fileOutput_png.file_slots[0].path = name + fileOutput_png.format.file_format # file name with appended frame idx
+            fileOutput_png.format.color_depth = arg_image_col_dep
+            fileOutput_png.format.compression = int(arg_image_comp)
+
+            # Link denoise-node output with compositor-output node (png)
+            links.new(denoise.outputs['Image'], fileOutput_png.inputs['Image'])
+
+            # Render!
             bpy.ops.render.render(write_still=True)
 
-        # extract depth information and store as exr and png files
-        if arg_depth=='TRUE' and name.find('_cam')==(-1) and name!='blender_bones_data':
-            self.get_depth(name)
+            # Remove previous results with same file name and extension
+            if arg_depth=='TRUE':
+                if (os.path.exists(setDir(self.path, name + "_depth","EXR"))):
+                    os.remove(setDir(self.path, name + "_depth", "exr"))
+
+                if (os.path.exists(setDir(self.path, name + "_depth", fileOutput_png_depth.format.file_format))):
+                    os.remove(setDir(self.path, name + "_depth", fileOutput_png_depth.format.file_format))
+
+            if (os.path.exists(setDir(self.path, name, fileOutput_png.format.file_format))):
+                os.remove(setDir(self.path, name, fileOutput_png.format.file_format))
+
+            # rename current files by removing automatically appended frame index
+            if arg_depth=='TRUE':
+                if (os.path.exists(setDir(self.path, name + "_depth." + fileOutput.format.file_format 
+                    + "0000", "exr"))):
+                    os.rename(setDir(self.path, name + "_depth." + fileOutput.format.file_format 
+                        + "0000", "exr"), setDir(self.path, name + "_depth", "exr"))
+
+                if (os.path.exists(setDir(self.path, name + "_depth." + fileOutput_png_depth.format.file_format 
+                    + "0000", "png"))):
+                    os.rename(setDir(self.path, name + "_depth." + fileOutput_png_depth.format.file_format
+                        + "0000",fileOutput_png_depth.format.file_format), 
+                        setDir(self.path, name + "_depth", "png"))
+
+            if (os.path.exists(setDir(self.path, name + fileOutput_png.format.file_format 
+                + "0000", "png"))):
+                os.rename(setDir(self.path, name + fileOutput_png.format.file_format
+                    + "0000",fileOutput_png.format.file_format), 
+                    setDir(self.path, name, "png"))
+
+            bpy.context.scene.render.use_compositing = False
+
 
     def reset(self, name):
 
