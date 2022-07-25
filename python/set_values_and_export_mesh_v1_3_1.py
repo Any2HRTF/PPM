@@ -49,6 +49,9 @@ arg_depth_codec_exr = argv[argv.index("--") + 12]
 arg_depth_col_dep_png = argv[argv.index("--") + 13]
 arg_depth_comp_png = argv[argv.index("--") + 14]
 
+arg_depth_nearest = argv[argv.index("--") + 15]
+arg_depth_farthest = argv[argv.index("--") + 16]
+
 def select(label, action):
     if action:
         bpy.ops.object.select_all(action='DESELECT')
@@ -234,12 +237,19 @@ class Ear():
             if arg_depth=='TRUE':
                 # Create map-range node
                 map = tree.nodes.new(type='CompositorNodeMapRange')
-                
-                # Set map maximum to Euclidian distance of camera to origin
-                cam = bpy.data.objects['Camera']
-                dist_l2 = math.sqrt(cam.location.x**2 + cam.location.y**2 + cam.location.z**2)
-                map.inputs[1].default_value = 0 # map minimum in Blender units
-                map.inputs[2].default_value = dist_l2 # map maximum in Blender units
+                               
+                if arg_depth_farthest=='0': #default
+                    map.inputs[1].default_value = 0 # map minimum in Blender units
+                else:
+                    map.inputs[1].default_value = float(arg_depth_farthest) # map minimum in Blender units
+
+                if arg_depth_nearest=='NaN': # default
+                    # Set map maximum to Euclidian distance of camera to origin
+                    cam = bpy.data.objects['Camera']
+                    dist_l2 = math.sqrt(cam.location.x**2 + cam.location.y**2 + cam.location.z**2)
+                    map.inputs[2].default_value = dist_l2 # map maximum in Blender units
+                else:
+                    map.inputs[2].default_value = float(arg_depth_nearest) # map maximum in Blender units
 
                 # Map values between 1 (white) and zero (black)
                 map.inputs[3].default_value = 1 # map minimum in normalised units (linear steps when using OPEN_EXR)
