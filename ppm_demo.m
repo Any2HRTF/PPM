@@ -35,7 +35,7 @@
 % 0.8 and above: Florian Pausch (2022)
 % 0.7 and below: Mantas Tamulionis (2021)
 %
-% Current release version: 1.3.0
+% Current release version: 1.3.1
 
 clear; close all; clc
 
@@ -86,7 +86,9 @@ ppm = ppm_set_values(ppm,...
     'depth_comp_exr',15,...
     'depth_codec_exr','ZIP', ...
     'depth_col_dep_png',16,...
-    'depth_comp_png',15); 
+    'depth_comp_png',15,...
+    'depth_nearest',[],... 
+    'depth_farthest',0);
 
 %% compare the resulting mesh to the specified target mesh
 %  and evaluate its fit based on the Hausdorff distance, plot result
