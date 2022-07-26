@@ -1,6 +1,6 @@
 %% MATLAB script to demonstrate the functionality of the interface to the 
-% parametric pinna model (PPM), including bi-directional communication with 
-% Blender via Python scripts
+%  parametric pinna model (PPM), including bi-directional communication with 
+%  Blender via Python scripts
 %
 % The PPM was developed at Austrian Research Institute (ARI), cf. [1-4].
 %
@@ -39,7 +39,7 @@
 
 clear; close all; clc
 
-%% initialize ppm
+%% Initialize ppm
 name_blender_file = 'PPM_modified_v1.blend';
 
 ppm = ppm_initialize(...
@@ -48,20 +48,20 @@ ppm = ppm_initialize(...
     'verbose_level',2,...
     'auto_delete',true);
 
-%% get parameter values from specified Blender file and export mesh
+%% Get parameter values from specified Blender file and export mesh
 [ppm,val] = ppm_get_values(ppm,...
     'type','Rotation',...
     'name','Size-Bendy',...
     'axis',[]);
 
-% display the selected parameter subset
+% Display the selected parameter subset
 if ppm.ini.verbose_level>0
     disp(val)
 end
 
-%% set and apply parameter value to specified Blender file
-% type 'ppm.parameters' to get a list of all parameters
-% type 'help ppm_set_values' to obtain information about parameter limits 
+%% Set and apply parameter value to specified Blender file
+% Type 'ppm.parameters' to get a list of all parameters
+% Type 'help ppm_set_values' to obtain information about parameter limits 
 ppm = ppm_set_values(ppm,... 
     'type','Rotation',...
     'name','Size-Bendy',...
@@ -90,7 +90,7 @@ ppm = ppm_set_values(ppm,...
     'depth_nearest',[],... 
     'depth_farthest',0);
 
-%% compare the resulting mesh to the specified target mesh
+%% Compare the resulting mesh to the specified target mesh
 %  and evaluate its fit based on the Hausdorff distance, plot result
 name_mesh_target = 'PPM_default_v1.ply';
 
