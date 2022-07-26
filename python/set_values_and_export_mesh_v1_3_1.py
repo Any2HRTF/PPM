@@ -211,8 +211,8 @@ class Ear():
         if arg_depth=='TRUE' or arg_image=='TRUE' and name.find('_cam')==(-1) and name!='blender_bones_data':
 
             bpy.context.scene.render.use_compositing = True
-            bpy.context.scene.render.filepath = self.path
-
+            bpy.context.scene.render.filepath = setDir(self.path, name, "png")
+            
             bpy.data.scenes["Scene"].render.resolution_x = int(arg_res)
             bpy.data.scenes["Scene"].render.resolution_y = int(arg_res)
             bpy.data.scenes["Scene"].render.image_settings.color_depth = arg_image_col_dep
