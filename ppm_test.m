@@ -1,0 +1,188 @@
+%% Matlab script to test full functionality of the interface to the
+%  parametric pinna model (PPM), including bi-directional communication with
+%  Blender via Python scripts
+
+% #Author: Florian Pausch (2022)
+
+clear; close all;
+
+test_get_values          = false;
+test_set_values_single   = false;
+test_set_values_multiple = true;
+test_evaluate            = false;
+
+%% ppm_initialize()
+path_blender_file = fullfile(pwd,'result');
+name_blender_file = 'PPM_modified_v1.blend';
+
+path_default        = fullfile(pwd,'default');
+path_data           = fullfile(pwd,'data');
+path_python         = fullfile(pwd,'python');
+path_result         = fullfile(pwd,'result');
+path_external       = fullfile(pwd,'external');
+name_parameter_file = 'parameter_defaults_v1';
+name_limit_file     = 'shape_key_limits_v1';
+auto_delete         = {true,false};
+verbose_level       = {0,1,2};
+
+fprintf('ppm_init(): Testing...\n')
+
+for idx=1:numel(auto_delete)
+    for jdx=1:numel(verbose_level)
+        try
+            ppm = ppm_initialize(...
+                'path_blender_file',path_blender_file,...
+                'name_blender_file',name_blender_file,...
+                'path_default',path_default,...
+                'path_data',path_data,...
+                'path_python',path_python,...
+                'path_result',path_result,...
+                'path_external',path_external,...
+                'name_parameter_file',name_parameter_file,...
+                'name_limit_file',name_limit_file,...
+                'auto_delete',auto_delete{idx},...
+                'verbose_level',verbose_level{idx});
+        catch e
+            disp(e)
+        end
+    end
+end
+
+fprintf('ppm_init(): Sucessfully tested.\n')
+
+%% ppm_get_values()
+
+ppm.ini.verbose_level = 2;
+
+type = unique(ppm.parameters(:,1));
+name = unique(ppm.parameters(:,2));
+axis = unique(ppm.parameters(:,3));
+axis = strrep(axis,'#','');
+axis(cellfun('isempty',axis)) = {[]};
+
+if test_get_values
+    fprintf('ppm_get_values(): Testing...\n')
+    wb = waitbar(0,'ppm_get_values(): Testing...');
+    wb.Children.Title.Interpreter = 'none';
+    cnt = 0;
+    for idx=1:numel(type)
+        for jdx=1:numel(name)
+            for kdx=1:numel(axis)
+                try
+                    [ppm,val] = ppm_get_values(ppm,...
+                        'type',type{idx},...
+                        'name',name{jdx},...
+                        'axis',axis{kdx});
+                catch e
+                    disp(e)
+                    if contains(e.identifier,'MATLAB')
+                        close(wb)
+                        error('Unexpected error.')
+                    end
+                end
+            end
+            cnt = cnt+1;
+            waitbar(cnt/numel(name)/numel(type),wb)
+        end
+    end
+    close(wb)
+    fprintf('ppm_get_values(): Sucessfully tested.\n')
+end
+
+%% ppm_set_values()
+
+val = -4.1;
+itr_vec = [1,3];
+instruction_mode_cell = {'abs','rel'};
+
+
+%% change single parameter
+if test_set_values_single
+    fprintf('ppm_set_values(): Testing single input...\n')
+    wb = waitbar(0,'ppm_set_values(): Testing single input...');
+    wb.Children.Title.Interpreter = 'none';
+
+    cnt = 0;
+    for idx=1:numel(type)
+        for jdx=1:numel(name)
+            for kdx=1:numel(axis)
+                for ldx=1:numel(itr_vec)
+                    for mdx=1:numel(instruction_mode_cell)
+                        try
+                            ppm = ppm_set_values(ppm,...
+                                'type',type{idx},...
+                                'name',name{jdx},...
+                                'axis',axis{kdx},...
+                                'val',val,...
+                                'itr',itr_vec(ldx),...
+                                'range',4,...
+                                'instruction_mode',instruction_mode_cell{mdx}, ...
+                                'rotation_mode','quaternion');
+                        catch e
+                            disp(e)
+                            if contains(e.identifier,'MATLAB')
+                                close(wb)
+                                error(['Unexpected error for type=',type{idx},', name=',name{jdx},...
+                                    ', axis=',axis{kdx},', instruction_mode=',instruction_mode_cell{ldx},...
+                                    ', itr=',num2str(itr_vec(mdx)),'. Aborted.'])
+                            end
+                        end
+                    end
+                end
+            end
+            cnt = cnt+1;
+            waitbar(cnt/numel(name)/numel(type),wb)
+        end
+    end
+    close(wb)
+    fprintf('ppm_set_values(): Sucessfully tested single input.\n')
+end
+
+%% change multiple parameters
+
+selection_cell = [1:3,5:10,12:14,33:35,40:42];
+type_cell = ppm.parameters(selection_cell,1);
+name_cell = ppm.parameters(selection_cell,2);
+axis_cell = ppm.parameters(selection_cell,3);
+% axis_cell = strrep(axis_cell,'#','');
+% axis_cell(cellfun('isempty',axis_cell)) = {[]};
+val_cell = cellfun(@(x) x-4.1, ppm.parameters(selection_cell,4),'UniformOutput',0);
+
+if test_set_values_multiple
+
+    fprintf('ppm_set_values(): Testing multiple input...\n')
+    wb = waitbar(0,'ppm_set_values(): Testing multiple input...');
+    wb.Children.Title.Interpreter = 'none';
+
+    cnt = 0;
+
+    for ldx=1:numel(itr_vec)
+        for mdx=1:numel(instruction_mode_cell)
+            try
+                ppm = ppm_set_values(ppm,...
+                    'type',type_cell,...
+                    'name',name_cell,...
+                    'axis',axis_cell,...
+                    'val',val_cell,...
+                    'itr',itr_vec(mdx),...
+                    'range',4,...
+                    'instruction_mode',instruction_mode_cell{mdx}, ...
+                    'rotation_mode','quaternion');
+            catch e
+                disp(e)
+                if contains(e.identifier,'MATLAB')
+                    close(wb)
+                    error(['Unexpected error for instruction_mode=',instruction_mode_cell{ldx},...
+                        ', itr=',num2str(itr_vec(mdx)),'. Aborted.'])
+                end
+            end
+            cnt = cnt+1;
+            waitbar(cnt/numel(name)/numel(type),wb)
+        end
+    end
+    close(wb)
+    fprintf('ppm_set_values(): Sucessfully tested multiple input.\n')
+
+end
+
+
