@@ -21,25 +21,67 @@ function ppm = ppm_modify_parameter_values(ppm)
 % #Author: Florian Pausch (2022)
 
 %% determine ppm.modify.idx
-if strcmp(ppm.modify.type,"Shape_key")
-    ppm.modify.idx = find(strcmp(ppm.modify.type,ppm.parameters(:,1)) & ...
-        strcmp(ppm.modify.name,ppm.parameters(:,2)));
-else % additionally check axis
-    ppm.modify.idx = find(strcmp(ppm.modify.type,ppm.parameters(:,1)) & ...
-        strcmp(ppm.modify.name,ppm.parameters(:,2)) & ...
-        strcmp(ppm.modify.axis,ppm.parameters(:,3)));
+if iscell(ppm.modify.type) || iscell(ppm.modify.name) || iscell(ppm.modify.axis)
+    ppm.modify.idx = zeros(size(ppm.modify.type,1),1);
+    for idx=1:size(ppm.modify.type,1)
+        ppm.modify.idx(idx) = find( strcmp(ppm.modify.type{idx},ppm.parameters(:,1)) & ...
+            strcmp(ppm.modify.name{idx},ppm.parameters(:,2)) & ...
+            strcmp(ppm.modify.axis{idx},ppm.parameters(:,3)) );
+    end
+else
+    if strcmp(ppm.modify.type,'Shape_key')
+        ppm.modify.idx = find(strcmp(ppm.modify.type,ppm.parameters(:,1)) & ...
+            strcmp(ppm.modify.name,ppm.parameters(:,2)));
+    else % additionally check axis
+        ppm.modify.idx = find(strcmp(ppm.modify.type,ppm.parameters(:,1)) & ...
+            strcmp(ppm.modify.name,ppm.parameters(:,2)) & ...
+            strcmp(ppm.modify.axis,ppm.parameters(:,3)));
+    end
 end
 
 %% store original parameter value before modifications
-ppm.modify.val_orig = ppm.parameters{ppm.modify.idx,4};
+if iscell(ppm.modify.type) || iscell(ppm.modify.name) || iscell(ppm.modify.axis)
+    ppm.modify.val_orig = cell2mat(ppm.parameters(ppm.modify.idx,4));
+else
+    ppm.modify.val_orig = ppm.parameters{ppm.modify.idx,4};
+end
 
-%% check if set value is within limits
-if strcmp(ppm.modify.type,"Shape_key")
-    
-    lim_low = ppm.ini.shape_key_limits{ppm.modify.idx-9,2};
-    lim_up = ppm.ini.shape_key_limits{ppm.modify.idx-9,3};
-    if ppm.modify.val > lim_up
+%% check if set shape-key value/s is/are within limits
+if iscell(ppm.modify.type) || iscell(ppm.modify.name) || iscell(ppm.modify.axis)
 
+    if any( ismember(ppm.modify.type,'Shape_key') )
+
+        shape_key_idx_local = find(strcmp('Shape_key',ppm.modify.type));
+        shape_key_idx_all = find(strcmp('Shape_key',ppm.parameters(:,1)));
+        [~,shape_key_idx_global] = ismember( ppm.modify.name(ismember( ppm.modify.name, ppm.parameters(shape_key_idx_all,2))), ...
+            ppm.parameters(:,2) );
+        shape_key_idx = shape_key_idx_global-10;
+
+        lim_low = cell2mat( ppm.ini.shape_key_limits(shape_key_idx,2) );
+        lim_up = cell2mat( ppm.ini.shape_key_limits(shape_key_idx,3) );
+
+        if ppm.modify.val(shape_key_idx_local) > lim_up
+            if ppm.ini.verbose_level>0
+                warning([mfilename,': The value/s of the shape-key parameter/s selected exceed/s the upper limit/s. Upper limit/s was/were assigned as value/s.']);
+            end
+            ppm.modify.val(shape_key_idx_local) = lim_up;
+        end
+
+        if  ppm.modify.val(shape_key_idx_local) < lim_low
+            if ppm.ini.verbose_level>0
+                warning([mfilename,': The value/s of the shape-key parameter/s selected exceed/s the lower limit/s. Lower limit/s was/were assigned as value/s.']);
+            end
+            ppm.modify.val(shape_key_idx_local) = lim_low;
+        end
+
+    end
+
+else
+
+    if strcmp(ppm.modify.type,"Shape_key")
+
+        lim_low = ppm.ini.shape_key_limits{ppm.modify.idx-10,2};
+        lim_up = ppm.ini.shape_key_limits{ppm.modify.idx-10,3};
         if ppm.modify.val > lim_up
             if ppm.ini.verbose_level>0
                 warning([mfilename,': The value of the Shape_key parameter you selected exceeds the upper limit of ',...
@@ -55,13 +97,14 @@ if strcmp(ppm.modify.type,"Shape_key")
             end
             ppm.modify.val = lim_low;
         end
-    
     end
+
 end
 
 %% modify the instruction file
+% itr=1
 if ppm.modify.itr == 1
-    
+
     ppm = ppm_add_or_assign(ppm);
     writecell(ppm.parameters, fullfile(ppm.ini.path.result, '1.txt'));
 
@@ -70,37 +113,74 @@ if ppm.modify.itr == 1
         cam_pose = [ppm.modify.cam_loc; ppm.modify.cam_rot; ppm.modify.cam_loc_ref];
         writematrix(cam_pose,fullfile(ppm.ini.path.result,'1_cam.txt'))
     end
-    
-else % ppm.modify.itr > 1
-    
-    ppm.modify.stp = ppm.modify.range/(ppm.modify.itr-1); % calculate step size for the parameter values to be tested
-    
-    if strcmp(ppm.modify.instruction_mode,'rel')
-        ppm.modify.val_vec = ((ppm.modify.val+ppm.modify.val_orig)-ppm.modify.range/2:...
-            ppm.modify.stp:...
-            (ppm.modify.val+ppm.modify.val_orig)+ppm.modify.range/2); % create a vector of values to be tested
-    else
-        ppm.modify.val_vec = (ppm.modify.val-ppm.modify.range/2:...
-            ppm.modify.stp:...
-            ppm.modify.val+ppm.modify.range/2); % create a vector of values to be tested
-    end
 
-    if strcmp(ppm.modify.type,"Shape_key")
-        if ppm.ini.verbose_level>0 && (any(ppm.modify.val_vec(ppm.modify.val_vec<lim_low)) || ...
-                any(ppm.modify.val_vec(ppm.modify.val_vec>lim_up)))
-            warning([mfilename,': Range of values of the Shape_key parameter selected exceeds the limits. ',...
-                'Select a value from ', num2str(lim_low), ' to ',num2str(lim_up),...
-                ' (set was limited to parameter limits).']);
-            ppm.modify.val_vec(ppm.modify.val_vec<lim_low) = lim_low;
-            ppm.modify.val_vec(ppm.modify.val_vec>lim_up) = lim_up;
+else % ppm.modify.itr > 1
+
+    ppm.modify.stp = ppm.modify.range/(ppm.modify.itr-1); % calculate step size for the parameter values to be modified
+    ppm.modify.val_vec = zeros(numel(ppm.modify.val), ...
+        numel((ppm.modify.val+ppm.modify.val_orig)-ppm.modify.range/2:...
+        ppm.modify.stp:...
+        (ppm.modify.val+ppm.modify.val_orig)+ppm.modify.range/2));
+
+    if strcmp(ppm.modify.instruction_mode,'rel')
+        for idx=1:size(ppm.modify.val,1)
+            ppm.modify.val_vec(idx,:) = ((ppm.modify.val(idx)+ppm.modify.val_orig(idx))-ppm.modify.range/2:...
+                ppm.modify.stp:...
+                (ppm.modify.val(idx)+ppm.modify.val_orig(idx))+ppm.modify.range/2); % create a vector of values to be modified
+        end
+    else
+        for idx=1:size(ppm.modify.val,1)
+            ppm.modify.val_vec(idx,:) = (ppm.modify.val(idx)-ppm.modify.range/2:...
+                ppm.modify.stp:...
+                ppm.modify.val(idx)+ppm.modify.range/2); % create a vector of values to be modified
         end
     end
-    
+
+    % set limits of .val_vec according to ppm.ini.name_limit_file
+    % cell-array input
+    if iscell(ppm.modify.type) || iscell(ppm.modify.name) || iscell(ppm.modify.axis)
+
+        if any(strcmp(ppm.modify.type,"Shape_key"))
+            for idx=1:ppm.modify.itr
+                if ppm.ini.verbose_level>0 && ( ...
+                        any( ppm.modify.val_vec(shape_key_idx_local,idx)<lim_low(idx) ) || ...
+                        any( ppm.modify.val_vec(shape_key_idx_local,idx)>lim_up(idx) ) )
+                    warning([mfilename,': Range of values of the selected shape-key parameter exceeds the limits. Affected parameter values were set according to the corresponding limits.'])
+                    
+                    idx_min_vio = shape_key_idx_local(ppm.modify.val_vec(shape_key_idx_local,idx)<lim_low);
+                    if ~isempty(idx_min_vio)
+                        ppm.modify.val_vec(idx_min_vio, idx) = lim_low(idx_min_vio-min(idx_min_vio)+1);
+                    end
+
+                    idx_max_vio = shape_key_idx_local(ppm.modify.val_vec(shape_key_idx_local,idx)>lim_up);                 
+                    if ~isempty(idx_max_vio)
+                        ppm.modify.val_vec(idx_max_vio, idx) = lim_up(idx_max_vio-min(idx_max_vio)+1);
+                    end
+
+                end
+            end     
+        end
+
+    else % single input
+
+        if strcmp(ppm.modify.type,"Shape_key")
+            if ppm.ini.verbose_level>0 && (any(ppm.modify.val_vec(ppm.modify.val_vec<lim_low)) || ...
+                    any(ppm.modify.val_vec(ppm.modify.val_vec>lim_up)))
+                warning([mfilename,': Range of values of the selected shape-key parameter exceeds the limits. ',...
+                    'Select a value between ', num2str(lim_low), ' and ',num2str(lim_up),...
+                    ' (set was limited to parameter limits).']);
+                ppm.modify.val_vec(ppm.modify.val_vec<lim_low) = lim_low;
+                ppm.modify.val_vec(ppm.modify.val_vec>lim_up) = lim_up;
+            end
+        end
+
+    end
+
     % create different blender instruction files that contain the range of
     % values to be tested
     for idx = 1:ppm.modify.itr
-        ppm.modify.val = ppm.modify.val_vec(idx);
-        
+        ppm.modify.val = ppm.modify.val_vec(:,idx);
+
         ppm = ppm_add_or_assign(ppm);
         writecell(ppm.parameters, fullfile(ppm.ini.path.result,[num2str(idx), '.txt']));
 
@@ -111,47 +191,72 @@ else % ppm.modify.itr > 1
         end
 
     end
-    
 end
 
 end
 
-%% add or assign value to parameter depending on ppm.modify.instruction_mode
+%% add or assign value/s to parameter/s depending on ppm.modify.instruction_mode
 function ppm = ppm_add_or_assign(ppm)
 
 % transform quaternions to Euler angles as per ppm.modify.rotation_mode and
 % reconstruct quaternion from modified Euler angle component
-if ~strcmp(ppm.modify.rotation_mode,'quaternion') && strcmp(ppm.modify.type,'Rotation')
+if any( ~strcmp(ppm.modify.rotation_mode,'quaternion') & strcmp(ppm.modify.type,'Rotation') )
 
-    idx = find( strcmp(ppm.modify.type,ppm.parameters(:,1)) & ...
-        strcmp(ppm.modify.name,ppm.parameters(:,2)) );
-    val_orig = cell2mat( ppm.parameters(idx,4) );
+    rotation_idx_local = find(strcmp(ppm.modify.type,'Rotation'));
+    rotation_idx = zeros(numel(rotation_idx_local),1);
+    for idx=rotation_idx_local'
+        rotation_idx(idx) = find( strcmp(ppm.modify.type(idx),ppm.parameters(:,1)) & ...
+            strcmp(ppm.modify.name{idx},ppm.parameters(:,2)) & ...
+            strcmp(ppm.modify.axis{idx},ppm.parameters(:,3)) );
+    end
+    rotation_idx(rotation_idx==0) = [];
+
+    % select corresponding quaternion-rotation entries 
+    rotation_idx_quat = zeros(numel(rotation_idx)+numel(rotation_idx)/3,1);
+    rotation_idx_quat(1:4:end) = rotation_idx(1:3:end)-1;
+    rotation_idx_quat(rotation_idx_quat==0) = rotation_idx;
+    val_orig = cell2mat( reshape(ppm.parameters(rotation_idx_quat,4),...
+        numel(rotation_idx_quat)/3, numel(rotation_idx)/3) );
 
     q = quaternion(val_orig);
     angles_Eul = EulerAngles(q,lower(ppm.modify.rotation_mode));
 
-    str_idx = strfind(ppm.modify.rotation_mode,ppm.modify.axis);
-
     % execute depending on specified instruction mode
     switch ppm.modify.instruction_mode
         case 'rel'
-            angles_Eul(str_idx) = angles_Eul(str_idx) + deg2rad(ppm.modify.val);
+            angles_Eul = angles_Eul + ...
+                reshape( deg2rad(ppm.modify.val(rotation_idx_local)), size(angles_Eul));
         case 'abs'
-            angles_Eul(str_idx) = deg2rad(ppm.modify.val);
+            angles_Eul = reshape( deg2rad(ppm.modify.val(rotation_idx_local)),...
+                                            size(angles_Eul) );
     end
 
     % reconstruct quaternion from modified Euler angles
     q_rec = quaternion.eulerangles(lower(ppm.modify.rotation_mode),angles_Eul);
-    ppm.parameters(idx,4) = num2cell(q_rec.e);
+    q_rec_double = squeeze(q_rec.double);
+    ppm.parameters(rotation_idx_quat,4) = num2cell(q_rec_double(:));
+
+    % change remaining values depending on specified instruction mode
+    switch ppm.modify.instruction_mode
+        case 'rel'
+            ppm.parameters(ppm.modify.idx(setdiff(ppm.modify.idx,rotation_idx_quat)),4) = ...
+                num2cell(ppm.modify.val_orig(setdiff(ppm.modify.idx,rotation_idx_quat)) + ...
+                         ppm.modify.val(setdiff(ppm.modify.idx,rotation_idx_quat)));
+        case 'abs'
+            ppm.parameters(setdiff(ppm.modify.idx,rotation_idx_quat),4) = ...
+                num2cell(ppm.modify.val(setdiff(ppm.modify.idx,rotation_idx_quat)));
+    end
 
 else
 
     % execute depending on specified instruction mode
     switch ppm.modify.instruction_mode
         case 'rel'
-            ppm.parameters{ppm.modify.idx,4} = ppm.modify.val_orig + ppm.modify.val;
+            ppm.parameters(ppm.modify.idx,4) = ...
+                num2cell(ppm.modify.val_orig + ppm.modify.val);
         case 'abs'
-            ppm.parameters{ppm.modify.idx,4} = ppm.modify.val;
+            ppm.parameters(ppm.modify.idx,4) = ...
+                num2cell(ppm.modify.val);
     end
 
 end
