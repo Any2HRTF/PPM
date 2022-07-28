@@ -179,7 +179,7 @@ addOptional(p,'instruction_mode','rel');
 addOptional(p,'rotation_mode','quaternion');
 addOptional(p,'cam_loc',[-10, 200, 5]);
 addOptional(p,'cam_rot',[90, 0, 180]);
-addOptional(p,'cam_loc_ref',[]);
+addOptional(p,'cam_loc_ref',[]); 
 
 % Input arguments for ppm_blender_execute()
 addOptional(p,'mesh',true);
