@@ -9,9 +9,9 @@ function ppm = ppm_set_values(ppm,varargin)
 %
 %   Required
 %     ppm    : PPM structure array, initialized as per ppm_initialize()
-%     'type' : Parameter type [string]
-%     'name' : Parameter name [string]
-%     'axis' : Displacement/rotation axis [string], '
+%     'type' : Parameter type [string OR cell array]
+%     'name' : Parameter name [string OR cell array]
+%     'axis' : Displacement/rotation axis [string OR cell array], '
 %              'W' (only for type 'Rotation')/'X'/'Y'/'Z' (default: []) 
 %              (only required if parameter is not of type 'Shape_key', 
 %              otherwise optional)
@@ -20,6 +20,9 @@ function ppm = ppm_set_values(ppm,varargin)
 %              the orientation quaternion, or the Euler-angle component in deg 
 %              as per ppm.modify.rotation_mode. The general behavior depends on 
 %              ppm.modify.instruction_mode. 
+%
+%      NOTE: Provide N x 1 cell arrays for 'type', 'name', 'axis' and 'val' 
+%            to change N parameter values simultaneously.
 %
 %   Optional (key/value pairs):
 %     'rotation_mode'    : Rotation mode [string]. Possible rotation modes include 
@@ -33,7 +36,10 @@ function ppm = ppm_set_values(ppm,varargin)
 %
 %                          NOTE: Manipulations of Euler-angle components will 
 %                                result in a correspondingly updated normalized
-%                                quaternion.
+%                                quaternion. In rotation modes other than `quaternion`,
+%                                provide triplets of X-, Y-, and Z-axis values 
+%                                if N parameter values are to be changed
+%                                simultaneously.
 %
 %     'instruction_mode' : Instruction mode [string]
 %                           'rel': val is added to val_orig and subsequently 
@@ -160,7 +166,7 @@ function ppm = ppm_set_values(ppm,varargin)
 
 % #Author: Florian Pausch (2022)
 
-%% parse input arguments
+%% Parse input arguments
 p = inputParser;
 
 addOptional(p,'type',[]);
@@ -175,7 +181,7 @@ addOptional(p,'cam_loc',[-10, 200, 5]);
 addOptional(p,'cam_rot',[90, 0, 180]);
 addOptional(p,'cam_loc_ref',[]);
 
-% input arguments for ppm_blender_execute()
+% Input arguments for ppm_blender_execute()
 addOptional(p,'mesh',true);
 addOptional(p,'remesh',false);
 addOptional(p,'image',false);
@@ -194,58 +200,148 @@ addOptional(p,'depth_comp_png',15);
 
 parse(p,varargin{:});
 
-%% check for input errors
-if ~sum(strcmp(p.Results.type,ppm.parameters(:,1)))
-    error('Input error. Unknown parameter type.')
-end
+%% Check for input errors
+% multiple parameters are to be changed
+if iscell(p.Results.type) || iscell(p.Results.name) || ...
+        iscell(p.Results.axis) || iscell(p.Results.val)
 
-if ~sum(strcmp(p.Results.name,ppm.parameters(:,2)))
-    error('Input error. Unknown parameter name.')
-end
+    if ~isequal( size(p.Results.type), size(p.Results.name), ...
+            size(p.Results.axis), size(p.Results.val) )
+        error('Input error. Dimensions of ''type'', ''name'' and/or ''axis'' are not consistent.')
+    end
 
-if ~sum(strcmp(p.Results.axis,ppm.parameters(:,3))) && ~strcmp(p.Results.type,'Shape_key')
-    error('Input error. Unknown displacement/rotation axis. Must be one of ''X'', ''Y'', or ''Z''.')
-end
+    if ~all(ismember(p.Results.type,ppm.parameters(:,1)))
+        error('Input error. Unknown parameter type.')
+    end
 
-if strcmp(p.Results.type,'Location') && strcmp(p.Results.axis,'W')
-    error('Input error. Axis does not exist for type ''Location''.')
-end
+    if ~all(ismember(p.Results.name,ppm.parameters(:,2)))
+        error('Input error. Unknown parameter name.')
+    end
 
-if strcmp(p.Results.type,'Rotation') && ~strcmp(p.Results.rotation_mode,'quaternion') && strcmp(p.Results.axis,'W')
-    error('Input error. W-component is not relevant for manipulation of Euler angle components.')
-end
+    if ~isempty(p.Results.axis)
+        if any( ~ismember(p.Results.axis,ppm.parameters(:,3)) & ~ismember(p.Results.type,'Shape_key') ...
+                & ~strcmp(p.Results.rotation_mode,'quaternion') )
+            error('Input error. Unknown displacement/rotation axis. Must be one of ''X'', ''Y'', or ''Z''.')
+        end
 
-if (isempty(p.Results.type) || isempty(p.Results.name) || isempty(p.Results.val))
-    error('Not enough input arguments. Please specify ''type'', ''name'', and ''val''.')
-end
+        if any( ~ismember(p.Results.axis,ppm.parameters(:,3)) & ~ismember(p.Results.type,'Shape_key') ...
+                & strcmp(p.Results.rotation_mode,'quaternion') )
+            error('Input error. Unknown displacement/rotation axis. Must be one of ''W'', ''X'', ''Y'', or ''Z''.')
+        end
 
-if ~strcmp(p.Results.type,'Shape_key') && isempty(p.Results.axis)
-    error('Not enough input arguments. Please specify ''axis''.')
-end
+        if any( ismember(p.Results.type,'Location') & ismember(p.Results.axis,'W') )
+            error('Input error. Axis does not exist for type ''Location''.')
+        end
 
-if ~sum(strcmp(p.Results.type,ppm.parameters(:,1)) & strcmp(p.Results.name,ppm.parameters(:,2)))
-    error('Input error. Unknown combination of parameter ''type'' and ''name''.')
+        if any( ismember(p.Results.type,'Rotation') & ~strcmp(p.Results.rotation_mode,'quaternion') ...
+                & ismember(p.Results.axis,'W') )
+            error('Input error. W-component is not relevant for manipulation of Euler angle components.')
+        end
+
+        if any( ismember(p.Results.type,'Scale') & ismember(p.Results.axis,'W') )
+            error('Input error. Axis does not exist for type ''Scale''.')
+        end
+    end
+
+    if (isempty(p.Results.type) || isempty(p.Results.name) || isempty(p.Results.val))
+        error('Input error. Not enough input arguments. Please specify ''type'', ''name'', and ''val''.')
+    end
+
+    if any( ~ismember(p.Results.type,'Shape_key') & ~ismember(p.Results.axis,{'W','X','Y','Z','#'}) )
+        error('Input error. Not enough input arguments. Please specify ''axis''.')
+    end
+
+    if ~all( ismember(p.Results.type, ppm.parameters(:,1)) & ismember(p.Results.name, ppm.parameters(:,2)) )
+        error('Input error. Unknown combination of parameter ''type'' and ''name''.')
+    end
+
+else % one parameter is to be changed
+
+    if ~any(strcmp(p.Results.type,ppm.parameters(:,1)))
+        error('Input error. Unknown parameter type.')
+    end
+
+    if ~any(strcmp(p.Results.name,ppm.parameters(:,2)))
+        error('Input error. Unknown parameter name.')
+    end
+
+    if ~any(strcmp(p.Results.axis,ppm.parameters(:,3))) && ~strcmp(p.Results.type,'Shape_key')
+        error('Input error. Unknown displacement/rotation axis. Must be one of ''X'', ''Y'', or ''Z''.')
+    end
+
+    if strcmp(p.Results.type,'Location') && strcmp(p.Results.axis,'W')
+        error('Input error. Axis does not exist for type ''Location''.')
+    end
+
+    if strcmp(p.Results.type,'Rotation') && ~strcmp(p.Results.rotation_mode,'quaternion') && strcmp(p.Results.axis,'W')
+        error('Input error. W-component is not relevant for manipulation of Euler angle components.')
+    end
+
+    if (isempty(p.Results.type) || isempty(p.Results.name) || isempty(p.Results.val))
+        error('Input error. Not enough input arguments. Please specify ''type'', ''name'', and ''val''.')
+    end
+
+    if ~strcmp(p.Results.type,'Shape_key') && isempty(p.Results.axis)
+        error('Input error. Not enough input arguments. Please specify ''axis''.')
+    end
+
+    if strcmp(p.Results.type,'Scale') && strcmp(p.Results.axis,'W')
+        error('Input error. Axis does not exist for type ''Scale''.')
+    end
+
+    if ~any(strcmp(p.Results.type,ppm.parameters(:,1)) & strcmp(p.Results.name,ppm.parameters(:,2)))
+        error('Input error. Unknown combination of parameter ''type'' and ''name''.')
+    end
+
+    if ~any(strcmp(p.Results.axis,ppm.parameters(:,3))) && ~strcmp(p.Results.type,'Shape_key') ...
+            && strcmp(p.Results.rotation_mode,'quaternion')
+        error('Input error. Unknown displacement/rotation axis. Must be one of ''W'', ''X'', ''Y'', or ''Z''.')
+    end
+
+    if strcmp(p.Results.type,'Location') && strcmp(p.Results.axis,'W')
+        error('Input error. Axis does not exist for type ''Location''.')
+    end
+
+    if strcmp(p.Results.type,'Rotation') && ~strcmp(p.Results.rotation_mode,'quaternion') ...
+            && strcmp(p.Results.axis,'W')
+        error('Input error. W-component is not relevant for manipulation of Euler angle components.')
+    end
+
 end
 
 if p.Results.itr>1 && isempty(p.Results.range) 
-    error('Not enough input arguments. Please specify ''range''.')
+    error('Input error. Not enough input arguments. Please specify ''range''.')
 end
 
 if ~ismember(p.Results.instruction_mode,{'rel','abs'})
-    error('Instruction mode must be either ''rel'' or ''abs''.')
+    error('Input error. Instruction mode must be either ''rel'' or ''abs''.')
 end
 
 if ~ismember(p.Results.rotation_mode,{'quaternion','XYZ','XZY','YXZ','YZX','ZXY','ZYX'})
-    error('Rotation mode must be either ''quaternion'',''XYZ'',''XZY'',''YXZ'',''YZX'',''ZXY'', or ''ZYX''.')
+    error('Input error. Rotation mode must be either ''quaternion'',''XYZ'',''XZY'',''YXZ'',''YZX'',''ZXY'', or ''ZYX''.')
 end
 
-%% assign input arguments to ppm struct
+%% Assign input arguments to ppm.modify
 ppm.modify.type  = p.Results.type;
 ppm.modify.name  = p.Results.name;
 ppm.modify.axis  = p.Results.axis;
-ppm.modify.val   = p.Results.val;
-ppm.modify.itr   = p.Results.itr;
-ppm.modify.range = p.Results.range;
+
+if iscell(p.Results.axis)
+
+else
+    if strcmp(p.Results.axis,'#')
+        ppm.modify.axis = [];
+    end
+end
+
+if iscell(p.Results.val)
+    ppm.modify.val   = cell2mat(p.Results.val);
+else
+    ppm.modify.val   = p.Results.val;
+end
+
+ppm.modify.itr               = p.Results.itr;
+ppm.modify.range             = p.Results.range;
 ppm.modify.instruction_mode  = p.Results.instruction_mode;
 ppm.modify.rotation_mode     = p.Results.rotation_mode;
 ppm.modify.cam_loc           = p.Results.cam_loc;
@@ -271,10 +367,10 @@ if isempty(p.Results.depth_nearest)
     ppm.modify.depth_nearest = NaN;
 end
 
-%% assign the specified values to the selected parameter
+%% Assign the specified values to the selected parameter(s)
 ppm = ppm_modify_parameter_values(ppm);
 
-%% render modified mesh
+%% Render modified mesh
 ppm_blender_execute(ppm)
 
 end
