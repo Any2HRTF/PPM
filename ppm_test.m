@@ -140,13 +140,10 @@ end
 
 %% change multiple parameters
 
-selection_cell = [1:3,5:10,12:14,33:35,40:42];
-type_cell = ppm.parameters(selection_cell,1);
-name_cell = ppm.parameters(selection_cell,2);
-axis_cell = ppm.parameters(selection_cell,3);
-% axis_cell = strrep(axis_cell,'#','');
-% axis_cell(cellfun('isempty',axis_cell)) = {[]};
-val_cell = cellfun(@(x) x-4.1, ppm.parameters(selection_cell,4),'UniformOutput',0);
+selection_cell = {[1:3,5:10,12:14,33:35,40:42];...
+                  [1:3,5:10,12:14,33:35,40:41];...
+                  1:size(ppm.parameters,1)};
+rotation_cell = {'ZYX','quaternion'};
 
 if test_set_values_multiple
 
@@ -156,28 +153,40 @@ if test_set_values_multiple
 
     cnt = 0;
 
-    for ldx=1:numel(itr_vec)
-        for mdx=1:numel(instruction_mode_cell)
-            try
-                ppm = ppm_set_values(ppm,...
-                    'type',type_cell,...
-                    'name',name_cell,...
-                    'axis',axis_cell,...
-                    'val',val_cell,...
-                    'itr',itr_vec(mdx),...
-                    'range',4,...
-                    'instruction_mode',instruction_mode_cell{mdx}, ...
-                    'rotation_mode','quaternion');
-            catch e
-                disp(e)
-                if contains(e.identifier,'MATLAB')
-                    close(wb)
-                    error(['Unexpected error for instruction_mode=',instruction_mode_cell{ldx},...
-                        ', itr=',num2str(itr_vec(mdx)),'. Aborted.'])
+    for kdx=1:numel(selection_cell)
+        for jdx=1:numel(rotation_cell)
+
+            type_cell = ppm.parameters(selection_cell{kdx},1);
+            name_cell = ppm.parameters(selection_cell{kdx},2);
+            axis_cell = ppm.parameters(selection_cell{kdx},3);
+            % axis_cell = strrep(axis_cell,'#','');
+            % axis_cell(cellfun('isempty',axis_cell)) = {[]};
+            val_cell = cellfun(@(x) x-4.1, ppm.parameters(selection_cell{kdx},4),'UniformOutput',0);
+
+            for ldx=1:numel(itr_vec)
+                for mdx=1:numel(instruction_mode_cell)
+                    try
+                        ppm = ppm_set_values(ppm,...
+                            'type',type_cell,...
+                            'name',name_cell,...
+                            'axis',axis_cell,...
+                            'val',val_cell,...
+                            'itr',itr_vec(mdx),...
+                            'range',4,...
+                            'instruction_mode',instruction_mode_cell{mdx}, ...
+                            'rotation_mode',rotation_cell{jdx});
+                    catch e
+                        disp(e)
+                        if contains(e.identifier,'MATLAB')
+                            close(wb)
+                            error(['Unexpected error for instruction_mode=',instruction_mode_cell{ldx},...
+                                ', itr=',num2str(itr_vec(mdx)),'. Aborted.'])
+                        end
+                    end
                 end
             end
             cnt = cnt+1;
-            waitbar(cnt/numel(name)/numel(type),wb)
+            waitbar(cnt/numel(selection_cell)/numel(rotation_cell),wb)
         end
     end
     close(wb)
