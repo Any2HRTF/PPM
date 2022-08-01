@@ -60,14 +60,14 @@ if iscell(ppm.modify.type) || iscell(ppm.modify.name) || iscell(ppm.modify.axis)
         lim_low = cell2mat( ppm.ini.shape_key_limits(shape_key_idx,2) );
         lim_up = cell2mat( ppm.ini.shape_key_limits(shape_key_idx,3) );
 
-        if ppm.modify.val(shape_key_idx_local) > lim_up
+        if any(ppm.modify.val(shape_key_idx_local) > lim_up)
             if ppm.ini.verbose_level>0
                 warning([mfilename,': The value/s of the shape-key parameter/s selected exceed/s the upper limit/s. Upper limit/s was/were assigned as value/s.']);
             end
             ppm.modify.val(shape_key_idx_local) = lim_up;
         end
 
-        if  ppm.modify.val(shape_key_idx_local) < lim_low
+        if any(ppm.modify.val(shape_key_idx_local) < lim_low)
             if ppm.ini.verbose_level>0
                 warning([mfilename,': The value/s of the shape-key parameter/s selected exceed/s the lower limit/s. Lower limit/s was/were assigned as value/s.']);
             end
@@ -168,7 +168,7 @@ else % ppm.modify.itr > 1
                     any(ppm.modify.val_vec(ppm.modify.val_vec>lim_up)))
                 warning([mfilename,': Range of values of the selected shape-key parameter exceeds the limits. ',...
                     'Select a value between ', num2str(lim_low), ' and ',num2str(lim_up),...
-                    ' (set was limited to parameter limits).']);
+                    ' (set was limited as per parameter limits).']);
                 ppm.modify.val_vec(ppm.modify.val_vec<lim_low) = lim_low;
                 ppm.modify.val_vec(ppm.modify.val_vec>lim_up) = lim_up;
             end
@@ -254,11 +254,25 @@ else
         case 'rel'
             ppm.parameters(ppm.modify.idx,4) = ...
                 num2cell(ppm.modify.val_orig + ppm.modify.val);
+
         case 'abs'
             ppm.parameters(ppm.modify.idx,4) = ...
                 num2cell(ppm.modify.val);
     end
 
 end
+
+% apply shape-key limits to ppm.parameters (if instruction mode 'rel' resulted 
+% in further violations of the shape-key limits)
+shape_key_idx_all = find(strcmp('Shape_key',ppm.parameters(:,1)));
+
+sk_min_val = cell2mat(ppm.ini.shape_key_limits(:,2));
+sk_min_vio_idx = cell2mat(ppm.parameters(shape_key_idx_all,4)) < sk_min_val;
+
+sk_max_val = cell2mat(ppm.ini.shape_key_limits(:,3));
+sk_max_vio_idx = cell2mat(ppm.parameters(shape_key_idx_all,4)) > sk_max_val;
+
+ppm.parameters(shape_key_idx_all(sk_min_vio_idx),4) = num2cell(sk_min_val(sk_min_vio_idx));
+ppm.parameters(shape_key_idx_all(sk_max_vio_idx),4) = num2cell(sk_max_val(sk_max_vio_idx));
 
 end
