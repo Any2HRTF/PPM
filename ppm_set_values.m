@@ -62,9 +62,9 @@ function ppm = ppm_set_values(ppm,varargin)
 %                                'cam_rot' will be overwritten.
 %
 %   For ppm_blender_execute()
-%     'mesh'              : Render updated PPM mesh [logical], default: true 
+%     'mesh'              : Render updated modelled mesh [logical], default: true 
 %     'remesh'            : Disable/enable modififiers in blender [logical], default: false
-%     'image'             : Render PPM mesh as PNG [logical], default: false
+%     'image'             : Render modelled mesh as PNG [logical], default: false
 %     'image_res'         : Resolution (image_res x image_res) of the
 %                           rendered PNG image [double], default: 1024
 %     'image_col_dep'     : Set color depth of PNG file in bit [double], 
@@ -74,9 +74,10 @@ function ppm = ppm_set_values(ppm,varargin)
 %                           default: 15
 %     'set_cam'           : Set camera position and rotation as per cam_loc, cam_rot 
 %                           and/or cam_loc_ref [logical], default: false
-%     'depth'             : Export image-depth data (z buffer) as EXR and PNG
-%                           files, normalised to values between 1 (black) 
-%                           and (0) white [logical], default: false
+%     'depth'             : (Requires 'image' set to true) Export image-depth 
+%                           data (z buffer) as EXR and PNG files, normalised 
+%                           to values between 1 (black) and (0) white [logical], 
+%                           default: false
 %     'depth_nearest'     : Nearest distance representing the maximum value
 %                           of the normalised image-depth map (white), 
 %                           provided in Blender units [double], default: 
@@ -108,8 +109,8 @@ function ppm = ppm_set_values(ppm,varargin)
 %             .name [string]
 %             .axis [string]
 %             .val / .val_vec : parameter value after modification / 
-%                               (itr>1) vector of parameter values after
-%                               modification [double] 
+%                               (if itr>1: vector of parameter values after
+%                               modification) [double] 
 %             .itr [double]
 %             .range [double]
 %             .instruction_mode [string]
@@ -208,6 +209,18 @@ if iscell(p.Results.type) || iscell(p.Results.name) || ...
     if ~isequal( size(p.Results.type), size(p.Results.name), ...
             size(p.Results.axis), size(p.Results.val) )
         error('Input error. Dimensions of ''type'', ''name'' and/or ''axis'' are not consistent.')
+    end
+
+    if ~strcmp(p.Results.rotation_mode,'quaternion') && ...
+            ( ~isequal( numel(strcmp(p.Results.axis,'X')),...
+                     numel(strcmp(p.Results.axis,'Y')),...
+                     numel(strcmp(p.Results.axis,'Z')) ) || ...
+                     ( mod( sum(strcmp(p.Results.axis,'X'))+...
+                      sum(strcmp(p.Results.axis,'Y'))+...
+                      sum(strcmp(p.Results.axis,'Z')), 3 ) ) )
+        error(['Input error. When using rotation mode ''',...
+            p.Results.rotation_mode,...
+            ', fully occupied value triplets are expected for ''axis'', with corresponding entries for ''type'', ''name'', and ''val''.'])
     end
 
     if ~all(ismember(p.Results.type,ppm.parameters(:,1)))
