@@ -22,7 +22,8 @@ function ppm = ppm_set_values(ppm,varargin)
 %              ppm.modify.instruction_mode. 
 %
 %      NOTE: Provide N x 1 cell arrays for 'type', 'name', 'axis' and 'val' 
-%            to change N parameter values simultaneously.
+%            to change N parameter values simultaneously. Anisotropic scaling 
+%            is only possible when `type` is set to 'Size-Bendy'.
 %
 %   Optional (key/value pairs):
 %     'rotation_mode'    : Rotation mode [string]. Possible rotation modes include 
@@ -105,9 +106,9 @@ function ppm = ppm_set_values(ppm,varargin)
 %
 %   ppm : PPM structure array [struct] extended by
 %         .modify
-%             .type [string]
-%             .name [string]
-%             .axis [string]
+%             .type [string OR cell array]
+%             .name [string OR cell array]
+%             .axis [string OR cell array]
 %             .val / .val_vec : parameter value after modification / 
 %                               (if itr>1: vector of parameter values after
 %                               modification) [double] 
@@ -133,9 +134,9 @@ function ppm = ppm_set_values(ppm,varargin)
 %             .depth_codec_exr [string]
 %             .depth_col_dep_png [double]
 %             .depth_comp_png [double]
-%             .idx [double]   : row in ppm.parameters [double]
-%             .val_orig       : original parameter value before modification [double]
-%             .stp            : step size between parameter values (if itr>1) [double]
+%             .idx      : row in ppm.parameters [double]
+%             .val_orig : original parameter value before modification [double]
+%             .stp      : step size between parameter values (if itr>1) [double]
 %
 % Definition of parameter limits and conventions in ppm.parameters:
 % (Row)   .type     .name           .axis    (Limits)        (Description) 
@@ -161,7 +162,7 @@ function ppm = ppm_set_values(ppm,varargin)
 %
 % NOTE: All changes of parameter values are non-destructive and only
 %       contained in the exported meshes. The Blender file itself, specified  
-%       in ppm_initialize, is not modified.
+%       in ppm_initialize(), is not modified.
 %
 % Related functions : ppm_initialize, ppm_get_values, ppm_evaluate
 
@@ -246,6 +247,13 @@ if iscell(p.Results.type) || iscell(p.Results.name) || ...
             error('Input error. Axis does not exist for type ''Location''.')
         end
 
+        if strcmp(p.Results.type,'Scale') && ~strcmp(p.Results.axis,'W') && ~strcmp(p.Results.name,'Size-Bendy')
+            axes_other = unique( ppm.parameters(~strcmp(p.Results.axis, ppm.parameters(:,3)), 3) );
+            axes_other(strcmp(axes_other,'#') | strcmp(axes_other,'W')) = [];
+            warning([mfilename,': Only isotropic scaling is possible for control bones. Axes ', ...
+                char(axes_other(1))', ' and ', char(axes_other(2))', ' were set to the value of ', p.Results.axis, '.'])
+        end
+
         if any( ismember(p.Results.type,'Rotation') & ~strcmp(p.Results.rotation_mode,'quaternion') ...
                 & ismember(p.Results.axis,'W') )
             error('Input error. W-component is not relevant for manipulation of Euler angle components.')
@@ -302,6 +310,13 @@ else % one parameter is to be changed
         error('Input error. Axis does not exist for type ''Scale''.')
     end
 
+%     if strcmp(p.Results.type,'Scale') && ~strcmp(p.Results.axis,'W') && ~strcmp(p.Results.name,'Size-Bendy')
+%         axes_other = unique( ppm.parameters(~strcmp(p.Results.axis, ppm.parameters(:,3)), 3) );
+%         axes_other(strcmp(axes_other,'#') | strcmp(axes_other,'W')) = [];
+%         warning([mfilename,': Only isotropic scaling is possible for control bones. Axes ', ...
+%             char(axes_other(1))', ' and ', char(axes_other(2))', ' were set to the value of ', p.Results.axis, '.'])
+%     end
+
     if ~any(strcmp(p.Results.type,ppm.parameters(:,1)) & strcmp(p.Results.name,ppm.parameters(:,2)))
         error('Input error. Unknown combination of parameter ''type'' and ''name''.')
     end
@@ -335,12 +350,20 @@ if ~ismember(p.Results.rotation_mode,{'quaternion','XYZ','XZY','YXZ','YZX','ZXY'
 end
 
 %% Assign input arguments to ppm.modify
-ppm.modify.type  = p.Results.type;
-ppm.modify.name  = p.Results.name;
-ppm.modify.axis  = p.Results.axis;
+if strcmp(p.Results.type,'Scale') && ~strcmp(p.Results.name,'Size-Bendy')
+    % address isotropic scaling of control bones
+    ppm.modify.type = repmat(cellstr(p.Results.type),3,1);
+    ppm.modify.name = repmat(cellstr(p.Results.name),3,1);
+    ppm.modify.axis = [cellstr(p.Results.axis); axes_other];
+    ppm.modify.val = repmat(p.Results.val,3,1);
+else
+    ppm.modify.type = p.Results.type;
+    ppm.modify.name = p.Results.name;
+    ppm.modify.axis = p.Results.axis;
+end
 
 if iscell(p.Results.axis)
-
+    % TODO
 else
     if strcmp(p.Results.axis,'#')
         ppm.modify.axis = [];
