@@ -93,7 +93,7 @@ end
 
 val = -4.1;
 itr_vec = [1,3];
-instruction_mode_cell = {'abs','rel'};
+instruction_mode_cell = {'rel','abs'};
 
 
 %% change single parameter
@@ -127,11 +127,11 @@ if test_set_values_single
                                     ', itr=',num2str(itr_vec(mdx)),'. Aborted.'])
                             end
                         end
+                        cnt = cnt+1;
+                        waitbar(cnt/numel(name)/numel(type)/numel(axis)/numel(itr_vec)/numel(instruction_mode_cell),wb)
                     end
                 end
             end
-            cnt = cnt+1;
-            waitbar(cnt/numel(name)/numel(type),wb)
         end
     end
     close(wb)
@@ -142,7 +142,10 @@ end
 
 selection_cell = {[1:3,5:10,12:14,33:35,40:42];...
                   [1:3,5:10,12:14,33:35,40:41];...
-                  1:size(ppm.parameters,1)};
+                  1:size(ppm.parameters,1);...
+                  [8:10, 155:159];... % incomplete scaling triplets
+                  [8:10, 155:160];... % anisotropic scaling triplets for control bones
+                  [8:10, 155:160]};   % isotropic/anisotropic triplets for control bones/size bendy
 rotation_cell = {'ZYX','quaternion'};
 
 if test_set_values_multiple
@@ -161,7 +164,30 @@ if test_set_values_multiple
             axis_cell = ppm.parameters(selection_cell{kdx},3);
             % axis_cell = strrep(axis_cell,'#','');
             % axis_cell(cellfun('isempty',axis_cell)) = {[]};
-            val_cell = cellfun(@(x) x-4.1, ppm.parameters(selection_cell{kdx},4),'UniformOutput',0);
+            
+            switch kdx
+                case 5
+                    if jdx==1
+                        val_cell(1) = cellfun(@(x) x-0.3, ppm.parameters(selection_cell{kdx}(1),4),'UniformOutput',0);
+                        val_cell(2) = cellfun(@(x) x+0.2, ppm.parameters(selection_cell{kdx}(2),4),'UniformOutput',0);
+                        val_cell(3) = cellfun(@(x) x-0.6, ppm.parameters(selection_cell{kdx}(3),4),'UniformOutput',0);
+                        val_cell = val_cell';
+                        val_cell = repmat(val_cell,3,1);
+                    end
+                case 6
+                    if jdx==1
+                        val_cell(1) = cellfun(@(x) x-0.3, ppm.parameters(selection_cell{kdx}(1),4),'UniformOutput',0);
+                        val_cell(2) = cellfun(@(x) x+0.2, ppm.parameters(selection_cell{kdx}(2),4),'UniformOutput',0);
+                        val_cell(3) = cellfun(@(x) x-0.6, ppm.parameters(selection_cell{kdx}(3),4),'UniformOutput',0);
+                        val_cell(4) = cellfun(@(x) x-0.1, ppm.parameters(selection_cell{kdx}(1),4),'UniformOutput',0);
+                        val_cell(5) = cellfun(@(x) x-0.1, ppm.parameters(selection_cell{kdx}(2),4),'UniformOutput',0);
+                        val_cell(6) = cellfun(@(x) x-0.1, ppm.parameters(selection_cell{kdx}(3),4),'UniformOutput',0);
+                        val_cell = val_cell';
+                        val_cell = [val_cell; val_cell(4:6)];
+                    end
+                otherwise
+                    val_cell = cellfun(@(x) x-4.1, ppm.parameters(selection_cell{kdx},4),'UniformOutput',0);
+            end
 
             for ldx=1:numel(itr_vec)
                 for mdx=1:numel(instruction_mode_cell)
@@ -183,11 +209,12 @@ if test_set_values_multiple
                                 ', itr=',num2str(itr_vec(mdx)),'. Aborted.'])
                         end
                     end
+                    cnt = cnt+1;
+                    waitbar(cnt/numel(selection_cell)/numel(rotation_cell)/numel(itr_vec)/numel(instruction_mode_cell),wb)
                 end
             end
-            cnt = cnt+1;
-            waitbar(cnt/numel(selection_cell)/numel(rotation_cell),wb)
         end
+        clear val_cell
     end
     close(wb)
     fprintf('ppm_set_values(): Sucessfully tested multiple input.\n')
