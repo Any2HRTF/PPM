@@ -5,7 +5,7 @@
 # Matlab-function descriptions for further information on its use. 
 #
 # Related Python function:
-# get_values_and_export_mesh_v1_3.py
+# get_values_and_export_mesh_v1_4_0.py
 #
 # Related Matlab functions:
 # ppm_demo, ppm_get_values, ppm_set_values
@@ -13,8 +13,6 @@
 # Versions and contributors:
 # PPM interface 0.8 and above: Florian Pausch (2022)
 # PPM interface 0.7 and below: Oscar Jones (2021)
-#
-# Current release version: 1.3.0
 
 print("Blender loaded")
 
