@@ -12,6 +12,7 @@ test_set_values_multiple = true;
 test_evaluate            = false;
 
 %% ppm_initialize()
+
 path_blender_file = fullfile(pwd,'result');
 name_blender_file = 'PPM_modified_v1.blend';
 
@@ -25,7 +26,7 @@ name_limit_file     = 'shape_key_limits_v1';
 auto_delete         = {true,false};
 verbose_level       = {0,1,2};
 
-warning('ppm_init(): Testing...\n')
+fprintf('ppm_init(): Testing...\n')
 
 for idx=1:numel(auto_delete)
     for jdx=1:numel(verbose_level)
@@ -48,7 +49,7 @@ for idx=1:numel(auto_delete)
     end
 end
 
-warning('ppm_init(): Sucessfully tested.\n')
+fprintf('ppm_init(): Sucessfully tested.\n\n')
 
 %% ppm_get_values()
 
@@ -61,7 +62,7 @@ axis = strrep(axis,'#','');
 axis(cellfun('isempty',axis)) = {[]};
 
 if test_get_values
-    warning('ppm_get_values(): Testing...\n')
+    fprintf('ppm_get_values(): Testing...\n')
     wb = waitbar(0,'ppm_get_values(): Testing...');
     wb.Children.Title.Interpreter = 'none';
     cnt = 0;
@@ -86,7 +87,7 @@ if test_get_values
         end
     end
     close(wb)
-    warning('ppm_get_values(): Sucessfully tested.\n')
+    fprintf('ppm_get_values(): Sucessfully tested.\n\n')
 end
 
 %% ppm_set_values()
@@ -95,9 +96,10 @@ val = -4.1;
 itr_vec = [1,3];
 instruction_mode_cell = {'rel','abs'};
 
-%% change single parameter
+%% change a single parameter value
+
 if test_set_values_single
-    warning('ppm_set_values(): Testing single input...\n')
+    fprintf('ppm_set_values(): Testing single input...\n')
     wb = waitbar(0,'ppm_set_values(): Testing single input...');
     wb.Children.Title.Interpreter = 'none';
 
@@ -123,7 +125,7 @@ if test_set_values_single
                                 close(wb)
                                 error(['Unexpected error for type=',type{idx},', name=',name{jdx},...
                                     ', axis=',axis{kdx},', instruction_mode=',instruction_mode_cell{ldx},...
-                                    ', itr=',num2str(itr_vec(mdx)),'. Aborted.'])
+                                    ', itr=',num2str(itr_vec(ldx)),'. Aborted.'])
                             end
                         end
                         cnt = cnt+1;
@@ -134,10 +136,10 @@ if test_set_values_single
         end
     end
     close(wb)
-    warning('ppm_set_values(): Sucessfully tested single input.\n')
+    fprintf('ppm_set_values(): Sucessfully tested single input.\n\n')
 end
 
-%% change multiple parameters
+%% change multiple parameter values
 
 selection_cell = {[1:3,5:10,12:14,33:35,40:42];...
                   [1:3,5:10,12:14,33:35,40:41];...
@@ -149,7 +151,7 @@ rotation_cell = {'ZYX','quaternion'};
 
 if test_set_values_multiple
 
-    warning('ppm_set_values(): Testing multiple input...\n')
+    fprintf('ppm_set_values(): Testing multiple input...\n')
     wb = waitbar(0,'ppm_set_values(): Testing multiple input...');
     wb.Children.Title.Interpreter = 'none';
 
@@ -196,7 +198,7 @@ if test_set_values_multiple
                             'name',name_cell,...
                             'axis',axis_cell,...
                             'val',val_cell,...
-                            'itr',itr_vec(mdx),...
+                            'itr',itr_vec(ldx),...
                             'range',4,...
                             'instruction_mode',instruction_mode_cell{mdx}, ...
                             'rotation_mode',rotation_cell{jdx});
@@ -205,7 +207,7 @@ if test_set_values_multiple
                         if contains(e.identifier,'MATLAB')
                             close(wb)
                             error(['Unexpected error for instruction_mode=',instruction_mode_cell{ldx},...
-                                ', itr=',num2str(itr_vec(mdx)),'. Aborted.'])
+                                ', itr=',num2str(itr_vec(ldx)),'. Aborted.'])
                         end
                     end
                     cnt = cnt+1;
@@ -216,8 +218,76 @@ if test_set_values_multiple
         clear val_cell
     end
     close(wb)
-    warning('ppm_set_values(): Sucessfully tested multiple input.\n')
+    fprintf('ppm_set_values(): Sucessfully tested multiple input.\n\n')
 
 end
 
+%% ppm_evaluate()
+
+selection_cell = {3;...
+    [1:3,5:10,12:14,33:35,40:42]};
+
+caxis_min = -3;
+caxis_max = 7;
+name_mesh_target = 'PPM_default_v1.ply';
+
+if test_evaluate
+
+    fprintf('ppm_evaluate(): Testing...\n')
+    wb = waitbar(0,'ppm_set_values(): Testing single input...');
+    wb.Children.Title.Interpreter = 'none';
+
+    cnt = 0;
+
+    for kdx=1:numel(selection_cell)
+        for ldx=1:numel(itr_vec)
+            if kdx==1
+                type_cell = char(ppm.parameters(selection_cell{kdx},1));
+                name_cell = char(ppm.parameters(selection_cell{kdx},2));
+                axis_cell = char(ppm.parameters(selection_cell{kdx},3));
+                val_cell = cell2mat(cellfun(@(x) x-4.1, ...
+                    ppm.parameters(selection_cell{kdx},4),'UniformOutput',0));
+            else
+                type_cell = ppm.parameters(selection_cell{kdx},1);
+                name_cell = ppm.parameters(selection_cell{kdx},2);
+                axis_cell = ppm.parameters(selection_cell{kdx},3);
+                val_cell = cellfun(@(x) x-4.1, ppm.parameters(selection_cell{kdx},4),'UniformOutput',0);
+            end
+
+            ppm = ppm_set_values(ppm,...
+                'type',type_cell,...
+                'name',name_cell,...
+                'axis',axis_cell,...
+                'val',val_cell,...
+                'itr',itr_vec(ldx),...
+                'range',4,...
+                'instruction_mode','abs', ...
+                'rotation_mode','quaternion');
+
+            try
+                ppm = ppm_evaluate(ppm,...
+                    'path_mesh_target',ppm.ini.path.data,...
+                    'name_mesh_target',name_mesh_target,...
+                    'caxis_min',caxis_min,...
+                    'caxis_max',caxis_max);
+            catch e
+                disp(e)
+                if contains(e.identifier,'MATLAB')
+                    close(wb)
+                    error('Unexpected error. Aborted.')
+                end
+            end
+
+            cnt = cnt+1;
+            waitbar(cnt/numel(selection_cell)/numel(itr_vec),wb)
+
+        end
+
+        clear val_cell
+
+    end
+
+    close(wb)
+    fprintf('ppm_evaluate(): Sucessfully tested.\n\n')
+end
 
