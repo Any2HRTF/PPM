@@ -10,42 +10,41 @@ function ppm = ppm_evaluate(ppm,varargin)
 %   Required
 %     ppm                : PPM structure array, initialized as per 
 %                          ppm_initialize() and optionally modified via 
-%                          ppm_set_values(). Type 'help ppm_initialize' to 
-%                          obtain further information [struct].                          
+%                          ppm_set_values() [struct]                          
 %     'path_mesh_target' : Path to target mesh [string]
 %     'name_mesh_target' : File name of target mesh [string]
 %
 %   Optional
 %     .path_mesh_result  : Path to result mesh [string], default: ppm.ini.path.result
 %     .name_mesh_result  : File name of result mesh [string], default: '1.ply'
-%     'caxis_min'        : lower limit of colorbar [double], default: min(hd)
-%     'caxis_max'        : upper limit of colorbar [double], default: max(hd)
+%     'caxis_min'        : Lower limit of colorbar [double], default: min(hd)
+%     'caxis_max'        : Upper limit of colorbar [double], default: max(hd)
 %
 % Output parameters:
 %
 %   ppm : PPM structure array extended by
 %         .evaluate
-%             .val             : if ppm.modify > 1 the parameter value is 
+%             .val             : If ppm.modify > 1 the parameter value is 
 %                                set to the one resulting in the minimum mean
 %                                minimum Hausdorff distance across iterations
-%             .mesh_target     : target mesh [double]
-%             .mesh_result     : resulting mesh after modifications of PPM 
+%             .mesh_target     : Target mesh [double]
+%             .mesh_result     : Resulting mesh after modifications of PPM 
 %                                parameters [double]
-%             .hd              : minimum Hausdorff distance per point 
+%             .hd              : Minimum Hausdorff distance per point 
 %                                of the result mesh [double]
-%             .hd_mean         : average minimum Hausdorff distance 
+%             .hd_mean         : Average minimum Hausdorff distance 
 %                                across the entire result mesh per 
 %                                iteration (if ppm.modify.itr > 1) [double]
-%             .hd_std          : standard deviation of minimum Hausdorff distance 
+%             .hd_std          : Standard deviation of minimum Hausdorff distance 
 %                                across the entire result mesh per 
 %                                iteration (if ppm.modify.itr > 1) [double]
-%             .hd_median       : median of minimum Hausdorff distance 
+%             .hd_median       : Median of minimum Hausdorff distance 
 %                                across the entire result mesh per 
 %                                iteration (if ppm.modify.itr > 1) [double]
-%             .hd_mean_min     : minimum average minimum Hausdorff distance 
+%             .hd_mean_min     : Minimum average minimum Hausdorff distance 
 %                                across all iterations mesh (if 
 %                                ppm.modify.itr > 1) [double]
-%             .hd_mean_min_itr : index of iteration that yielded the 
+%             .hd_mean_min_itr : Index of iteration that yielded the 
 %                                minimum average minimum Hausdorff distance 
 %                                (only relevant if ppm.modify.itr > 1) [double]
 %
@@ -152,40 +151,49 @@ else % itr > 1
     ppm.evaluate.hd_median = median(ppm.evaluate.hd); % calculate median of minimum HDs
     [ppm.evaluate.hd_mean_min,ppm.evaluate.hd_mean_min_itr] = min(ppm.evaluate.hd_mean); % find the smallest mean of minimum HDs
     ppm.modify.val = ppm.modify.val_vec(ppm.evaluate.hd_mean_min_itr); % assign parameter value with lowest HD to parameter
-    
+
     if ppm.ini.verbose_level>0
         figure('units','normalized','outerposition',[0 0 1 1])
-        tiledlayout(2,2)
-
-        % plot HD means over the different parameter values tested
-        nexttile
-        plot(ppm.modify.val_vec, ppm.evaluate.hd_mean,'o-');
-        hold on
-        plot(ppm.modify.val_vec(ppm.evaluate.hd_mean_min_itr), ...
-            min(ppm.evaluate.hd_mean),'r.','markersize',20);
-        set(gca,'xtick',round(ppm.modify.val_vec*1000)/1000)
-        xlabel('Parameter value per iteration')
-        ylabel ('Mean minimum Hausdorff distance')
-        grid minor
-        axis square
-        if strcmp(ppm.modify.type,'Shape key')
-            title(sprintf('Parameter Nr. %d: %s, %s',ppm.modify.idx,...
-                ppm.modify.type,...
-                ppm.modify.name))
+        
+        if size(ppm.modify.val_vec,1)>1
+            tiledlayout(1,2)
         else
-            title(sprintf('Parameter Nr. %d: %s, %s (%s)',ppm.modify.idx,...
-                ppm.modify.type,...
-                ppm.modify.name,...
-                ppm.modify.axis))
+            tiledlayout(2,2)
+
+            % plot HD means over the different parameter values tested
+            nexttile
+            plot(ppm.modify.val_vec, ppm.evaluate.hd_mean,'o-');
+            hold on
+            plot(ppm.modify.val_vec(ppm.evaluate.hd_mean_min_itr), ...
+                min(ppm.evaluate.hd_mean),'r.','markersize',20);
+            set(gca,'xtick',round(ppm.modify.val_vec*1000)/1000)
+            xlabel('Parameter value per iteration')
+            ylabel ('Mean minimum Hausdorff distance')
+            grid minor
+            axis square
+            if strcmp(ppm.modify.type,'Shape key')
+                title(sprintf('Parameter Nr. %d: %s, %s',ppm.modify.idx,...
+                    ppm.modify.type,...
+                    ppm.modify.name))
+            else
+                title(sprintf('Parameter Nr. %d: %s, %s (%s)',ppm.modify.idx,...
+                    ppm.modify.type,...
+                    ppm.modify.name,...
+                    ppm.modify.axis))
+            end
         end
 
         % Create a graph showing HDs using the parameter value that gives the smallest mean
-        nexttile      
+        if size(ppm.modify.val_vec,1)==1
+            nexttile
+        end
         ppm_plot_hd(ppm,...
             'caxis_min',p.Results.caxis_min,...
             'caxis_max',p.Results.caxis_max);
 
-        delete(nexttile(2))
+        if size(ppm.modify.val_vec,1)==1
+            delete(nexttile(2))
+        end
 
         disp([mfilename,': Average Hausdorff distance of the entire mesh (mu+/-sigma, Mdn): ', ...
             [num2str(mean(ppm.evaluate.hd(:,ppm.evaluate.hd_mean_min_itr))),'+/-', ...
