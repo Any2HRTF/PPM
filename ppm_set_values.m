@@ -3,6 +3,7 @@ function ppm = ppm_set_values(ppm,varargin)
 %                 in the Blender file specified in the PPM structure array
 %
 % Usage: 
+%
 %   ppm = ppm_set_values(ppm,varargin)
 %
 % Input parameters:
@@ -11,8 +12,9 @@ function ppm = ppm_set_values(ppm,varargin)
 %     ppm    : PPM structure array, initialized as per ppm_initialize()
 %     'type' : Parameter type [string OR cell array]
 %     'name' : Parameter name [string OR cell array]
-%     'axis' : Displacement/rotation axis [string OR cell array], '
-%              'W' (only for type 'Rotation')/'X'/'Y'/'Z' (default: []) 
+%     'axis' : Displacement/rotation axis [string OR cell array], 
+%              'W' (only for type 'Rotation' and ppm.modify.instruction_mode  
+%              set to 'quaternion')/'X'/'Y'/'Z' (default: []) 
 %              (only required if parameter is not of type 'Shape_key', 
 %              otherwise optional)
 %     'val'  : Value to be assigned to the selected parameter [double].
@@ -23,7 +25,10 @@ function ppm = ppm_set_values(ppm,varargin)
 %
 %      NOTE: Provide N x 1 cell arrays for 'type', 'name', 'axis' and 'val' 
 %            to change N parameter values simultaneously. Anisotropic scaling 
-%            is only possible when `type` is set to 'Size-Bendy'.
+%            is only possible when `name` is set to 'Size-Bendy'. To scale 
+%            Size-Bendy and/or different control bones, provide different 
+%            and/or identical value triplets, respectively, per corresponding 
+%            axis triplets.
 %
 %   Optional (key/value pairs):
 %     'rotation_mode'    : Rotation mode [string]. Possible rotation modes include 
@@ -36,11 +41,11 @@ function ppm = ppm_set_values(ppm,varargin)
 %                          'ZYX': ZYX Euler rotation (order: X -> Y -> Z)
 %
 %                          NOTE: Manipulations of Euler-angle components will 
-%                                result in a correspondingly updated normalized
-%                                quaternion. In rotation modes other than `quaternion`,
+%                                result in correspondingly updated normalized
+%                                quaternions. In rotation modes other than `quaternion`,
 %                                provide triplets of X-, Y-, and Z-axis values 
 %                                if N parameter values are to be changed
-%                                simultaneously.
+%                                simultaneously. 
 %
 %     'instruction_mode' : Instruction mode [string]
 %                           'rel': val is added to val_orig and subsequently 
