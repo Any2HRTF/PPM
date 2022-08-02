@@ -213,15 +213,15 @@ if iscell(p.Results.type) || iscell(p.Results.name) || ...
     end
 
     if ~strcmp(p.Results.rotation_mode,'quaternion') && ...
-            ( ~isequal( numel(strcmp(p.Results.axis,'X')),...
-                     numel(strcmp(p.Results.axis,'Y')),...
-                     numel(strcmp(p.Results.axis,'Z')) ) || ...
+            ( ~isequal( sum(strcmp(p.Results.axis,'X')),...
+                     sum(strcmp(p.Results.axis,'Y')),...
+                     sum(strcmp(p.Results.axis,'Z')) ) || ...
                      ( mod( sum(strcmp(p.Results.axis,'X'))+...
                       sum(strcmp(p.Results.axis,'Y'))+...
                       sum(strcmp(p.Results.axis,'Z')), 3 ) ) )
         error(['Input error. When using rotation mode ''',...
             p.Results.rotation_mode,...
-            ', fully occupied value triplets are expected for ''axis'', with corresponding entries for ''type'', ''name'', and ''val''.'])
+            ', fully occupied triplets are expected for ''axis'', with corresponding entries for ''type'', ''name'', and ''val''.'])
     end
 
     if ~all(ismember(p.Results.type,ppm.parameters(:,1)))
@@ -247,13 +247,6 @@ if iscell(p.Results.type) || iscell(p.Results.name) || ...
             error('Input error. Axis does not exist for type ''Location''.')
         end
 
-        if strcmp(p.Results.type,'Scale') && ~strcmp(p.Results.axis,'W') && ~strcmp(p.Results.name,'Size-Bendy')
-            axes_other = unique( ppm.parameters(~strcmp(p.Results.axis, ppm.parameters(:,3)), 3) );
-            axes_other(strcmp(axes_other,'#') | strcmp(axes_other,'W')) = [];
-            warning([mfilename,': Only isotropic scaling is possible for control bones. Axes ', ...
-                char(axes_other(1))', ' and ', char(axes_other(2))', ' were set to the value of ', p.Results.axis, '.'])
-        end
-
         if any( ismember(p.Results.type,'Rotation') & ~strcmp(p.Results.rotation_mode,'quaternion') ...
                 & ismember(p.Results.axis,'W') )
             error('Input error. W-component is not relevant for manipulation of Euler angle components.')
@@ -262,6 +255,28 @@ if iscell(p.Results.type) || iscell(p.Results.name) || ...
         if any( ismember(p.Results.type,'Scale') & ismember(p.Results.axis,'W') )
             error('Input error. Axis does not exist for type ''Scale''.')
         end
+
+        if any(ismember(p.Results.type,'Scale')) && ~all(ismember(p.Results.name,'Size-Bendy')) && ...
+                ( ~isequal( sum(strcmp(p.Results.axis,'X')),...
+                sum(strcmp(p.Results.axis,'Y')),...
+                sum(strcmp(p.Results.axis,'Z')) ) || ...
+                ( mod( sum(strcmp(p.Results.axis,'X'))+...
+                sum(strcmp(p.Results.axis,'Y'))+...
+                sum(strcmp(p.Results.axis,'Z')), 3 ) ) )
+
+            error('Input error. Fully occupied triplets are expected for ''Scale'', with corresponding entries for ''type'' and ''name''. If ''name'' is not set to ''Size-Bendy'' identical triplets for ''val'' are required (isotropic scaling).')
+        end
+
+        if any(ismember(p.Results.type,'Scale')) && ~all(ismember(p.Results.name,'Size-Bendy'))
+
+            scale_idx_local = ismember(p.Results.type,'Scale') & ~ismember(p.Results.name,'Size-Bendy');
+            scale_reshape = cell2mat(reshape(p.Results.val(scale_idx_local),3,numel(p.Results.val(scale_idx_local))/3));
+            
+            if ~all(~diff(scale_reshape),'all')
+                error('Input error. Only isotropic scaling is possible for control bones. Provide identical axis-related values for the corresponding scaling triplets.')
+            end
+        end
+
     end
 
     if (isempty(p.Results.type) || isempty(p.Results.name) || isempty(p.Results.val))
@@ -310,12 +325,12 @@ else % one parameter is to be changed
         error('Input error. Axis does not exist for type ''Scale''.')
     end
 
-%     if strcmp(p.Results.type,'Scale') && ~strcmp(p.Results.axis,'W') && ~strcmp(p.Results.name,'Size-Bendy')
-%         axes_other = unique( ppm.parameters(~strcmp(p.Results.axis, ppm.parameters(:,3)), 3) );
-%         axes_other(strcmp(axes_other,'#') | strcmp(axes_other,'W')) = [];
-%         warning([mfilename,': Only isotropic scaling is possible for control bones. Axes ', ...
-%             char(axes_other(1))', ' and ', char(axes_other(2))', ' were set to the value of ', p.Results.axis, '.'])
-%     end
+    if strcmp(p.Results.type,'Scale') && ~strcmp(p.Results.name,'Size-Bendy')
+        axes_other = unique( ppm.parameters(~strcmp(p.Results.axis, ppm.parameters(:,3)), 3) );
+        axes_other(strcmp(axes_other,'#') | strcmp(axes_other,'W')) = [];
+        warning([mfilename,': Only isotropic scaling is possible for control bones. Axes ', ...
+            char(axes_other(1))', ' and ', char(axes_other(2))', ' were set to the value of ', p.Results.axis, '.'])
+    end
 
     if ~any(strcmp(p.Results.type,ppm.parameters(:,1)) & strcmp(p.Results.name,ppm.parameters(:,2)))
         error('Input error. Unknown combination of parameter ''type'' and ''name''.')
@@ -350,21 +365,30 @@ if ~ismember(p.Results.rotation_mode,{'quaternion','XYZ','XZY','YXZ','YZX','ZXY'
 end
 
 %% Assign input arguments to ppm.modify
-if strcmp(p.Results.type,'Scale') && ~strcmp(p.Results.name,'Size-Bendy')
-    % address isotropic scaling of control bones
-    ppm.modify.type = repmat(cellstr(p.Results.type),3,1);
-    ppm.modify.name = repmat(cellstr(p.Results.name),3,1);
-    ppm.modify.axis = [cellstr(p.Results.axis); axes_other];
-    ppm.modify.val = repmat(p.Results.val,3,1);
-else
+if iscell(p.Results.type) || iscell(p.Results.name) || ...
+        iscell(p.Results.axis) || iscell(p.Results.val)
+
     ppm.modify.type = p.Results.type;
     ppm.modify.name = p.Results.name;
     ppm.modify.axis = p.Results.axis;
+
+else
+
+    if strcmp(p.Results.type,'Scale') && ~strcmp(p.Results.name,'Size-Bendy')
+        % address isotropic scaling of control bones
+        ppm.modify.type = repmat(cellstr(p.Results.type),3,1);
+        ppm.modify.name = repmat(cellstr(p.Results.name),3,1);
+        ppm.modify.axis = [cellstr(p.Results.axis); axes_other];
+        ppm.modify.val = repmat(p.Results.val,3,1);
+    else
+        ppm.modify.type = p.Results.type;
+        ppm.modify.name = p.Results.name;
+        ppm.modify.axis = p.Results.axis;
+    end
+
 end
 
-if iscell(p.Results.axis)
-    % TODO
-else
+if ~iscell(p.Results.axis)
     if strcmp(p.Results.axis,'#')
         ppm.modify.axis = [];
     end
@@ -400,7 +424,7 @@ ppm.modify.depth_col_dep_png = p.Results.depth_col_dep_png;
 ppm.modify.depth_comp_png    = p.Results.depth_comp_png;
 
 if isempty(p.Results.depth_nearest) 
-    ppm.modify.depth_nearest = NaN;
+    ppm.modify.depth_nearest = NaN; % NaN for set_values_and_export_mesh_vX.py
 end
 
 %% Assign the specified values to the selected parameter(s)
