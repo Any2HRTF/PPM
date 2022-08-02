@@ -429,7 +429,7 @@ ppm.modify.depth_col_dep_png = p.Results.depth_col_dep_png;
 ppm.modify.depth_comp_png    = p.Results.depth_comp_png;
 
 if isempty(p.Results.depth_nearest) 
-    ppm.modify.depth_nearest = NaN; % NaN for set_values_and_export_mesh_vX.py
+    ppm.modify.depth_nearest = 'cam_loc'; % for set_values_and_export_mesh_vX.py
 end
 
 %% Assign the specified values to the selected parameter(s)
