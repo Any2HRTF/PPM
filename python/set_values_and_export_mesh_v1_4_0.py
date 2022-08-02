@@ -241,7 +241,7 @@ class Ear():
                 else:
                     map.inputs[1].default_value = float(arg_depth_farthest) # map minimum in Blender units
 
-                if arg_depth_nearest=='NaN': # default
+                if arg_depth_nearest=='cam_loc': # default
                     # Set map maximum to Euclidian distance of camera to origin
                     cam = bpy.data.objects['Camera']
                     dist_l2 = math.sqrt(cam.location.x**2 + cam.location.y**2 + cam.location.z**2)
