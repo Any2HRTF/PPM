@@ -7,7 +7,7 @@
 clear; close all;
 
 test_get_values          = false;
-test_set_values_single   = false;
+test_set_values_single   = true;
 test_set_values_multiple = true;
 test_evaluate            = false;
 
@@ -25,7 +25,7 @@ name_limit_file     = 'shape_key_limits_v1';
 auto_delete         = {true,false};
 verbose_level       = {0,1,2};
 
-fprintf('ppm_init(): Testing...\n')
+warning('ppm_init(): Testing...\n')
 
 for idx=1:numel(auto_delete)
     for jdx=1:numel(verbose_level)
@@ -48,7 +48,7 @@ for idx=1:numel(auto_delete)
     end
 end
 
-fprintf('ppm_init(): Sucessfully tested.\n')
+warning('ppm_init(): Sucessfully tested.\n')
 
 %% ppm_get_values()
 
@@ -61,7 +61,7 @@ axis = strrep(axis,'#','');
 axis(cellfun('isempty',axis)) = {[]};
 
 if test_get_values
-    fprintf('ppm_get_values(): Testing...\n')
+    warning('ppm_get_values(): Testing...\n')
     wb = waitbar(0,'ppm_get_values(): Testing...');
     wb.Children.Title.Interpreter = 'none';
     cnt = 0;
@@ -86,7 +86,7 @@ if test_get_values
         end
     end
     close(wb)
-    fprintf('ppm_get_values(): Sucessfully tested.\n')
+    warning('ppm_get_values(): Sucessfully tested.\n')
 end
 
 %% ppm_set_values()
@@ -95,10 +95,9 @@ val = -4.1;
 itr_vec = [1,3];
 instruction_mode_cell = {'rel','abs'};
 
-
 %% change single parameter
 if test_set_values_single
-    fprintf('ppm_set_values(): Testing single input...\n')
+    warning('ppm_set_values(): Testing single input...\n')
     wb = waitbar(0,'ppm_set_values(): Testing single input...');
     wb.Children.Title.Interpreter = 'none';
 
@@ -135,7 +134,7 @@ if test_set_values_single
         end
     end
     close(wb)
-    fprintf('ppm_set_values(): Sucessfully tested single input.\n')
+    warning('ppm_set_values(): Sucessfully tested single input.\n')
 end
 
 %% change multiple parameters
@@ -150,7 +149,7 @@ rotation_cell = {'ZYX','quaternion'};
 
 if test_set_values_multiple
 
-    fprintf('ppm_set_values(): Testing multiple input...\n')
+    warning('ppm_set_values(): Testing multiple input...\n')
     wb = waitbar(0,'ppm_set_values(): Testing multiple input...');
     wb.Children.Title.Interpreter = 'none';
 
@@ -217,7 +216,7 @@ if test_set_values_multiple
         clear val_cell
     end
     close(wb)
-    fprintf('ppm_set_values(): Sucessfully tested multiple input.\n')
+    warning('ppm_set_values(): Sucessfully tested multiple input.\n')
 
 end
 
