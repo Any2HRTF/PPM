@@ -8,7 +8,7 @@ function ppm = ppm_set_values(ppm,varargin)
 %
 % Input parameters:
 %
-%   Required
+%   Required:
 %     ppm    : PPM structure array, initialized as per ppm_initialize()
 %     'type' : Parameter type [string OR cell array]
 %     'name' : Parameter name [string OR cell array]
@@ -67,7 +67,7 @@ function ppm = ppm_set_values(ppm,varargin)
 %                          NOTE: If 'cam_loc_ref' is set the values for 
 %                                'cam_rot' will be overwritten.
 %
-%   For ppm_blender_execute()
+%   For ppm_blender_execute():
 %     'mesh'              : Render updated modelled mesh [logical], default: true 
 %     'remesh'            : Disable/enable modififiers in blender [logical], default: false
 %     'image'             : Render modelled mesh as PNG [logical], default: false
