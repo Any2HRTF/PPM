@@ -3,6 +3,7 @@ function ppm = ppm_evaluate(ppm,varargin)
 %               target mesh in terms of the Hausdorff distance
 %
 % Usage: 
+%
 %   ppm = ppm_evaluate(ppm,varargin)
 %
 % Input parameters:
@@ -54,7 +55,7 @@ function ppm = ppm_evaluate(ppm,varargin)
 
 % #Author: Florian Pausch (2022)
 
-%% parse input arguments
+%% Parse input arguments
 p = inputParser;
 
 addOptional(p,'path_mesh_result',ppm.ini.path.result);
@@ -76,7 +77,7 @@ else
     itr = ppm.modify.itr;
 end
 
-%% set default renderer
+%% Set default MATLAB renderer
 set(0, 'DefaultFigureRenderer', 'opengl');
 
 %% load first result mesh and specified target mesh
@@ -86,7 +87,7 @@ ppm.evaluate.mesh_result = mesh_result_temp.Location;
 mesh_target_temp = pcread(fullfile(p.Results.path_mesh_target, p.Results.name_mesh_target));
 ppm.evaluate.mesh_target = mesh_target_temp.Location;
 
-%% load remaining result meshes obtained in the corresponding iterations
+%% load remaining result meshes exported in the corresponding iterations
 if itr>1
     mesh_result_mtx = zeros(size(ppm.evaluate.mesh_result,1),...
         size(ppm.evaluate.mesh_result,2),itr); 
@@ -101,7 +102,7 @@ end
 %% calculate Hausdorff distance and visualize result
 if itr==1
     
-    % compare result and target meshes
+    % Compare result and target meshes
     ppm.evaluate.hd = hausdorff_dist(ppm.evaluate.mesh_result,ppm.evaluate.mesh_target);
 
     if ppm.ini.verbose_level>0
@@ -113,7 +114,7 @@ if itr==1
         figure('units','normalized','outerposition',[0 0 1 1])
         tiledlayout(1,2)
 
-        % plot result mesh with color-coded Hausdorff distance
+        % Plot result mesh with color-coded Hausdorff distance
         ppm_plot_hd(ppm,...
             'caxis_min',p.Results.caxis_min,...
             'caxis_max',p.Results.caxis_max);
@@ -126,7 +127,7 @@ if itr==1
     
 else % itr > 1
     
-    % create a matrix to store HDs given by different parameter values
+    % Create a matrix to store HDs given by different parameter values
     ppm.evaluate.hd = zeros(size(ppm.evaluate.mesh_result,1),itr);
     
     % Read all the meshes and calculate HDs
@@ -160,7 +161,7 @@ else % itr > 1
         else
             tiledlayout(2,2)
 
-            % plot HD means over the different parameter values tested
+            % Plot HD means over the different parameter values tested
             nexttile
             plot(ppm.modify.val_vec, ppm.evaluate.hd_mean,'o-');
             hold on
