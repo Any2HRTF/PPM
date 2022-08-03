@@ -1,15 +1,15 @@
-%% Matlab script to test full functionality of the interface to the
+%% MATLAB script for comprehensive functionality tests of the interface to the
 %  parametric pinna model (PPM), including bi-directional communication with
 %  Blender via Python scripts
 
 % #Author: Florian Pausch (2022)
 
 clear; close all;
-
-test_get_values          = false;
+    
+test_get_values          = true;
 test_set_values_single   = true;
 test_set_values_multiple = true;
-test_evaluate            = false;
+test_evaluate            = true;
 
 %% ppm_initialize()
 
