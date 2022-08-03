@@ -5,6 +5,7 @@ function ppm_plot_hd(ppm,varargin)
 %          distance values. 
 %
 % Usage: 
+%
 %   plot_hd(ppm)
 %
 % Input parameters:
@@ -13,10 +14,10 @@ function ppm_plot_hd(ppm,varargin)
 % 
 % Related functions: hausdorff_dist
 
-% #Author: Mantas Tamulionis (2021)
-% Modifications by Florian Pausch (2022)        
+% #Author: Florian Pausch (2022)
+% Initial version by Mantas Tamulionis (2021)    
 
-%% parse input arguments
+%% Parse input arguments
 p = inputParser;
 
 addOptional(p,'caxis_min',[]);
@@ -39,9 +40,10 @@ else
     hd_mean_min_itr = 1;
 end
 
+%% Select mesh with lowest mean HD
 hd_plot = ppm.evaluate.hd(:,hd_mean_min_itr);
 
-% clip HD values below/above caxis_min/caxis_max
+%% Clip HD values below/above caxis_min/caxis_max for plot
 if isempty(p.Results.caxis_min)
     caxis_min = min(ppm.evaluate.hd(:,hd_mean_min_itr));
 else
@@ -72,7 +74,7 @@ else
    hd_c = 0.8*ones(size(cmatrix));
 end
 
-% overlay with target mesh in grey color
+%% Plot mesh and overlay it with target mesh in grey color
 nexttile
 ptCloud_target = pointCloud(ppm.evaluate.mesh_target, ...
     'Color',0.8*ones(size(ppm.evaluate.mesh_target)));
@@ -101,6 +103,7 @@ if ~all(range(hd_c)==0)
 end
 view([180 0])
 
+%% Plot histogram of HD values
 nexttile
 histogram(ppm.evaluate.hd(:,hd_mean_min_itr),'EdgeColor','black','FaceColor',[.5 .5 .5]);
 xlabel('Hausdorff distance (mm)')
