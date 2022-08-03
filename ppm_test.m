@@ -96,7 +96,7 @@ val = -4.1;
 itr_vec = [1,3];
 instruction_mode_cell = {'rel','abs'};
 
-%% change a single parameter value
+%% Change a single parameter value
 
 if test_set_values_single
     fprintf('ppm_set_values(): Testing single input...\n')
@@ -139,7 +139,7 @@ if test_set_values_single
     fprintf('ppm_set_values(): Sucessfully tested single input.\n\n')
 end
 
-%% change multiple parameter values
+%% Change multiple parameter values
 
 selection_cell = {[1:3,5:10,12:14,33:35,40:42];...
                   [1:3,5:10,12:14,33:35,40:41];...
