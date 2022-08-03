@@ -1,5 +1,5 @@
 function [ppm,val] = ppm_get_values(ppm,varargin)
-%ppm_get_values - Obtain the parameters values from the parametric pinna 
+%ppm_get_values - Get the parameters values from the parametric pinna 
 %                 model (PPM) in the Blender file specified in the 
 %                 PPM structure array
 %
@@ -8,10 +8,10 @@ function [ppm,val] = ppm_get_values(ppm,varargin)
 %
 % Input parameters:
 %
-%   Required
+%   Required:
 %     ppm    : PPM structure array, initialized as per ppm_initialize.
 %   
-%   Optional (to fetch a subset of the current parameter values)
+%   Optional (to fetch a subset of the current parameter values):
 %     'type' : Parameter type [string]
 %     'name' : Parameter name [string]
 %     'axis' : Displacement/rotation axis [string], 
@@ -20,17 +20,17 @@ function [ppm,val] = ppm_get_values(ppm,varargin)
 %
 % Output parameters:
 %
-%   ppm  : updated PPM structure array [struct]
+%   ppm  : Updated PPM structure array [struct]
 %          .parameters : parameter values as obtained from the
 %                       specified Blender file, i.e.
 %                       fullfile(path_blender_file,name_blender_file) [cell]
-%    val : subset of queried parameters with current values [cell] 
+%    val : Subset of queried parameters with current values [cell] 
 %
 % Related functions : ppm_initialize, ppm_set_values, ppm_evaluate
 
 % #Author: Florian Pausch (2022)
 
-%% parse input arguments
+%% Parse input arguments
 p = inputParser;
 
 addOptional(p,'type',[]);
@@ -39,7 +39,7 @@ addOptional(p,'axis',[]);
 
 parse(p,varargin{:});
 
-%% check for input errors
+%% Check for input errors
 if ~isempty(p.Results.type)
     if ~ismember(p.Results.type,ppm.parameters(:,1))
         error('Input error: Unknown parameter type.')
@@ -68,10 +68,10 @@ if ~isempty(p.Results.type) && ~isempty(p.Results.name)
     end
 end
 
-%% create .txt file containing the current parameter values
+%% Create .txt file containing the current parameter values
 writecell(ppm.parameters, fullfile(ppm.ini.path.result,'1.txt'));
 
-%% fetch parameter values from the specified Blender project
+%% Fetch parameter values from the specified Blender file
 switch ppm.ini.verbose_level
     case 0
         args = [ppm.ini.path.blender_exe, ' -b ', ppm.ini.blender_file,...
@@ -108,7 +108,7 @@ end
 parameters = importdata(fullfile(ppm.ini.path.result,'blender_bones_data.txt'));
 ppm.parameters(:,4) = num2cell(parameters.data);
 
-%% return selected parameters
+%% Return selected parameters
 if ~isempty(p.Results.type) || ~isempty(p.Results.name) || ~isempty(p.Results.axis)
 
     if isempty(p.Results.type)
