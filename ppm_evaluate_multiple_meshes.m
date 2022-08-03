@@ -7,7 +7,7 @@
 
 clear; close all; clc
 
-%% define meshes/files to be compared
+%% Define meshes/files to be compared
 mesh_ppm = {
     'SOU_BK_mergeHeadEars_Pois_12_7_Smooth_BEMReady_left_ear_adapt_ppm_v1.blend',...
     'SOU_CV_left_ear_adapt_ppm_v1.blend',...
@@ -26,23 +26,23 @@ idx_wb = 1;
 
 for idx=sel
 
-    %% initialize ppm
+    %% Initialize ppm
     ppm = ppm_initialize(...
         'path_blender_file',fullfile(pwd,'result'),...
         'name_blender_file',mesh_ppm{idx},...
         'verbose_level',0,...
         'auto_delete',true);
 
-    %% get parameter values from the specified blender file
+    %% Get parameter values from the specified blender file
     [ppm,val] = ppm_get_values(ppm);
 
-    %% compare the resulting mesh to the specified target mesh
+    %% Compare the resulting mesh to the specified target mesh
     %  and evaluate its fit based on Hausdorff distances, plot result
     ppm = ppm_evaluate(ppm,...
         'path_mesh_target',ppm.ini.path.data,...
         'name_mesh_target',mesh_target{idx});
 
-    % plot result mesh with color-coded Hausdorff distance
+    % Plot result mesh with color-coded Hausdorff distance
     if idx==sel(1)
         figure('units','normalized','outerposition',[0.19,0.05,0.62,0.91])
         tiledlayout(numel(sel),2)
