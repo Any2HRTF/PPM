@@ -16,14 +16,14 @@ function ppm_blender_execute(ppm)
 
 % #Author: Florian Pausch (2022)
 
-%% parse input arguments
+%% Parse input arguments
 % convert 1 and 0 to TRUE and FALSE, respectively (for Python scripts)
 parsePool = [ppm.modify.mesh, ppm.modify.remesh, ppm.modify.image, ppm.modify.set_cam,...
     ppm.modify.depth];
 parsePoolString = {'TRUE','FALSE'};
 parsedStrings = parsePoolString((parsePool==0)+1);
 
-%% execute Blender via Python scripts
+%% Execute Blender via Python scripts
 switch ppm.ini.verbose_level
     
     case 0
