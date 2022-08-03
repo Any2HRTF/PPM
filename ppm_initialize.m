@@ -1,6 +1,5 @@
 function ppm = ppm_initialize(varargin)
-%ppm_initialize - Initialize the parametric pinna model (PPM) structure
-%                 array
+%ppm_initialize - Initialize the parametric-pinna-model (PPM) structure array
 %
 % Usage: 
 %   ppm = ppm_initialize(varargin)
@@ -37,18 +36,18 @@ function ppm = ppm_initialize(varargin)
 %
 % Output parameters:
 %
-%   ppm : initialized PPM structure array [struct]
+%   ppm : Initialized PPM structure array [struct]
 %         .ini
 %             .blender_file     : fullfile(path_blender_file, ...
 %                                          name_blender_file) [string]
 %             .verbose_level
-%             .path             : paths to default, data, python, result,
+%             .path             : Paths to default, data, python, result,
 %                                 and external folders, and blender_exe [string]
-%             .sysarch          : automatically determined system [string]
+%             .sysarch          : Automatically determined system [string]
 %                                 architecture (e.g. win64)
-%             .shape_key_limits : limits of PPM parameters of type 
+%             .shape_key_limits : Limits of PPM parameters of type 
 %                                 'Shape_key' [cell]
-%         .parameters           : initial parameter values as per 
+%         .parameters           : Initial parameter values as per 
 %                                 fullfile(ppm.ini.path.default,...
 %                                       'parameter_defaults_v1.mat') [cell]
 %
@@ -60,7 +59,7 @@ function ppm = ppm_initialize(varargin)
 
 % #Author: Florian Pausch (2022)
 
-%% parse input arguments
+%% Parse input arguments
 p = inputParser;
 
 addOptional(p,'path_blender_file',[]);
@@ -77,7 +76,7 @@ addOptional(p,'name_parameter_file','parameter_defaults_v1');
 
 parse(p,varargin{:});
 
-%% check for input errors
+%% Check for input errors
 if (isempty(p.Results.path_blender_file) || isempty(p.Results.name_blender_file))
     error([mfilename, ': Input error. Please specify ''path_blender_file'' and ''name_blender_file''.'])
 end
@@ -86,9 +85,7 @@ if ~((p.Results.verbose_level>=0) && (p.Results.verbose_level<=2))
     error(mfilename, ': Input error. ''verbose_level'' must be between 0 and 2.')
 end
 
-%% assign default parameters to ppm
-% set Blender project to be modified
-
+%% Assign default parameters to ppm and set Blender project to be modified
 ppm.ini.blender_file  = fullfile(p.Results.path_blender_file,...
                                  p.Results.name_blender_file);
 ppm.ini.verbose_level = p.Results.verbose_level; 
@@ -101,7 +98,7 @@ if ~exist(ppm.ini.path.result,'dir'); mkdir(ppm.ini.path.result); end
 if ~exist(ppm.ini.path.external,'dir'); mkdir(ppm.ini.path.external); end
 addpath(genpath(ppm.ini.path.external))
 
-%% download quaternion class from MATLAB File Exchange
+%% Download quaternion class from MATLAB File Exchange
 if ~exist(fullfile(ppm.ini.path.external,'quaternion'),'dir')
     mkdir(fullfile(ppm.ini.path.external,'quaternion'))
     disp([mfilename,': Downloading required class `quaternion` from MATLAB File Exchange...'])
@@ -112,16 +109,13 @@ if ~exist(fullfile(ppm.ini.path.external,'quaternion'),'dir')
     addpath(genpath(ppm.ini.path.external))
 end
 
-%% optionally delete all existing txt/ply files in result folder
+%% Optionally delete all existing txt/ply files in result folder
 filelist = [dir(fullfile(ppm.ini.path.result,'*.txt')); dir(fullfile(ppm.ini.path.result,'*.exr'))];
 if ~isempty(filelist) && p.Results.auto_delete==1
     if ppm.ini.verbose_level>0
         warning([mfilename,': Specified result folder contained previous results, which were deleted.'])
     end
     for idx=1:numel(filelist)
-%         if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'_cam.txt']),'file')
-%             delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'_cam.txt']))
-%         end
         delete(fullfile(p.Results.path_result,filelist(idx).name))
         if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.ply']),'file')
             delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.ply']))
@@ -140,9 +134,6 @@ elseif ~isempty(filelist) && p.Results.auto_delete==0
     answer = questdlg([mfilename,': Specified result folder contained previous results, which will be deleted. Proceed?'],'Yes','No');
     if strcmp(answer,'Yes')
         for idx=1:numel(filelist)
-%             if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'_cam.txt']),'file')
-%                 delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'_cam.txt']))
-%             end
             delete(fullfile(p.Results.path_result,filelist(idx).name))
             if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.ply']),'file')
                 delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.ply']))
@@ -162,7 +153,7 @@ elseif ~isempty(filelist) && p.Results.auto_delete==0
     end
 end
 
-%% determine Blender location depending on system architecture
+%% Determine Blender location depending on system architecture
 ppm.ini.sysarch = computer('arch'); % determines system architecture
 switch ppm.ini.sysarch
     case 'win64'
@@ -177,10 +168,10 @@ switch ppm.ini.sysarch
         error('Please manually set path to Blender.')
 end
 
-% load default transformation matrix
+%% Load default transformation matrix
 load(fullfile(ppm.ini.path.default,[p.Results.name_parameter_file,'.mat']),'parameter_defaults_v1');
 ppm.parameters = parameter_defaults_v1;
 
-% load default ppm parameter limits
+%% Load default ppm parameter limits
 load(fullfile(ppm.ini.path.default,[p.Results.name_limit_file,'.mat']),'shape_key_limits_v1');
 ppm.ini.shape_key_limits = shape_key_limits_v1;
