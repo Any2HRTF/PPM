@@ -49,7 +49,7 @@ name_blender_file = 'PPM_modified_v1.blend';
 ppm = ppm_initialize(...
     'path_blender_file',fullfile(pwd,'result'),...
     'name_blender_file',name_blender_file,...
-    'verbose_level',2,...
+    'verbose_level',1,...
     'auto_delete',true);
 
 %% Get parameter values from specified Blender file and export mesh
@@ -63,8 +63,8 @@ if ppm.ini.verbose_level>0
     disp(val)
 end
 
-%% Set and apply parameter value to specified Blender file and export mesh 
-% and optionally image (with depth)
+%% Set and apply parameter value to specified Blender file, export mesh, 
+% and optionally render image (including depth data)
 
 % Type 'ppm.parameters' to get a list of all parameters
 % Type 'help ppm_set_values' to obtain further information 
