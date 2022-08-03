@@ -143,8 +143,8 @@ else % ppm.modify.itr > 1
         if any(strcmp(ppm.modify.type,"Shape_key"))
             for idx=1:ppm.modify.itr
                 if ppm.ini.verbose_level>0 && ( ...
-                        any( ppm.modify.val_vec(shape_key_idx_local,idx)<lim_low(idx) ) || ...
-                        any( ppm.modify.val_vec(shape_key_idx_local,idx)>lim_up(idx) ) )
+                        any( ppm.modify.val_vec(shape_key_idx_local,idx)<lim_low ) || ...
+                        any( ppm.modify.val_vec(shape_key_idx_local,idx)>lim_up ) )
                     warning([mfilename,': Range of values of the selected shape-key parameter exceeds the limits. Affected parameter values were set according to the corresponding limits.'])
                     
                     idx_min_vio = shape_key_idx_local(ppm.modify.val_vec(shape_key_idx_local,idx)<lim_low);
