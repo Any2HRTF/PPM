@@ -41,7 +41,7 @@
 clear; close all; clc
 
 % Change a single or multiple PPM-parameter values
-type_ppm_input = 'multi'; % {'single','multi'}
+type_ppm_input = 'single'; % {'single','multi'}
 
 %% Initialize PPM
 name_blender_file = 'PPM_modified_v1.blend';
@@ -87,15 +87,9 @@ switch type_ppm_input
     case 'multi'
 
         % Multiple-parameter input (and further optional parameters in ppm_set_values())
-        selection = [1:3,5:7,12:14,33:35,40:42];
-        type_mod = ppm.parameters(selection,1);
-        name_mod = ppm.parameters(selection,2);
-        axis_mod = ppm.parameters(selection,3);
-        val_mod = cellfun(@(x) x+4.1, ppm.parameters(selection,4),'UniformOutput',0);
-
-        % selection_cell = [8:10, 155:157, 164:166];
-        selection_cell = [1:3,5:10,12:14,33:35,40:42];
-        % selection_cell = 1:size(ppm.parameters,1);
+        selection_cell = [8:10, 155:157, 164:166];
+%         selection_cell = [1:3,5:10,12:14,33:35,40:42];
+        selection_cell = 1:size(ppm.parameters,1);
 
         type_cell = ppm.parameters(selection_cell,1);
         name_cell = ppm.parameters(selection_cell,2);
@@ -134,7 +128,7 @@ end
 
 %% Compare the resulting mesh to a specified target mesh
 %  and evaluate its fit based on the Hausdorff distance, plot result
-name_mesh_target = 'PPM_default_v1.ply';
+name_mesh_target = 'SOU_CV_left_ear.ply';
 
 ppm = ppm_evaluate(ppm,...
     'path_mesh_target',ppm.ini.path.data,...
