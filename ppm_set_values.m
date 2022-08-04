@@ -17,7 +17,7 @@ function ppm = ppm_set_values(ppm,varargin)
 %              set to 'quaternion')/'X'/'Y'/'Z' (default: []) 
 %              (only required if parameter is not of type 'Shape_key', 
 %              otherwise optional)
-%     'val'  : Value to be assigned to the selected parameter [double].
+%     'val'  : Value to be assigned to the selected parameter [double OR cell array].
 %              For parameter type 'Rotation', 'val' sets the values of
 %              the orientation quaternion, or the Euler-angle component in deg 
 %              as per ppm.modify.rotation_mode. The general behavior depends on 
