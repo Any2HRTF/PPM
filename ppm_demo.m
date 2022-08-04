@@ -17,7 +17,7 @@
 % Blender model ARI_PPM_v1 (armature and object definitions)
 %
 % Related functions : ppm_initialize, ppm_get_values, ppm_set_values, 
-%                     ppm_evaluate
+%                     ppm_evaluate, ppm_test
 %
 % [1] Pollack K.; Majdak P.; Brinkmann F.; Kreuzer W. (2021) Von Fotos zu 
 %     personalisierter räumlicher Audiowiedergabe. e & i Elektrotechnik und 
