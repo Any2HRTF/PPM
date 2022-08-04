@@ -89,7 +89,7 @@ switch type_ppm_input
         % Multiple-parameter input (and further optional parameters in ppm_set_values())
         selection_cell = [8:10, 155:157, 164:166];
 %         selection_cell = [1:3,5:10,12:14,33:35,40:42];
-        selection_cell = 1:size(ppm.parameters,1);
+%         selection_cell = 1:size(ppm.parameters,1);
 
         type_cell = ppm.parameters(selection_cell,1);
         name_cell = ppm.parameters(selection_cell,2);
