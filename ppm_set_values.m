@@ -82,7 +82,8 @@ function ppm = ppm_set_values(ppm,varargin)
 %                           and/or cam_loc_ref [logical], default: false
 %     'depth'             : (Requires 'image' set to true) Export image-depth 
 %                           data (z buffer) as EXR and PNG files, normalised 
-%                           to values between 1 (black) and (0) white [logical], 
+%                           to values between 1 (black, farthest) and 0 
+%                           (white, closest) [logical], 
 %                           default: false
 %     'depth_nearest'     : Nearest distance representing the maximum value
 %                           of the normalised image-depth map (white), 
