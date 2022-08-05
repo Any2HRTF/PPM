@@ -225,6 +225,7 @@ class Ear():
             bpy.data.scenes["Scene"].render.resolution_y = int(arg_res)
             bpy.data.scenes["Scene"].render.image_settings.color_depth = arg_image_col_dep
             bpy.data.scenes["Scene"].render.image_settings.compression = int(arg_image_comp)
+            bpy.data.scenes["Scene"].render.image_settings.color_mode = 'BW'
             
             # Enable nodes
             bpy.context.scene.use_nodes = True
