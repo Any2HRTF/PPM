@@ -31,24 +31,25 @@ stdout = io.StringIO()
 argv = sys.argv
 
 arg_path = argv[argv.index("--") + 1]
-arg_mesh = argv[argv.index("--") + 2]
-arg_remesh = argv[argv.index("--") + 3]
-arg_image = argv[argv.index("--") + 4]
-arg_res = argv[argv.index("--") + 5]
-arg_image_col_dep = argv[argv.index("--") + 6]
-arg_image_comp = argv[argv.index("--") + 7]
-arg_cam = argv[argv.index("--") + 8]
+arg_pc = argv[argv.index("--") + 2]
+arg_mesh = argv[argv.index("--") + 3]
+arg_remesh = argv[argv.index("--") + 4]
+arg_image = argv[argv.index("--") + 5]
+arg_res = argv[argv.index("--") + 6]
+arg_image_col_dep = argv[argv.index("--") + 7]
+arg_image_comp = argv[argv.index("--") + 8]
+arg_cam = argv[argv.index("--") + 9]
 
-arg_depth = argv[argv.index("--") + 9]
-arg_depth_col_dep_exr = argv[argv.index("--") + 10]
-arg_depth_comp_exr = argv[argv.index("--") + 11]
-arg_depth_codec_exr = argv[argv.index("--") + 12]
+arg_depth = argv[argv.index("--") + 10]
+arg_depth_col_dep_exr = argv[argv.index("--") + 11]
+arg_depth_comp_exr = argv[argv.index("--") + 12]
+arg_depth_codec_exr = argv[argv.index("--") + 13]
 
-arg_depth_col_dep_png = argv[argv.index("--") + 13]
-arg_depth_comp_png = argv[argv.index("--") + 14]
+arg_depth_col_dep_png = argv[argv.index("--") + 14]
+arg_depth_comp_png = argv[argv.index("--") + 15]
 
-arg_depth_nearest = argv[argv.index("--") + 15]
-arg_depth_farthest = argv[argv.index("--") + 16]
+arg_depth_nearest = argv[argv.index("--") + 16]
+arg_depth_farthest = argv[argv.index("--") + 17]
 
 def select(label, action):
     if action:
@@ -136,13 +137,22 @@ class Ear():
     def shapeKey(self, name, val):
         bpy.data.shape_keys["Key.002"].key_blocks[name].value = float(val)
 
-    def export(self, name):
+    def export_pc(self, name):
 
         if name.find('_cam')==(-1) or name!='blender_bones_data':
-            target_file = setDir(self.path, name, "ply")
+            target_file_ply = setDir(self.path, name, "ply")
             select('ARI_PPM_v1', True)
             with redirect_stdout(stdout):
-                bpy.ops.export_mesh.ply(filepath=target_file, use_selection=True, use_normals=False, use_uv_coords=False, use_colors=False)
+                bpy.ops.export_mesh.ply(filepath=target_file_ply, use_selection=True, use_normals=False, use_uv_coords=False, use_colors=False)
+            select('ARI_PPM_v1', False)
+
+    def export_mesh(self, name):
+
+        if name.find('_cam')==(-1) or name!='blender_bones_data':
+            target_file_stl = setDir(self.path, name, "stl")
+            select('ARI_PPM_v1', True)
+            with redirect_stdout(stdout):
+                bpy.ops.export_mesh.stl(filepath=target_file_stl, use_selection=True, use_scene_unit=True)
             select('ARI_PPM_v1', False)
     
     def render(self, name):
@@ -404,8 +414,10 @@ class Ear():
             if name.find('_cam')==(-1) and name!='blender_bones_data':
                 self.load(name)
                 self.modifiers(True)
+                if arg_pc == 'TRUE':
+                    self.export_pc(name)
                 if arg_mesh == 'TRUE':
-                    self.export(name)
+                    self.export_mesh(name)
                 if arg_image == 'TRUE':
                     self.render(name)
                 self.modifiers(False)
