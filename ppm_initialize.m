@@ -120,6 +120,9 @@ if ~isempty(filelist) && p.Results.auto_delete==1
         if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.ply']),'file')
             delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.ply']))
         end
+        if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.stl']),'file')
+            delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.stl']))
+        end
         if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.png']),'file')
             delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.png']))
         end
@@ -137,6 +140,9 @@ elseif ~isempty(filelist) && p.Results.auto_delete==0
             delete(fullfile(p.Results.path_result,filelist(idx).name))
             if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.ply']),'file')
                 delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.ply']))
+            end
+            if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.stl']),'file')
+                delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.stl']))
             end
             if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.png']),'file')
                 delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.png']))
