@@ -68,8 +68,11 @@ function ppm = ppm_set_values(ppm,varargin)
 %                                'cam_rot' will be overwritten.
 %
 %   For ppm_blender_execute():
-%     'mesh'              : Render updated modelled mesh [logical], default: true 
-%     'remesh'            : Disable/enable modififiers in blender [logical], default: false
+%     'pc'                : Export modelled mesh as point cloud (PLY) [logical]
+%                           default: true
+%     'mesh'              : Export modelled mesh as mesh (STL) [logical], default: false 
+%     'remesh'            : Disable/enable reduction of vertex/face count of 
+%                           the modelled mesh before exporting [logical], default: false
 %     'image'             : Render modelled mesh as PNG [logical], default: false
 %     'image_res'         : Resolution (image_res x image_res) of the
 %                           rendered PNG image [double], default: 1024
@@ -190,7 +193,8 @@ addOptional(p,'cam_rot',[90, 0, 180]);
 addOptional(p,'cam_loc_ref',[]); 
 
 % Input arguments for ppm_blender_execute()
-addOptional(p,'mesh',true);
+addOptional(p,'pc',true);
+addOptional(p,'mesh',false);
 addOptional(p,'remesh',false);
 addOptional(p,'image',false);
 addOptional(p,'image_res',1024);
@@ -414,6 +418,7 @@ ppm.modify.cam_loc           = p.Results.cam_loc;
 ppm.modify.cam_rot           = p.Results.cam_rot;
 ppm.modify.cam_loc_ref       = p.Results.cam_loc_ref;
 ppm.modify.set_cam           = p.Results.set_cam;
+ppm.modify.pc                = p.Results.pc;
 ppm.modify.mesh              = p.Results.mesh;
 ppm.modify.remesh            = p.Results.remesh;
 ppm.modify.image             = p.Results.image;
