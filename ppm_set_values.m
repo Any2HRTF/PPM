@@ -77,7 +77,7 @@ function ppm = ppm_set_values(ppm,varargin)
 %     'image_res'         : Resolution (image_res x image_res) of the
 %                           rendered PNG image [double], default: 1024
 %     'image_col_dep'     : Set color depth of PNG file in bit [double], 
-%                           {8, 10, 12, 16, 32}, default: 16
+%                           {8, 16}, default: 16
 %     'image_comp'        : Set amount of compression in rendered PNG file [double], 
 %                           [0, 100] = [none, maximum lossless compression], 
 %                           default: 15
@@ -106,7 +106,7 @@ function ppm = ppm_set_values(ppm,varargin)
 %                           {'NONE', 'PXR24', 'ZIP', 'PIZ’, 'RLE’, 'ZIPS’, 
 %                           'B44 , 'B44A', 'DWAA', 'DWAB'}, default: 'NONE'
 %     'depth_col_dep_png' : Set color-depth of depth data (z buffer) in PNG file
-%                           [double], {8, 10, 12, 16, 32}, default: 16
+%                           [double], {8, 16}, default: 16
 %     'depth_comp_png'    : Set amount of compression in rendered image-depth PNG 
 %                           file [double], [0, 100] = [none, maximum lossless compression], 
 %                           default: 15
