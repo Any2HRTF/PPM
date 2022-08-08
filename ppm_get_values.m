@@ -11,12 +11,17 @@ function [ppm,val] = ppm_get_values(ppm,varargin)
 %   Required:
 %     ppm    : PPM structure array, initialized as per ppm_initialize.
 %   
-%   Optional (to fetch a subset of the current parameter values):
+%   Optional:
+%     Fetch a subset of the current parameter values (logical conjunction):
 %     'type' : Parameter type [string]
 %     'name' : Parameter name [string]
 %     'axis' : Displacement/rotation axis [string], 
 %              'W' (only for rotation)/'X'/'Y'/'Z' (default: []), 
 %              (not relevant if parameter is of type "Shape_key")
+%
+%     Export modelled mesh:
+%     'pc'   : Export as point cloud (PLY) [logical], default: true
+%     'mesh' : Export as mesh (STL) [logical], default: false 
 %
 % Output parameters:
 %
@@ -36,6 +41,8 @@ p = inputParser;
 addOptional(p,'type',[]);
 addOptional(p,'name',[]);
 addOptional(p,'axis',[]);
+addOptional(p,'pc',true);
+addOptional(p,'mesh',false);
 
 parse(p,varargin{:});
 
@@ -69,14 +76,23 @@ if ~isempty(p.Results.type) && ~isempty(p.Results.name)
 end
 
 %% Create .txt file containing the current parameter values
-writecell(ppm.parameters, fullfile(ppm.ini.path.result,'1.txt'));
+writecell(ppm.parameters, fullfile(ppm.ini.path.result,'blender_bones_data.txt'));
 
 %% Fetch parameter values from the specified Blender file
+
+% convert 1 and 0 to TRUE and FALSE, respectively (for Python scripts)
+parsePool = [p.Results.pc, p.Results.mesh];
+parsePoolString = {'TRUE','FALSE'};
+parsedStrings = parsePoolString((parsePool==0)+1);
+
 switch ppm.ini.verbose_level
     case 0
         args = [ppm.ini.path.blender_exe, ' -b ', ppm.ini.blender_file,...
-            ' -P ' fullfile(ppm.ini.path.python,'get_values_and_export_mesh_v1_4_0.py'),' -- ',...
-            [ppm.ini.path.result,'\'], ' -a > nul 2>&1'];
+            ' -P ' fullfile(ppm.ini.path.python,'get_values_and_export_mesh_v1_5_0.py'),' -- ',...
+            [ppm.ini.path.result,'\'], ' ',...
+            parsedStrings{1}, ' ',...
+            parsedStrings{2}, ' ',...
+            ' -a > nul 2>&1'];
         stat = system(args);
         if stat
             error('Parameters could not be obtained from Blender file. Check ''args''. Aborted.') 
@@ -84,8 +100,11 @@ switch ppm.ini.verbose_level
     case 1
         disp([mfilename,': Obtaining parameter values from specified Blender file...'])
         args = [ppm.ini.path.blender_exe, ' -b ', ppm.ini.blender_file,...
-            ' -P ' fullfile(ppm.ini.path.python,'get_values_and_export_mesh_v1_4_0.py'),' -- ',...
-            [ppm.ini.path.result,'\'], ' -a > nul 2>&1'];
+            ' -P ' fullfile(ppm.ini.path.python,'get_values_and_export_mesh_v1_5_0.py'),' -- ',...
+            [ppm.ini.path.result,'\'], ' ',...
+            parsedStrings{1}, ' ',...
+            parsedStrings{2}, ' ',...
+            ' -a > nul 2>&1'];
         stat = system(args);
         if stat
             error('Parameters could not be obtained from Blender file. Check ''args''. Aborted.')
@@ -95,8 +114,10 @@ switch ppm.ini.verbose_level
     case 2
         disp([mfilename,': Obtaining parameter values from specified Blender file...'])
         args = [ppm.ini.path.blender_exe, ' -b ', ppm.ini.blender_file,...
-            ' -P ' fullfile(ppm.ini.path.python,'get_values_and_export_mesh_v1_4_0.py'),' -- ',...
-            [ppm.ini.path.result,'\']];
+            ' -P ' fullfile(ppm.ini.path.python,'get_values_and_export_mesh_v1_5_0.py'),' -- ',...
+            [ppm.ini.path.result,'\'], ' ',...
+            parsedStrings{1}, ' ',...
+            parsedStrings{2}];
         stat = system(args);
         if stat
             error('Parameters could not be obtained from Blender file. Check ''args''. Aborted.')
