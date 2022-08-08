@@ -24,8 +24,9 @@ from contextlib import redirect_stdout
 stdout = io.StringIO()
 
 argv = sys.argv
-
 arg_path = argv[argv.index("--") + 1]
+arg_pc = argv[argv.index("--") + 2]
+arg_mesh = argv[argv.index("--") + 3]
 
 def select(label, action):
     if action:
@@ -41,17 +42,8 @@ def setDir(folder, file, extension):
     target_file = os.path.join(folder, '{}.{}'.format(file, extension))
     return target_file
 
-def export(self, name):
-
-    if name!='blender_bones_data':
-        target_file = setDir(self.path, name, "ply")
-        select('ARI_PPM_v1', True)
-        with redirect_stdout(stdout):
-            bpy.ops.export_mesh.ply(filepath=target_file, use_selection=True, use_normals=False, use_uv_coords=False, use_colors=False)
-        select('ARI_PPM_v1', False)
-
-txtr = open(arg_path + '1.txt', 'r')
-txtw = open(arg_path + 'blender_bones_data.txt', 'w')
+txtr = open(arg_path + 'blender_bones_data.txt', 'r')
+txtw = open(arg_path + '1.txt', 'w')
 lines = txtr.readlines()
 for line in lines:
     transform = line.split(',')[0]
@@ -118,24 +110,40 @@ class Ear():
     def __init__(self, name):
         self.name = name
         self.path = str(arg_path)
-        # self.bones = []
-        # self.bonesLookup = {}
 
-    def export(self,name):
+    def export(self, name):
 
-        if name!='blender_bones_data':
-            target_file = setDir(self.path, name, "ply")
-            select('ARI_PPM_v1', True)
+        select('ARI_PPM_v1', True)
+
+        if arg_pc == 'TRUE':
+            target_file_ply = setDir(self.path, name, "ply")
             with redirect_stdout(stdout):
-                bpy.ops.export_mesh.ply(filepath=target_file, use_selection=True, use_normals=False, use_uv_coords=False, use_colors=False)
-            select('ARI_PPM_v1', False)
+                bpy.ops.export_mesh.ply(filepath=target_file_ply, 
+                                        use_selection=True, 
+                                        use_normals=False, 
+                                        use_uv_coords=False, 
+                                        use_colors=False)
 
-    def export_mesh(self):
+        if arg_mesh == 'TRUE':
+            target_file_stl = setDir(self.path, name, "stl")
+            with redirect_stdout(stdout):
+                bpy.ops.export_mesh.stl(filepath=target_file_stl, 
+                                        use_selection=True, 
+                                        use_scene_unit=True)
+
+        select('ARI_PPM_v1', False)
+
+    def loadAll(self):
         os.chdir(self.path)
+
         for file in glob.glob("*.txt"):
+
             name = file.split('.')[0]
-            self.export(name)
+            print(name)
 
+            if name!='blender_bones_data':
+                if arg_pc == 'TRUE' or arg_mesh == 'TRUE':
+                    self.export(name)
+  
 Ear = Ear("Ear")
-
-Ear.export_mesh()
+Ear.loadAll()
