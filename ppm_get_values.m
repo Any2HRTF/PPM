@@ -105,7 +105,7 @@ switch ppm.ini.verbose_level
             parsedStrings{1}, ' ',...
             parsedStrings{2}, ' ',...
             ' -a > nul 2>&1'];
-        stat = system(args);
+        stat = system(args); 
         if stat
             error('Parameters could not be obtained from Blender file. Check ''args''. Aborted.')
         else
