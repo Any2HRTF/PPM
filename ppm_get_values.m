@@ -126,7 +126,7 @@ switch ppm.ini.verbose_level
         end
 end
 
-parameters = importdata(fullfile(ppm.ini.path.result,'blender_bones_data.txt'));
+parameters = importdata(fullfile(ppm.ini.path.result,'1.txt'));
 ppm.parameters(:,4) = num2cell(parameters.data);
 
 %% Return selected parameters
