@@ -31,6 +31,11 @@ arg_mesh = argv[argv.index("--") + 3]
 def select(label, action):
     if action:
         bpy.ops.object.select_all(action='DESELECT')
+        for obj in bpy.data.objects:
+            obj.hide_render = True
+        bpy.data.objects[label].hide_render = False
+        bpy.data.objects["Area"].hide_render = False
+        bpy.data.objects["Armature"].hide_render = False
         bpy.data.objects[label].select_set(True)
         bpy.context.view_layer.objects.active = bpy.data.objects[label]
     else:
@@ -139,7 +144,6 @@ class Ear():
         for file in glob.glob("*.txt"):
 
             name = file.split('.')[0]
-            print(name)
 
             if name!='blender_bones_data':
                 if arg_pc == 'TRUE' or arg_mesh == 'TRUE':
