@@ -150,7 +150,7 @@ end
 
 %% Compare the resulting mesh to a specified target mesh
 %  and evaluate its fit based on the Hausdorff distance, plot result
-name_mesh_target = 'PPM_modified_v1.blend';
+name_mesh_target = 'PPM_default_v1.ply';
 
 ppm = ppm_evaluate(ppm,...
     'path_mesh_target',ppm.ini.path.data,...
