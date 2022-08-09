@@ -54,11 +54,6 @@ arg_depth_farthest = argv[argv.index("--") + 17]
 def select(label, action):
     if action:
         bpy.ops.object.select_all(action='DESELECT')
-        for obj in bpy.data.objects:
-            obj.hide_render = True
-        bpy.data.objects[label].hide_render = False
-        bpy.data.objects["Area"].hide_render = False
-        bpy.data.objects["Armature"].hide_render = False
         bpy.data.objects[label].select_set(True)
         bpy.context.view_layer.objects.active = bpy.data.objects[label]
     else:
