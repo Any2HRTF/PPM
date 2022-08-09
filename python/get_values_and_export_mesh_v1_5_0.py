@@ -5,7 +5,7 @@
 # Matlab-function descriptions for further information on its use. 
 #
 # Related Python function:
-# set_values_and_export_mesh_v1_4_0.py
+# set_values_and_export_mesh_v1_5_0.py
 #
 # Related Matlab functions:
 # ppm_demo, ppm_get_values, ppm_set_values
