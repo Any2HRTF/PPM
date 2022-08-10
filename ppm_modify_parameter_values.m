@@ -106,7 +106,8 @@ end
 if ppm.modify.itr == 1
 
     ppm = ppm_add_or_assign(ppm);
-    writecell(ppm.parameters, fullfile(ppm.ini.path.result, 'parameters', '1.txt'));
+    writecell(ppm.parameters, fullfile(ppm.ini.path.result, 'parameters', ...
+        [num2str(ppm.modify.sample_start_idx),'.txt']));
 
     if ppm.modify.set_cam && ppm.modify.image
         % save camera perspective as txt-file to be loaded by set_values_and_export_mesh.py
@@ -115,7 +116,8 @@ if ppm.modify.itr == 1
         if ~exist(fullfile(ppm.ini.path.result,'cam'),'dir')
             mkdir(fullfile(ppm.ini.path.result,'cam'))
         end
-        writematrix(cam_pose,fullfile(ppm.ini.path.result,'cam','1_cam.txt'))
+        writematrix(cam_pose,fullfile(ppm.ini.path.result,'cam',...
+            [num2str(ppm.modify.sample_start_idx),'_cam.txt']))
     end
 
 else % ppm.modify.itr > 1
@@ -182,8 +184,8 @@ else % ppm.modify.itr > 1
 
     % create different blender instruction files that contain the range of
     % values to be tested
-    for idx = 1:ppm.modify.itr
-        ppm.modify.val = ppm.modify.val_vec(:,idx);
+    for idx = ppm.modify.sample_start_idx:ppm.modify.sample_start_idx+ppm.modify.itr-1
+        ppm.modify.val = ppm.modify.val_vec(:,idx-ppm.modify.sample_start_idx+1);
 
         ppm = ppm_add_or_assign(ppm);
         writecell(ppm.parameters, fullfile(ppm.ini.path.result,'parameters',...
