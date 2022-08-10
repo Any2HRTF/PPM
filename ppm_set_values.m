@@ -53,10 +53,13 @@ function ppm = ppm_set_values(ppm,varargin)
 %                           'abs': val is directly assigned to the parameter
 %     'itr'              : Number of iterations. Test itr neigboring values in steps 
 %                          of range/itr, symmetrically around val [double] 
-%                          (default: 1). 
+%                          (default: 1) 
 %     'range'            : Range of values to be tested, in a range of 
 %                          (+/-range/2) symmetric around val [double] 
-%                          (default: 1).
+%                          (default: 1)
+%     'sample_start_idx' : File-name index. If itr>1 the exported or
+%                          rendered files start at this index and are
+%                          incremented [double], default: 1
 %     'cam_loc'          : Location vector of the camera [double] 
 %                          (default: [-10, 200, 5])
 %     'cam_rot'          : Rotation vector of the camera, containing 
@@ -123,6 +126,7 @@ function ppm = ppm_set_values(ppm,varargin)
 %                               modification) [double] 
 %             .itr [double]
 %             .range [double]
+%             .sample_start_idx [double]
 %             .instruction_mode [string]
 %             .rotation_mode [string]
 %             .cam_loc [double]
@@ -185,6 +189,7 @@ addOptional(p,'name',[]);
 addOptional(p,'axis',[]);
 addOptional(p,'val',[]);
 addOptional(p,'itr',1);
+addOptional(p,'sample_start_idx',1);
 addOptional(p,'range',1);
 addOptional(p,'instruction_mode','rel');
 addOptional(p,'rotation_mode','quaternion');
@@ -417,6 +422,7 @@ end
 
 ppm.modify.itr               = p.Results.itr;
 ppm.modify.range             = p.Results.range;
+ppm.modify.sample_start_idx  = p.Results.sample_start_idx;
 ppm.modify.instruction_mode  = p.Results.instruction_mode;
 ppm.modify.rotation_mode     = p.Results.rotation_mode;
 ppm.modify.cam_loc           = p.Results.cam_loc;
