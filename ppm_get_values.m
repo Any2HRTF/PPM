@@ -20,8 +20,10 @@ function [ppm,val] = ppm_get_values(ppm,varargin)
 %              (not relevant if parameter is of type "Shape_key")
 %
 %     Export modelled mesh:
-%     'pc'   : Export as point cloud (PLY) [logical], default: true
-%     'mesh' : Export as mesh (STL) [logical], default: false 
+%     'pc'               : Export as point cloud (PLY) [logical], default: true
+%     'mesh'             : Export as mesh (STL) [logical], default: false
+%     'sample_start_idx' : File-name index. The exported files start at 
+%                          this index [double], default: 1
 %
 % Output parameters:
 %
@@ -43,6 +45,7 @@ addOptional(p,'name',[]);
 addOptional(p,'axis',[]);
 addOptional(p,'pc',true);
 addOptional(p,'mesh',false);
+addOptional(p,'sample_start_idx',1);
 
 parse(p,varargin{:});
 
@@ -96,6 +99,7 @@ switch ppm.ini.verbose_level
             ppm.ini.path.result, ' ',...
             parsedStrings{1}, ' ',...
             parsedStrings{2}, ' ',...
+            num2str(p.Results.sample_start_idx), ' ',...
             ' -a > nul 2>&1'];
         stat = system(args);
         if stat
@@ -108,6 +112,7 @@ switch ppm.ini.verbose_level
             ppm.ini.path.result, ' ',...
             parsedStrings{1}, ' ',...
             parsedStrings{2}, ' ',...
+            num2str(p.Results.sample_start_idx), ' ',...
             ' -a > nul 2>&1'];
         stat = system(args); 
         if stat
@@ -121,7 +126,8 @@ switch ppm.ini.verbose_level
             ' -P ' fullfile(ppm.ini.path.python,'get_values_and_export_mesh_v1_5_0.py'),' -- ',...
             ppm.ini.path.result, ' ',...
             parsedStrings{1}, ' ',...
-            parsedStrings{2}];
+            parsedStrings{2}, ' ',...
+            num2str(p.Results.sample_start_idx)];
         stat = system(args);
         if stat
             error('Parameters could not be obtained from Blender file. Check ''args''. Aborted.')
@@ -130,7 +136,8 @@ switch ppm.ini.verbose_level
         end
 end
 
-parameters = importdata(fullfile(ppm.ini.path.result,'parameters','1.txt'));
+parameters = importdata(fullfile(ppm.ini.path.result,'parameters',...
+                        [num2str(p.Results.sample_start_idx),'.txt']));
 ppm.parameters(:,4) = num2cell(parameters.data);
 
 %% Return selected parameters
