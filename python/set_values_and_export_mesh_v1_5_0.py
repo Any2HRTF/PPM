@@ -139,7 +139,7 @@ class Ear():
     def export_pc(self, name):
 
         if name.find('_cam')==(-1) or name!='blender_bones_data':
-            target_file_ply = setDir(self.path, name, "ply")
+            target_file_ply = setDir(os.path.join(self.path,'pc'), name, "ply")
             select('ARI_PPM_v1', True)
             with redirect_stdout(stdout):
                 bpy.ops.export_mesh.ply(filepath=target_file_ply, use_selection=True, use_normals=False, use_uv_coords=False, use_colors=False)
@@ -148,7 +148,7 @@ class Ear():
     def export_mesh(self, name):
 
         if name.find('_cam')==(-1) or name!='blender_bones_data':
-            target_file_stl = setDir(self.path, name, "stl")
+            target_file_stl = setDir(os.path.join(self.path,'mesh'), name, "stl")
             select('ARI_PPM_v1', True)
             with redirect_stdout(stdout):
                 bpy.ops.export_mesh.stl(filepath=target_file_stl, use_selection=True, use_scene_unit=True)
@@ -166,7 +166,7 @@ class Ear():
 
         if arg_cam=='TRUE' and name.find('_cam')==(-1):
       
-            cam_file = setDir(self.path, name + '_cam', 'txt')
+            cam_file = setDir(os.path.join(self.path,'cam'), name + '_cam', 'txt')
             with open(cam_file,'r') as cam_pose:
                 for idx, line in enumerate(cam_pose):
                     if idx == 0:
@@ -217,8 +217,15 @@ class Ear():
         # render image and depth information, and store as png and exr files
         if arg_depth=='TRUE' or arg_image=='TRUE' and name.find('_cam')==(-1) and name!='blender_bones_data':
 
+            if (not os.path.exists(os.path.join(self.path,'img'))) and arg_image=='TRUE':
+                os.makedirs(os.path.join(self.path,'img'))   
+
+            if (not os.path.exists(os.path.join(self.path,'img_depth'))) and arg_depth=='TRUE':
+                os.makedirs(os.path.join(self.path,'img_depth','png'))
+                os.makedirs(os.path.join(self.path,'img_depth','exr'))   
+
             bpy.context.scene.render.use_compositing = True
-            bpy.context.scene.render.filepath = setDir(self.path, name, "png")
+            bpy.context.scene.render.filepath = setDir(os.path.join(self.path,'img'), name, "png")
             
             bpy.data.scenes["Scene"].render.resolution_x = int(arg_res)
             bpy.data.scenes["Scene"].render.resolution_y = int(arg_res)
@@ -267,20 +274,20 @@ class Ear():
                 links.new(render_layer.outputs['Depth'], map.inputs['Value'])
 
                 # Create a file-output node, set the path, and file format (exr depth)
-                fileOutput = tree.nodes.new(type='CompositorNodeOutputFile')
-                fileOutput.base_path = self.path
-                fileOutput.format.file_format = "OPEN_EXR"
-                fileOutput.file_slots[0].path = name + "_depth." + fileOutput.format.file_format # file name with appended frame idx
-                fileOutput.format.color_depth = arg_depth_col_dep_exr
-                fileOutput.format.compression = int(arg_depth_comp_exr)
-                fileOutput.format.exr_codec = arg_depth_codec_exr # [‘NONE’, ‘PXR24’, ‘ZIP’, ‘PIZ’, ‘RLE’, ‘ZIPS’, ‘B44’, ‘B44A’, ‘DWAA’, ‘DWAB’], default ‘NONE’
+                fileOutput_exr_depth = tree.nodes.new(type='CompositorNodeOutputFile')
+                fileOutput_exr_depth.base_path = os.path.join(self.path,'img_depth','exr')
+                fileOutput_exr_depth.format.file_format = "OPEN_EXR"
+                fileOutput_exr_depth.file_slots[0].path = name + "_depth." + fileOutput_exr_depth.format.file_format # file name with appended frame idx
+                fileOutput_exr_depth.format.color_depth = arg_depth_col_dep_exr
+                fileOutput_exr_depth.format.compression = int(arg_depth_comp_exr)
+                fileOutput_exr_depth.format.exr_codec = arg_depth_codec_exr # [‘NONE’, ‘PXR24’, ‘ZIP’, ‘PIZ’, ‘RLE’, ‘ZIPS’, ‘B44’, ‘B44A’, ‘DWAA’, ‘DWAB’], default ‘NONE’
 
                 # Link output of map node to input of compositor-output node (exr depth)
-                links.new(map.outputs['Value'], fileOutput.inputs['Image'])
+                links.new(map.outputs['Value'], fileOutput_exr_depth.inputs['Image'])
 
                 # Create a file-output node, set the path, and file format (png depth)
                 fileOutput_png_depth = tree.nodes.new(type='CompositorNodeOutputFile')
-                fileOutput_png_depth.base_path = self.path
+                fileOutput_png_depth.base_path = os.path.join(self.path,'img_depth','png')
                 fileOutput_png_depth.format.file_format = "PNG"
                 fileOutput_png_depth.file_slots[0].path = name + "_depth." + fileOutput_png_depth.format.file_format # file name with appended frame idx
                 fileOutput_png_depth.format.color_depth = arg_depth_col_dep_png
@@ -297,7 +304,7 @@ class Ear():
 
             # Create a file-output node, set the path, and file format (png)
             fileOutput_png = tree.nodes.new(type='CompositorNodeOutputFile')
-            fileOutput_png.base_path = self.path
+            fileOutput_png.base_path = os.path.join(self.path,'img')
             fileOutput_png.format.file_format = "PNG"
             fileOutput_png.file_slots[0].path = name + fileOutput_png.format.file_format # file name with appended frame idx
             fileOutput_png.format.color_depth = arg_image_col_dep
@@ -311,40 +318,40 @@ class Ear():
 
             # Remove previous results with same file name and extension
             if arg_depth=='TRUE':
-                if (os.path.exists(setDir(self.path, name + "_depth","EXR"))):
-                    os.remove(setDir(self.path, name + "_depth", "exr"))
+                if (os.path.exists(setDir(fileOutput_exr_depth.base_path, name + "_depth","EXR"))):
+                    os.remove(setDir(fileOutput_exr_depth.base_path, name + "_depth", "exr"))
 
-                if (os.path.exists(setDir(self.path, name + "_depth", fileOutput_png_depth.format.file_format))):
-                    os.remove(setDir(self.path, name + "_depth", fileOutput_png_depth.format.file_format))
+                if (os.path.exists(setDir(fileOutput_png_depth.base_path, name + "_depth", fileOutput_png_depth.format.file_format))):
+                    os.remove(setDir(fileOutput_png_depth.base_path, name + "_depth", fileOutput_png_depth.format.file_format))
 
-            if (os.path.exists(setDir(self.path, name, fileOutput_png.format.file_format))):
-                os.remove(setDir(self.path, name, fileOutput_png.format.file_format))
+            if (os.path.exists(setDir(fileOutput_png.base_path, name, fileOutput_png.format.file_format))):
+                os.remove(setDir(fileOutput_png.base_path, name, fileOutput_png.format.file_format))
 
             # rename current files by removing automatically appended frame index
             if arg_depth=='TRUE':
-                if (os.path.exists(setDir(self.path, name + "_depth." + fileOutput.format.file_format 
+                if (os.path.exists(setDir(fileOutput_exr_depth.base_path, name + "_depth." + fileOutput_exr_depth.format.file_format 
                     + "0000", "exr"))):
-                    os.rename(setDir(self.path, name + "_depth." + fileOutput.format.file_format 
-                        + "0000", "exr"), setDir(self.path, name + "_depth", "exr"))
+                    os.rename(setDir(fileOutput_exr_depth.base_path, name + "_depth." + fileOutput_exr_depth.format.file_format 
+                        + "0000", "exr"), setDir(fileOutput_exr_depth.base_path, name + "_depth", "exr"))
 
-                if (os.path.exists(setDir(self.path, name + "_depth." + fileOutput_png_depth.format.file_format 
+                if (os.path.exists(setDir(fileOutput_png_depth.base_path, name + "_depth." + fileOutput_png_depth.format.file_format 
                     + "0000", "png"))):
-                    os.rename(setDir(self.path, name + "_depth." + fileOutput_png_depth.format.file_format
+                    os.rename(setDir(fileOutput_png_depth.base_path, name + "_depth." + fileOutput_png_depth.format.file_format
                         + "0000",fileOutput_png_depth.format.file_format), 
-                        setDir(self.path, name + "_depth", "png"))
+                        setDir(fileOutput_png_depth.base_path, name + "_depth", "png"))
 
-            if (os.path.exists(setDir(self.path, name + fileOutput_png.format.file_format 
+            if (os.path.exists(setDir(fileOutput_png.base_path, name + fileOutput_png.format.file_format 
                 + "0000", "png"))):
-                os.rename(setDir(self.path, name + fileOutput_png.format.file_format
+                os.rename(setDir(fileOutput_png.base_path, name + fileOutput_png.format.file_format
                     + "0000",fileOutput_png.format.file_format), 
-                    setDir(self.path, name, "png"))
+                    setDir(fileOutput_png.base_path, name, "png"))
 
             bpy.context.scene.render.use_compositing = False
 
 
     def reset(self, name):
 
-        target_file = setDir(self.path, name, "txt")
+        target_file = setDir(os.path.join(self.path,'parameters'), name, "txt")
         file = open(target_file, 'r')
         lines = file.readlines()
         lines.reverse()
@@ -370,7 +377,7 @@ class Ear():
 
     def load(self, name):
 
-        target_file = setDir(self.path, name, "txt")
+        target_file = setDir(os.path.join(self.path,'parameters'), name, "txt")
         file = open(target_file, 'r')
         lines = file.readlines()
         for line in lines:
@@ -394,8 +401,9 @@ class Ear():
                 pass
 
     def loadAll(self):
+
         #print("Locating instructions... ", end="", flush=True)
-        os.chdir(self.path)
+        os.chdir(os.path.join(self.path,'parameters'))
         #print("Done")
         #print("Loaded Instructions from {}".format(self.path))
         #print("Exporting to {}".format(self.path))
@@ -414,9 +422,13 @@ class Ear():
             if name.find('_cam')==(-1) and name!='blender_bones_data':
                 self.load(name)
                 self.modifiers(True)
-                if arg_pc == 'TRUE':
+                if arg_pc == 'TRUE':                
+                    if (not os.path.exists(os.path.join(self.path,'pc'))):
+                        os.makedirs(os.path.join(self.path,'pc'))   
                     self.export_pc(name)
                 if arg_mesh == 'TRUE':
+                    if (not os.path.exists(os.path.join(self.path,'mesh'))):
+                        os.makedirs(os.path.join(self.path,'mesh'))
                     self.export_mesh(name)
                 if arg_image == 'TRUE':
                     self.render(name)
@@ -426,6 +438,10 @@ class Ear():
             os.close(1)
             os.dup(old)
             os.close(old)
+
+        # move render-log file
+        os.replace(os.path.join(self.path,'parameters','blender_render.log'), 
+                   os.path.join(self.path,'blender_render.log'))
 
 Ear = Ear("Ear")
 
