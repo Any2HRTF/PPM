@@ -47,8 +47,8 @@ def setDir(folder, file, extension):
     target_file = os.path.join(folder, '{}.{}'.format(file, extension))
     return target_file
 
-txtr = open(arg_path + 'blender_bones_data.txt', 'r')
-txtw = open(arg_path + '1.txt', 'w')
+txtr = open(os.path.join(arg_path, 'parameters', 'blender_bones_data.txt'), 'r')
+txtw = open(os.path.join(arg_path, 'parameters', '1.txt'), 'w')
 lines = txtr.readlines()
 for line in lines:
     transform = line.split(',')[0]
@@ -120,8 +120,11 @@ class Ear():
 
         select('ARI_PPM_v1', True)
 
-        if arg_pc == 'TRUE':
-            target_file_ply = setDir(self.path, name, "ply")
+        if arg_pc == 'TRUE':   
+            if not os.path.exists(os.path.join(self.path,'pc')):
+                os.makedirs(os.path.join(self.path,'pc'))      
+            
+            target_file_ply = setDir(os.path.join(self.path,'pc'), name, "ply")
             with redirect_stdout(stdout):
                 bpy.ops.export_mesh.ply(filepath=target_file_ply, 
                                         use_selection=True, 
@@ -130,7 +133,10 @@ class Ear():
                                         use_colors=False)
 
         if arg_mesh == 'TRUE':
-            target_file_stl = setDir(self.path, name, "stl")
+            if not os.path.exists(os.path.join(self.path,'mesh')):
+                os.makedirs(os.path.join(self.path,'mesh'))   
+
+            target_file_stl = setDir(os.path.join(self.path,'mesh'), name, "stl")
             with redirect_stdout(stdout):
                 bpy.ops.export_mesh.stl(filepath=target_file_stl, 
                                         use_selection=True, 
@@ -139,7 +145,7 @@ class Ear():
         select('ARI_PPM_v1', False)
 
     def loadAll(self):
-        os.chdir(self.path)
+        os.chdir(os.path.join(self.path,'parameters'))
 
         for file in glob.glob("*.txt"):
 
