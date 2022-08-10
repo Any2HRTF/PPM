@@ -106,12 +106,16 @@ end
 if ppm.modify.itr == 1
 
     ppm = ppm_add_or_assign(ppm);
-    writecell(ppm.parameters, fullfile(ppm.ini.path.result, '1.txt'));
+    writecell(ppm.parameters, fullfile(ppm.ini.path.result, 'parameters', '1.txt'));
 
     if ppm.modify.set_cam && ppm.modify.image
         % save camera perspective as txt-file to be loaded by set_values_and_export_mesh.py
         cam_pose = [ppm.modify.cam_loc; ppm.modify.cam_rot; ppm.modify.cam_loc_ref];
-        writematrix(cam_pose,fullfile(ppm.ini.path.result,'1_cam.txt'))
+
+        if ~exist(fullfile(ppm.ini.path.result,'cam'),'dir')
+            mkdir(fullfile(ppm.ini.path.result,'cam'))
+        end
+        writematrix(cam_pose,fullfile(ppm.ini.path.result,'cam','1_cam.txt'))
     end
 
 else % ppm.modify.itr > 1
@@ -182,12 +186,17 @@ else % ppm.modify.itr > 1
         ppm.modify.val = ppm.modify.val_vec(:,idx);
 
         ppm = ppm_add_or_assign(ppm);
-        writecell(ppm.parameters, fullfile(ppm.ini.path.result,[num2str(idx), '.txt']));
+        writecell(ppm.parameters, fullfile(ppm.ini.path.result,'parameters',...
+            [num2str(idx), '.txt']));
 
         if ppm.modify.set_cam && ppm.modify.image
+            if ~exist(fullfile(ppm.ini.path.result,'cam'),'dir')
+                mkdir(fullfile(ppm.ini.path.result,'cam'))
+            end
+
             % save camera perspective as txt-file to be loaded by set_values_and_export_mesh.py
             cam_pose = [ppm.modify.cam_loc; ppm.modify.cam_rot; ppm.modify.cam_loc_ref];
-            writematrix(cam_pose,fullfile(ppm.ini.path.result,[num2str(idx),'_cam.txt']))
+            writematrix(cam_pose,fullfile(ppm.ini.path.result,'cam',[num2str(idx),'_cam.txt']))
         end
 
     end
