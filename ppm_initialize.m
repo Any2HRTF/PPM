@@ -109,50 +109,33 @@ if ~exist(fullfile(ppm.ini.path.external,'quaternion'),'dir')
     addpath(genpath(ppm.ini.path.external))
 end
 
-%% Optionally delete all existing txt/ply files in result folder
-filelist = [dir(fullfile(ppm.ini.path.result,'*.txt')); dir(fullfile(ppm.ini.path.result,'*.exr'))];
-if ~isempty(filelist) && p.Results.auto_delete==1
+%% Optionally delete all existing export/render folders in result folder 
+%  (img, img_depth, mesh, parameters, pc) 
+
+filelist = ppm.ini.path.result;
+files_all = dir(filelist);
+files_all_dir = [files_all.isdir];
+dir_results = files_all(files_all_dir); 
+dir_results_names = {dir_results(3:end).name};
+
+if ~isempty(dir_results_names) && p.Results.auto_delete==1
     if ppm.ini.verbose_level>0
         warning([mfilename,': Specified result folder contained previous results, which were deleted.'])
     end
-    for idx=1:numel(filelist)
-        delete(fullfile(p.Results.path_result,filelist(idx).name))
-        if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.ply']),'file')
-            delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.ply']))
-        end
-        if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.stl']),'file')
-            delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.stl']))
-        end
-        if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.png']),'file')
-            delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.png']))
-        end
-    end
-    if exist(fullfile(p.Results.path_result,'blender_bones_data.txt'),'file')
-        delete(fullfile(p.Results.path_result,'blender_bones_data.txt'))
+    for idx=1:numel(dir_results_names)
+        rmdir(fullfile(p.Results.path_result,dir_results_names{idx}),'s')
     end
     if exist(fullfile(p.Results.path_result,'blender_render.log'),'file')
-        delete(fullfile(p.Results.path_result,'blender_render.log'))
+        rmdir(fullfile(p.Results.path_result,'blender_render.log'),'s')
     end
-elseif ~isempty(filelist) && p.Results.auto_delete==0
+elseif ~isempty(dir_results_names) && p.Results.auto_delete==0
     answer = questdlg([mfilename,': Specified result folder contained previous results, which will be deleted. Proceed?'],'Yes','No');
     if strcmp(answer,'Yes')
-        for idx=1:numel(filelist)
-            delete(fullfile(p.Results.path_result,filelist(idx).name))
-            if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.ply']),'file')
-                delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.ply']))
-            end
-            if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.stl']),'file')
-                delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.stl']))
-            end
-            if exist(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.png']),'file')
-                delete(fullfile(p.Results.path_result,[filelist(idx).name(1:end-4),'.png']))
-            end
-        end
-        if exist(fullfile(p.Results.path_result,'blender_bones_data.txt'),'file')
-            delete(fullfile(p.Results.path_result,'blender_bones_data.txt'))
+        for idx=1:numel(dir_results_names)
+            rmdir(fullfile(p.Results.path_result,dir_results_names{idx}),'s')
         end
         if exist(fullfile(p.Results.path_result,'blender_render.log'),'file')
-            delete(fullfile(p.Results.path_result,'blender_render.log'))
+            rmdir(fullfile(p.Results.path_result,'blender_render.log'),'s')
         end
     else
         error('Aborted by user.')
