@@ -1,6 +1,6 @@
 function ppm = ppm_evaluate(ppm,varargin)
-%ppm_evaluate - Evaluate the parametric-pinna-model (PPM) mesh against a 
-%               target mesh in terms of the Hausdorff distance
+%ppm_evaluate - Evaluate the parametric-pinna-model (PPM) point cloud against a 
+%               target point cloud in terms of the Hausdorff distance
 %
 % Usage: 
 %
@@ -12,12 +12,16 @@ function ppm = ppm_evaluate(ppm,varargin)
 %     ppm                : PPM structure array, initialized as per 
 %                          ppm_initialize() and optionally modified via 
 %                          ppm_set_values() [struct]                          
-%     'path_mesh_target' : Path to target mesh [string]
-%     'name_mesh_target' : File name of target mesh [string]
+%     'path_pc_target'   : Path to target point cloud [string]
+%     'name_pc_target'   : File name of target point cloud [string]
 %
 %   Optional
-%     .path_mesh_result  : Path to result mesh [string], default: ppm.ini.path.result
-%     .name_mesh_result  : File name of result mesh [string], default: '1.ply'
+%     'path_pc_result'   : Path to result point cloud [string], 
+%                          default: ppm.ini.path.result/pc
+%     'name_pc_result'   : File name of result point cloud [string], default: '1.ply'
+%     'sample_start_idx' : File-name index. If itr>1 the exported PLY files 
+%                          start at this index and are incremented [double], 
+%                          default: 1
 %     'caxis_min'        : Lower limit of colorbar [double], default: min(hd)
 %     'caxis_max'        : Upper limit of colorbar [double], default: max(hd)
 %
@@ -28,22 +32,23 @@ function ppm = ppm_evaluate(ppm,varargin)
 %             .val             : If ppm.modify > 1 the parameter value is 
 %                                set to the one resulting in the minimum mean
 %                                minimum Hausdorff distance across iterations
-%             .mesh_target     : Target mesh [double]
-%             .mesh_result     : Resulting mesh after modifications of PPM 
+%             .pc_target       : Target point cloud [double]
+%             .pc_result       : Resulting point cloud after modifications of PPM 
 %                                parameters [double]
+%             .sample_start_idx [double]
 %             .hd              : Minimum Hausdorff distance per point 
-%                                of the result mesh [double]
+%                                of the result point cloud [double]
 %             .hd_mean         : Average minimum Hausdorff distance 
-%                                across the entire result mesh per 
+%                                across the entire result point cloud per 
 %                                iteration (if ppm.modify.itr > 1) [double]
 %             .hd_std          : Standard deviation of minimum Hausdorff distance 
-%                                across the entire result mesh per 
+%                                across the entire result point cloud per 
 %                                iteration (if ppm.modify.itr > 1) [double]
 %             .hd_median       : Median of minimum Hausdorff distance 
-%                                across the entire result mesh per 
+%                                across the entire result point cloud per 
 %                                iteration (if ppm.modify.itr > 1) [double]
 %             .hd_mean_min     : Minimum average minimum Hausdorff distance 
-%                                across all iterations mesh (if 
+%                                across all iterations point cloud (if 
 %                                ppm.modify.itr > 1) [double]
 %             .hd_mean_min_itr : Index of iteration that yielded the 
 %                                minimum average minimum Hausdorff distance 
@@ -58,17 +63,18 @@ function ppm = ppm_evaluate(ppm,varargin)
 %% Parse input arguments
 p = inputParser;
 
-addOptional(p,'path_mesh_result',ppm.ini.path.result);
-addOptional(p,'name_mesh_result','1.ply');
-addOptional(p,'path_mesh_target',[]);
-addOptional(p,'name_mesh_target',[]);
+addOptional(p,'path_pc_result',fullfile(ppm.ini.path.result,'pc'));
+addOptional(p,'name_pc_result','1.ply');
+addOptional(p,'path_pc_target',[]);
+addOptional(p,'name_pc_target',[]);
+addOptional(p,'sample_start_idx',1);
 addOptional(p,'caxis_min',[]);
 addOptional(p,'caxis_max',[]);
 
 parse(p,varargin{:});
 
-if (isempty(p.Results.path_mesh_target) || isempty(p.Results.name_mesh_target))
-    error('ppm_evaluate: Input error. Please specify ''path_mesh_target'' and ''name_mesh_target''.')
+if (isempty(p.Results.path_pc_target) || isempty(p.Results.name_pc_target))
+    error('ppm_evaluate: Input error. Please specify ''path_pc_target'' and ''name_pc_target''.')
 end
 
 if ~isfield(ppm,'modify')
@@ -80,46 +86,55 @@ end
 %% Set default MATLAB renderer
 set(0, 'DefaultFigureRenderer', 'opengl');
 
-%% load first result mesh and specified target mesh
-mesh_result_temp = pcread(fullfile(p.Results.path_mesh_result,p.Results.name_mesh_result));
-ppm.evaluate.mesh_result = mesh_result_temp.Location;
+%% Load specified target point cloud
+pc_target_temp = pcread(fullfile(p.Results.path_pc_target, p.Results.name_pc_target));
+ppm.evaluate.pc_target = pc_target_temp.Location;
 
-mesh_target_temp = pcread(fullfile(p.Results.path_mesh_target, p.Results.name_mesh_target));
-ppm.evaluate.mesh_target = mesh_target_temp.Location;
+%% Load result point clouds exported in the corresponding iterations
+pc_result = dir(p.Results.path_pc_result);
+pc_result_name = {pc_result(3:end).name};
 
-%% load remaining result meshes exported in the corresponding iterations
-if itr>1
-    mesh_result_mtx = zeros(size(ppm.evaluate.mesh_result,1),...
-        size(ppm.evaluate.mesh_result,2),itr); 
-    mesh_result_mtx(:,:,1) = ppm.evaluate.mesh_result;
-    for idx=2:itr
-        mesh_result_temp = pcread(fullfile(ppm.ini.path.result,[num2str(idx),'.ply']));
-        mesh_result_mtx(:,:,idx) = mesh_result_temp.Location;
+if itr==1
+    pc_result_temp = pcread(fullfile(p.Results.path_pc_result, ...
+        [num2str(p.Results.sample_start_idx),'.ply']));
+    ppm.evaluate.pc_result = pc_result_temp.Location;
+else % itr>1
+    pc_result_temp= pcread(fullfile(p.Results.path_pc_result, ...
+        [num2str(p.Results.sample_start_idx),'.ply']));
+    ppm.evaluate.pc_result = pc_result_temp.Location;
+    
+    pc_result_mtx = zeros(size(ppm.evaluate.pc_result,1),...
+        size(ppm.evaluate.pc_result,2),itr); 
+    pc_result_mtx(:,:,1) = ppm.evaluate.pc_result;
+    for idx=p.Results.sample_start_idx+1:p.Results.sample_start_idx+itr-1
+        pc_result_temp = pcread(fullfile(p.Results.path_pc_result,...
+            pc_result_name{idx-p.Results.sample_start_idx+1}));
+        pc_result_mtx(:,:,idx-p.Results.sample_start_idx+1) = pc_result_temp.Location;
     end
-    ppm.evaluate.mesh_result = mesh_result_mtx;
+    ppm.evaluate.pc_result = pc_result_mtx;
 end
 
-%% calculate Hausdorff distance and visualize result
+%% Calculate Hausdorff distance and visualize result
 if itr==1
     
-    % Compare result and target meshes
-    ppm.evaluate.hd = hausdorff_dist(ppm.evaluate.mesh_result,ppm.evaluate.mesh_target);
+    % Compare result and target point clouds
+    ppm.evaluate.hd = hausdorff_dist(ppm.evaluate.pc_result,ppm.evaluate.pc_target);
 
     if ppm.ini.verbose_level>0
        
-        if isequal(ppm.evaluate.mesh_result,ppm.evaluate.mesh_target)
-            warning([mfilename,': Result mesh and target mesh are identical.'])
+        if isequal(ppm.evaluate.pc_result,ppm.evaluate.pc_target)
+            warning([mfilename,': Result point cloud and target point cloud are identical.'])
         end
 
         figure('units','normalized','outerposition',[0 0 1 1])
         tiledlayout(1,2)
 
-        % Plot result mesh with color-coded Hausdorff distance
+        % Plot result point cloud with color-coded Hausdorff distance
         ppm_plot_hd(ppm,...
             'caxis_min',p.Results.caxis_min,...
             'caxis_max',p.Results.caxis_max);
 
-        disp([mfilename,': Average Hausdorff distance of the entire mesh (mu+/-sigma, Mdn): ', ...
+        disp([mfilename,': Average Hausdorff distance of the entire point cloud (mu+/-sigma, Mdn): ', ...
             [num2str(mean(ppm.evaluate.hd)),'+/-',num2str(std(ppm.evaluate.hd)), ', ', ...
             num2str(median(ppm.evaluate.hd))]]);
     
@@ -128,16 +143,16 @@ if itr==1
 else % itr > 1
     
     % Create a matrix to store HDs given by different parameter values
-    ppm.evaluate.hd = zeros(size(ppm.evaluate.mesh_result,1),itr);
+    ppm.evaluate.hd = zeros(size(ppm.evaluate.pc_result,1),itr);
     
-    % Read all the meshes and calculate HDs
+    % Read all the point clouds and calculate HDs
     if ppm.ini.verbose_level>0
         wb = waitbar(0,'ppm\_multiple\_hausdorff\_dist: Calculating HD for all iterations...');
     end
     
     for idx = 1:itr
-        ppm.evaluate.hd(:,idx) = hausdorff_dist(squeeze(ppm.evaluate.mesh_result(:,:,idx)), ...
-            ppm.evaluate.mesh_target);
+        ppm.evaluate.hd(:,idx) = hausdorff_dist(squeeze(ppm.evaluate.pc_result(:,:,idx)), ...
+            ppm.evaluate.pc_target);
         if ppm.ini.verbose_level>0
             waitbar(idx/itr,wb)
         end
@@ -196,16 +211,15 @@ else % itr > 1
             delete(nexttile(2))
         end
 
-        disp([mfilename,': Average Hausdorff distance of the entire mesh (mu+/-sigma, Mdn): ', ...
+        disp([mfilename,': Average Hausdorff distance of the entire point cloud (mu+/-sigma, Mdn): ', ...
             [num2str(mean(ppm.evaluate.hd(:,ppm.evaluate.hd_mean_min_itr))),'+/-', ...
             num2str(std(ppm.evaluate.hd(:,ppm.evaluate.hd_mean_min_itr))), ', ', ...
             num2str(median(ppm.evaluate.hd(:,ppm.evaluate.hd_mean_min_itr)))]]);
     end
    
-    if isequal(squeeze(ppm.evaluate.mesh_result(:,:,ppm.evaluate.hd_mean_min_itr)), ...
-            ppm.evaluate.mesh_target)
-        warning([mfilename,': Result mesh and target mesh are identical.'])
+    if isequal(squeeze(ppm.evaluate.pc_result(:,:,ppm.evaluate.hd_mean_min_itr)), ...
+            ppm.evaluate.pc_target)
+        warning([mfilename,': Result point cloud and target point cloud are identical.'])
     end
 
 end
-
