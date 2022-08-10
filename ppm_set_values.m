@@ -374,6 +374,11 @@ if ~ismember(p.Results.rotation_mode,{'quaternion','XYZ','XZY','YXZ','YZX','ZXY'
     error('Input error. Rotation mode must be either ''quaternion'',''XYZ'',''XZY'',''YXZ'',''YZX'',''ZXY'', or ''ZYX''.')
 end
 
+%% Fetch parameter values of Blender file if not done yet
+if ~exist(fullfile(ppm.ini.path.result,'parameters'),'dir')
+    ppm = ppm_get_values(ppm);
+end
+
 %% Assign input arguments to ppm.modify
 if iscell(p.Results.type) || iscell(p.Results.name) || ...
         iscell(p.Results.axis) || iscell(p.Results.val)
