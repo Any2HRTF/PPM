@@ -1,8 +1,7 @@
 function ppm_plot_hd(ppm,varargin)
-%ppm_plot_hd - Plot a target mesh and contrast it with the result mesh 
-%          after modifying parameters of the PPM. The latter mesh is 
-%          color-coded in terms of the corresponding Hausdorff 
-%          distance values. 
+%ppm_plot_hd - Plot a target point cloud and contrast it with the result point 
+%          cloud after modifying parameters of the PPM. The latter point cloud
+%          is color-coded in terms of the corresponding Hausdorff-distance values. 
 %
 % Usage: 
 %
@@ -40,7 +39,7 @@ else
     hd_mean_min_itr = 1;
 end
 
-%% Select mesh with lowest mean HD
+%% Select point cloud with lowest mean HD
 hd_plot = ppm.evaluate.hd(:,hd_mean_min_itr);
 
 %% Clip HD values below/above caxis_min/caxis_max for plot
@@ -74,21 +73,21 @@ else
    hd_c = 0.8*ones(size(cmatrix));
 end
 
-%% Plot mesh and overlay it with target mesh in grey color
+%% Plot point cloud and overlay it with target point cloud in grey color
 nexttile
-ptCloud_target = pointCloud(ppm.evaluate.mesh_target, ...
-    'Color',0.8*ones(size(ppm.evaluate.mesh_target)));
+ptCloud_target = pointCloud(ppm.evaluate.pc_target, ...
+    'Color',0.8*ones(size(ppm.evaluate.pc_target)));
 pcshow(ptCloud_target,'MarkerSize', 10);
 filename = strsplit(ppm.ini.blender_file,'\');
 title(filename{end},'Interpreter','none')
 hold on
 
 % Create new ptCloud with HD-dependent color codes and plot
-ptCloud_result = pointCloud(ppm.evaluate.mesh_result(:,:,hd_mean_min_itr), ...
+ptCloud_result = pointCloud(ppm.evaluate.pc_result(:,:,hd_mean_min_itr), ...
     'Color',cmatrix);
 pcshow(ptCloud_result,'MarkerSize', 20);
 
-hl = legend('Target mesh','Modelled mesh');
+hl = legend('Target point cloud','Modelled point cloud');
 set(hl,'color','white','location','southwestoutside');
 
 if ~all(range(hd_c)==0)
