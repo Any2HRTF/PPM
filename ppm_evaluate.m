@@ -16,9 +16,6 @@ function ppm = ppm_evaluate(ppm,varargin)
 %     'name_pc_target'   : File name of target point cloud [string]
 %
 %   Optional
-%     'path_pc_result'   : Path to result point cloud [string], 
-%                          default: ppm.ini.path.result/pc
-%     'name_pc_result'   : File name of result point cloud [string], default: '1.ply'
 %     'sample_start_idx' : File-name index. If itr>1 the exported PLY files 
 %                          start at this index and are incremented [double], 
 %                          default: 1
@@ -63,8 +60,6 @@ function ppm = ppm_evaluate(ppm,varargin)
 %% Parse input arguments
 p = inputParser;
 
-addOptional(p,'path_pc_result',fullfile(ppm.ini.path.result,'pc'));
-addOptional(p,'name_pc_result','1.ply');
 addOptional(p,'path_pc_target',[]);
 addOptional(p,'name_pc_target',[]);
 addOptional(p,'sample_start_idx',1);
@@ -88,26 +83,38 @@ set(0, 'DefaultFigureRenderer', 'opengl');
 
 %% Load specified target point cloud
 pc_target_temp = pcread(fullfile(p.Results.path_pc_target, p.Results.name_pc_target));
-ppm.evaluate.pc_target = pc_target_temp.Location;
+ppm.evaluate.pc_target = double(pc_target_temp.Location);
 
 %% Load result point clouds exported in the corresponding iterations
-pc_result = dir(p.Results.path_pc_result);
+pc_result = dir(fullfile(ppm.ini.path.result,'pc'));
 pc_result_name = {pc_result(3:end).name};
 
 if itr==1
-    pc_result_temp = pcread(fullfile(p.Results.path_pc_result, ...
-        [num2str(p.Results.sample_start_idx),'.ply']));
+    try
+        pc_result_temp = pcread(fullfile(fullfile(ppm.ini.path.result,'pc'), ...
+            [num2str(p.Results.sample_start_idx),'.ply']));
+    catch
+        error(['Input error. Result point cloud ', ...
+            fullfile(fullfile(ppm.ini.path.result,'ply'), [num2str(p.Results.sample_start_idx),'.ply']),...
+            ' does not exist. Consider specifying ''sample_start_idx''.'])
+    end
     ppm.evaluate.pc_result = pc_result_temp.Location;
 else % itr>1
-    pc_result_temp= pcread(fullfile(p.Results.path_pc_result, ...
-        [num2str(p.Results.sample_start_idx),'.ply']));
+    try
+        pc_result_temp = pcread(fullfile(fullfile(ppm.ini.path.result,'pc'), ...
+            [num2str(p.Results.sample_start_idx),'.ply']));
+    catch
+        error(['Input error. Result point cloud ', ...
+            fullfile(fullfile(ppm.ini.path.result,'ply'), [num2str(p.Results.sample_start_idx),'.ply']),...
+            ' does not exist. Consider specifying ''sample_start_idx''.'])
+    end
     ppm.evaluate.pc_result = pc_result_temp.Location;
-    
+
     pc_result_mtx = zeros(size(ppm.evaluate.pc_result,1),...
         size(ppm.evaluate.pc_result,2),itr); 
     pc_result_mtx(:,:,1) = ppm.evaluate.pc_result;
     for idx=p.Results.sample_start_idx+1:p.Results.sample_start_idx+itr-1
-        pc_result_temp = pcread(fullfile(p.Results.path_pc_result,...
+        pc_result_temp = pcread(fullfile(fullfile(ppm.ini.path.result,'pc'),...
             pc_result_name{idx-p.Results.sample_start_idx+1}));
         pc_result_mtx(:,:,idx-p.Results.sample_start_idx+1) = pc_result_temp.Location;
     end
