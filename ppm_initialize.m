@@ -126,7 +126,7 @@ if ~isempty(dir_results_names) && p.Results.auto_delete==1
         rmdir(fullfile(p.Results.path_result,dir_results_names{idx}),'s')
     end
     if exist(fullfile(p.Results.path_result,'blender_render.log'),'file')
-        rmdir(fullfile(p.Results.path_result,'blender_render.log'),'s')
+        delete(fullfile(p.Results.path_result,'blender_render.log'))
     end
 elseif ~isempty(dir_results_names) && p.Results.auto_delete==0
     answer = questdlg([mfilename,': Specified result folder contained previous results, which will be deleted. Proceed?'],'Yes','No');
@@ -135,7 +135,7 @@ elseif ~isempty(dir_results_names) && p.Results.auto_delete==0
             rmdir(fullfile(p.Results.path_result,dir_results_names{idx}),'s')
         end
         if exist(fullfile(p.Results.path_result,'blender_render.log'),'file')
-            rmdir(fullfile(p.Results.path_result,'blender_render.log'),'s')
+            delete(fullfile(p.Results.path_result,'blender_render.log'))
         end
     else
         error('Aborted by user.')
