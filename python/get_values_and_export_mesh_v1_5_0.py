@@ -27,6 +27,7 @@ argv = sys.argv
 arg_path = argv[argv.index("--") + 1]
 arg_pc = argv[argv.index("--") + 2]
 arg_mesh = argv[argv.index("--") + 3]
+arg_sample_start_idx = argv[argv.index("--") + 4]
 
 def select(label, action):
     if action:
@@ -48,7 +49,7 @@ def setDir(folder, file, extension):
     return target_file
 
 txtr = open(os.path.join(arg_path, 'parameters', 'blender_bones_data.txt'), 'r')
-txtw = open(os.path.join(arg_path, 'parameters', '1.txt'), 'w')
+txtw = open(os.path.join(arg_path, 'parameters', arg_sample_start_idx + '.txt'), 'w')
 lines = txtr.readlines()
 for line in lines:
     transform = line.split(',')[0]
