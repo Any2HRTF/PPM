@@ -39,8 +39,8 @@ for idx=sel
     %% Compare the resulting mesh to the specified target mesh
     %  and evaluate its fit based on Hausdorff distances, plot result
     ppm = ppm_evaluate(ppm,...
-        'path_mesh_target',ppm.ini.path.data,...
-        'name_mesh_target',mesh_target{idx});
+        'path_pc_target',ppm.ini.path.data,...
+        'name_pc_target',mesh_target{idx});
 
     % Plot result mesh with color-coded Hausdorff distance
     if idx==sel(1)
