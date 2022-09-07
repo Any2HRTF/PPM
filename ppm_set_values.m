@@ -135,6 +135,7 @@ function ppm = ppm_set_values(ppm,varargin)
 %             .itr [double]
 %             .range [double]
 %             .sample_start_idx [double]
+%             .auto_correct [logical] 
 %             .instruction_mode [string]
 %             .rotation_mode [string]
 %             .cam_loc [double]
