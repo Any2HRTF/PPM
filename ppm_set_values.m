@@ -85,6 +85,8 @@ function ppm = ppm_set_values(ppm,varargin)
 %     'remesh'            : Disable/enable reduction of vertex/face count of 
 %                           the modelled mesh before exporting [logical]
 %                           (default: false)
+%     'shade_smooth'      : Smooth faces of the modelled mesh for smoother
+%                           rendering results [logical] (default: false)
 %     'image'             : Render modelled mesh as PNG [logical] (default: false)
 %     'image_res'         : Resolution (image_res x image_res) of the
 %                           rendered PNG image [double] (default: 1024)
@@ -144,6 +146,7 @@ function ppm = ppm_set_values(ppm,varargin)
 %             .set_cam [logical]
 %             .mesh [logical]
 %             .remesh [logical]
+%             .shade_smooth [logical]
 %             .image [logical]
 %             .image_res [logical]
 %             .image_col_dep [double]
@@ -211,6 +214,7 @@ addOptional(p,'cam_loc_ref',[]);
 addOptional(p,'pc',true);
 addOptional(p,'mesh',false);
 addOptional(p,'remesh',false);
+addOptional(p,'shade_smooth',false);
 addOptional(p,'image',false);
 addOptional(p,'image_res',1024);
 addOptional(p,'image_col_dep',16);
@@ -458,6 +462,7 @@ ppm.modify.set_cam           = p.Results.set_cam;
 ppm.modify.pc                = p.Results.pc;
 ppm.modify.mesh              = p.Results.mesh;
 ppm.modify.remesh            = p.Results.remesh;
+ppm.modify.shade_smooth      = p.Results.shade_smooth;
 ppm.modify.image             = p.Results.image;
 ppm.modify.image_res         = p.Results.image_res;
 ppm.modify.image_col_dep     = p.Results.image_col_dep;
