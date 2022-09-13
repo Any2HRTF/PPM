@@ -51,6 +51,8 @@ arg_depth_comp_png = argv[argv.index("--") + 15]
 arg_depth_nearest = argv[argv.index("--") + 16]
 arg_depth_farthest = argv[argv.index("--") + 17]
 
+arg_shade_smooth = argv[argv.index("--") + 18]
+
 def select(label, action):
     if action:
         bpy.ops.object.select_all(action='DESELECT')
@@ -125,6 +127,7 @@ class Ear():
         self.bonesLookup = {}
 
     def modifiers(self, state):
+        
         if arg_remesh == 'TRUE':
             bpy.data.objects["ARI_PPM_v1"].modifiers["DataTransfer"].show_render = state
             bpy.data.objects["ARI_PPM_v1"].modifiers["DataTransfer"].show_viewport = state
@@ -162,8 +165,14 @@ class Ear():
 
         cam = bpy.data.objects['Camera']
         cam.rotation_mode = 'XYZ'
-        bpy.context.scene.camera = cam   
+        bpy.context.scene.camera = cam  
 
+        # Optionally smooth mesh faces for more pleasing rendering results
+        if arg_shade_smooth=='TRUE':
+            mesh = bpy.context.object.data
+            for f in mesh.polygons:
+                f.use_smooth = True
+ 
         if arg_cam=='TRUE' and name.find('_cam')==(-1):
       
             cam_file = setDir(os.path.join(self.path,'cam'), name + '_cam', 'txt')
