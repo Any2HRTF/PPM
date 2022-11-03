@@ -153,8 +153,7 @@ switch ppm.ini.sysarch
         ppm.ini.path.blender = '';
         error('Please manually set path to Blender.')
     otherwise % 'MACI64'
-        ppm.ini.path.blender_exe = ''; %'/Users/<user name>/BlenderApp/blender/blender.app/Contents/MacOS/Blender';
-        error('Please manually set path to Blender.')
+        ppm.ini.path.blender_exe = '/Applications/Blender.app/Contents/MacOS/Blender';
 end
 
 %% Load default transformation matrix
