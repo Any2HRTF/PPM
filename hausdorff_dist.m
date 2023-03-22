@@ -1,6 +1,7 @@
 function hd = hausdorff_dist(P,Q)
-%hausdorff_dist - Calculate the Hausdorff distance between two sets of points 
-% P and Q in Euclidian space [1, 2]. Function adapted from [3].
+%hausdorff_dist - Calculate the minimum pointwise distance between two sets 
+% of points P and Q in Euclidian space [1, 2]. The directed Hausdorff
+% distance corresponds to the maximum of hd. Function adapted from [3].
 %
 %   Usage: 
 %
@@ -23,8 +24,7 @@ function hd = hausdorff_dist(P,Q)
 %     (https://www.mathworks.com/matlabcentral/fileexchange/26738-hausdorff-distance), 
 %     MATLAB Central File Exchange. Retrieved February 18, 2022. 
 
-% #Author: Mantas Tamulionis (2021)
-% Modifications by Florian Pausch (2022)   
+% #Author: Florian Pausch (2022)   
 
 dist = zeros(size(P,1),1);
 for p = 1:size(P,1)
