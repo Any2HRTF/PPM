@@ -93,7 +93,8 @@ set(hl,'color','white','location','southwestoutside');
 if ~all(range(hd_c)==0)
     c=colorbar;
 end
-c.Label.String = 'Hausdorff distance (mm)';
+c.Label.String = 'Pointwise minimum distance (mm)';
+c.FontSize = 16;
 set(gcf,'color','w');
 set(gca,'color','w');
 
@@ -101,14 +102,17 @@ if ~all(range(hd_c)==0)
     caxis([caxis_min, caxis_max])
 end
 view([180 0])
+set(gca,'fontsize',14)
+
 
 %% Plot histogram of HD values
 nexttile
 histogram(ppm.evaluate.hd(:,hd_mean_min_itr),'EdgeColor','black','FaceColor',[.5 .5 .5]);
-xlabel('Hausdorff distance (mm)')
+xlabel('Pointwise minimum distance (mm)')
 ylabel('Count')
 axis square
 grid on
+set(gca,'fontsize',14)
 
 title(['$\mu\pm\sigma=', ...
     num2str(round(mean(ppm.evaluate.hd(:,hd_mean_min_itr))*100)/100),'\pm',...
