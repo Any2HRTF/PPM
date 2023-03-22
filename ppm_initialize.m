@@ -1,4 +1,4 @@
-function ppm = ppm_initialize(PPM_Interfave_Path, varargin)
+function ppm = ppm_initialize(varargin)
     %ppm_initialize - Initialize the parametric-pinna-model (PPM) structure array
     %
     % Usage: 
@@ -64,11 +64,11 @@ function ppm = ppm_initialize(PPM_Interfave_Path, varargin)
     
     addOptional(p,'path_blender_file',[]);
     addOptional(p,'name_blender_file',[]);
-    addOptional(p,'path_default',fullfile(PPM_Interfave_Path,'default'));
-    addOptional(p,'path_data',fullfile(PPM_Interfave_Path,'data'));
-    addOptional(p,'path_python',fullfile(PPM_Interfave_Path,'python'));
-    addOptional(p,'path_result',fullfile(PPM_Interfave_Path,'result'));
-    addOptional(p,'path_external',fullfile(PPM_Interfave_Path,'external'));
+    addOptional(p,'path_default',fullfile(pwd,'default'));
+    addOptional(p,'path_data',fullfile(pwd,'data'));
+    addOptional(p,'path_python',fullfile(pwd,'python'));
+    addOptional(p,'path_result',fullfile(pwd,'result'));
+    addOptional(p,'path_external',fullfile(pwd,'external'));
     addOptional(p,'auto_delete',false);
     addOptional(p,'verbose_level',1);
     addOptional(p,'name_limit_file','shape_key_limits_v1');
