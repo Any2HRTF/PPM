@@ -141,7 +141,7 @@ if itr==1
             'caxis_min',p.Results.caxis_min,...
             'caxis_max',p.Results.caxis_max);
 
-        disp([mfilename,': Average Hausdorff distance of the entire point cloud (mu+/-sigma, Mdn): ', ...
+        disp([mfilename,': Average minimum pointwise distance (mu+/-sigma, Mdn): ', ...
             [num2str(mean(ppm.evaluate.hd)),'+/-',num2str(std(ppm.evaluate.hd)), ', ', ...
             num2str(median(ppm.evaluate.hd))]]);
     
@@ -191,7 +191,7 @@ else % itr > 1
                 min(ppm.evaluate.hd_mean),'r.','markersize',20);
             set(gca,'xtick',round(ppm.modify.val_vec*1000)/1000)
             xlabel('Parameter value per iteration')
-            ylabel ('Mean minimum Hausdorff distance')
+            ylabel ('Mean minimum pointwise distance')
             grid minor
             axis square
             if strcmp(ppm.modify.type,'Shape key')
@@ -218,7 +218,7 @@ else % itr > 1
             delete(nexttile(2))
         end
 
-        disp([mfilename,': Average Hausdorff distance of the entire point cloud (mu+/-sigma, Mdn): ', ...
+        disp([mfilename,': Average minimum pointwise distance (mu+/-sigma, Mdn): ', ...
             [num2str(mean(ppm.evaluate.hd(:,ppm.evaluate.hd_mean_min_itr))),'+/-', ...
             num2str(std(ppm.evaluate.hd(:,ppm.evaluate.hd_mean_min_itr))), ', ', ...
             num2str(median(ppm.evaluate.hd(:,ppm.evaluate.hd_mean_min_itr)))]]);
