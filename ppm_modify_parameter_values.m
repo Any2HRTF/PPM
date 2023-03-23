@@ -212,22 +212,47 @@ function ppm = ppm_add_or_assign(ppm)
 % transform quaternions to Euler angles as per ppm.modify.rotation_mode and
 % reconstruct quaternion from modified Euler angle component
 if any( ~strcmp(ppm.modify.rotation_mode,'quaternion') & strcmp(ppm.modify.type,'Rotation') )
+    
+    if iscell(ppm.modify.type) || iscell(ppm.modify.name) || ...
+            iscell(ppm.modify.axis) || iscell(ppm.modify.val)
 
-    rotation_idx_local = find(strcmp(ppm.modify.type,'Rotation'));
-    rotation_idx = zeros(numel(rotation_idx_local),1);
-    for idx=rotation_idx_local'
-        rotation_idx(idx) = find( strcmp(ppm.modify.type(idx),ppm.parameters(:,1)) & ...
-            strcmp(ppm.modify.name{idx},ppm.parameters(:,2)) & ...
-            strcmp(ppm.modify.axis{idx},ppm.parameters(:,3)) );
+        rotation_idx_local = find(strcmp(ppm.modify.type,'Rotation'));
+        rotation_idx = zeros(numel(rotation_idx_local),1);
+        for idx=rotation_idx_local'
+            [~,rotation_idx(idx)] = max( ...
+                strcmp(ppm.modify.type{idx},ppm.parameters(:,1)) & ...
+                strcmp(ppm.modify.name{idx},ppm.parameters(:,2)) & ...
+                strcmp(ppm.modify.axis{idx},ppm.parameters(:,3)) );
+        end
+        rotation_idx(rotation_idx==0) = [];
+
+        % select corresponding quaternion-rotation entries
+        rotation_idx_quat = zeros(numel(rotation_idx)+numel(rotation_idx)/3,1);
+        rotation_idx_quat(1:4:end) = rotation_idx(1:3:end)-1;
+        rotation_idx_quat(rotation_idx_quat==0) = rotation_idx;
+        if length(rotation_idx_quat)>4
+            val_orig = cell2mat( reshape(ppm.parameters(rotation_idx_quat,4),...
+                numel(rotation_idx_quat)/3, numel(rotation_idx)/3) );
+        else
+            val_orig = cell2mat( ppm.parameters(rotation_idx_quat,4) );
+        end
+
+    else
+        
+        [~,rotation_idx] = max( ...
+            strcmp(ppm.modify.type,ppm.parameters(:,1)) & ...
+            strcmp(ppm.modify.name,ppm.parameters(:,2)) & ...
+            strcmp(ppm.modify.axis,ppm.parameters(:,3)) );
+
+        % select corresponding quaternion-rotation entries
+        rotation_idx_quat = find( ...
+            strcmp(ppm.modify.type,ppm.parameters(:,1)) & ...
+            strcmp(ppm.modify.name,ppm.parameters(:,2)) );
+        [~, rotation_idx_local] = max(rotation_idx==rotation_idx_quat);
+        rotation_idx_local = rotation_idx_local-1;
+        val_orig = cell2mat(ppm.parameters(rotation_idx_quat,4));
+        
     end
-    rotation_idx(rotation_idx==0) = [];
-
-    % select corresponding quaternion-rotation entries 
-    rotation_idx_quat = zeros(numel(rotation_idx)+numel(rotation_idx)/3,1);
-    rotation_idx_quat(1:4:end) = rotation_idx(1:3:end)-1;
-    rotation_idx_quat(rotation_idx_quat==0) = rotation_idx;
-    val_orig = cell2mat( reshape(ppm.parameters(rotation_idx_quat,4),...
-        numel(rotation_idx_quat)/3, numel(rotation_idx)/3) );
 
     q = quaternion(val_orig);
     angles_Eul = EulerAngles(q,lower(ppm.modify.rotation_mode));
@@ -235,11 +260,19 @@ if any( ~strcmp(ppm.modify.rotation_mode,'quaternion') & strcmp(ppm.modify.type,
     % execute depending on specified instruction mode
     switch ppm.modify.instruction_mode
         case 'rel'
-            angles_Eul = angles_Eul + ...
-                reshape( deg2rad(ppm.modify.val(rotation_idx_local)), size(angles_Eul));
+            if length(ppm.modify.val)>1
+                angles_Eul = angles_Eul + ...
+                    reshape( deg2rad(ppm.modify.val(rotation_idx_local)), size(angles_Eul));
+            else
+                angles_Eul(rotation_idx_local) = angles_Eul(rotation_idx_local) + deg2rad(ppm.modify.val);
+            end
         case 'abs'
-            angles_Eul = reshape( deg2rad(ppm.modify.val(rotation_idx_local)),...
-                                            size(angles_Eul) );
+            if length(ppm.modify.val)>1
+                angles_Eul = reshape( deg2rad(ppm.modify.val(rotation_idx_local)),...
+                    size(angles_Eul) );
+            else
+                angles_Eul(rotation_idx_local) = deg2rad(ppm.modify.val);
+            end
     end
 
     % reconstruct quaternion from modified Euler angles
