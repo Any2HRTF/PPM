@@ -24,6 +24,7 @@ from contextlib import redirect_stdout
 import bpy
 import math
 import mathutils
+from mathutils import Matrix
 import numpy as np
 
 stdout = io.StringIO()
@@ -91,8 +92,8 @@ class Bone():
         else:
             axis_idx = "error"
 
-        if arg_coord_sys_type == 'global':
-            self.set_to_world_coordinate_system(point, True)
+        # if arg_coord_sys_type == 'global':
+        #     self.set_to_world_coordinate_system(point)
 
         bpy.data.objects["Armature"].pose.bones[self.name + "-" + point].rotation_quaternion[axis_idx] = float(val)
 
@@ -108,9 +109,14 @@ class Bone():
             axis_idx = "error"
 
         if arg_coord_sys_type == 'global':
-            self.set_to_world_coordinate_system(point, True) 
+            mtx_world = self.get_matrix_world(point)
+            mtx_world.translation[axis_idx] = float(val)
+            mtx_local = self.get_matrix_local(point,mtx_world)
 
-        bpy.data.objects["Armature"].pose.bones[self.name + "-" + point].location[axis_idx] = float(val)
+            bpy.data.objects["Armature"].pose.bones[self.name + "-" + point].matrix_basis = mtx_local
+
+        else:
+            bpy.data.objects["Armature"].pose.bones[self.name + "-" + point].location[axis_idx] = float(val)
 
     def scaling(self, point, axis, val):
 
@@ -123,26 +129,63 @@ class Bone():
         else:
             axis_idx = "error"
 
-        if arg_coord_sys_type == 'global':
-            self.set_to_world_coordinate_system(point, True) 
+        # if arg_coord_sys_type == 'global':
+            
+        #     mtx_world = self.get_matrix_world(point)
+
+        #     vec_world_position, vec_world_rotation, _ = mtx_world.decompose()
+        #     vec_world_scale = mtx_world.to_scale()
+        #     # vec_world_scale[axis_idx] = float(val)
+
+        #     if self.name=='Size':
+        #         print(vec_world_scale)
+
+        #     mtx_world = Matrix.LocRotScale(vec_world_position, vec_world_rotation, vec_world_scale)
+
+        #     # mtx_world_scale = Matrix.Diagonal(vec_world_scale).to_4x4()
+        #     # print(mtx_world_position)
+        #     # print(mtx_world_rotation)
+        #     # print(mtx_world_scale)
+        #     # print('\n')
+
+        #     mtx_local = self.get_matrix_local(point,mtx_world)
+        #     bpy.data.objects["Armature"].pose.bones[self.name + "-" + point].matrix_basis = mtx_local
+
+        # else:
+        #     bpy.data.objects["Armature"].pose.bones[self.name + "-" + point].scale[axis_idx] = float(val)
 
         bpy.data.objects["Armature"].pose.bones[self.name + "-" + point].scale[axis_idx] = float(val)
 
-    def set_to_world_coordinate_system(self, point, state):
+    def get_matrix_world(self, point):
 
-        # apply pose manipulation based on global coordinate system
-        if arg_coord_sys_type == 'global':
-            armature = bpy.data.objects["Armature"]
-            pose_bone = bpy.data.objects["Armature"].pose.bones[self.name + "-" + point]
+        armature = bpy.data.objects["Armature"]
+        pose_bone = bpy.data.objects["Armature"].pose.bones[self.name + "-" + point]
 
-            matrix_world = armature.convert_space(
-                        pose_bone = pose_bone,
-                        matrix = pose_bone.matrix_basis,
-                        from_space = 'POSE',
-                        to_space = 'WORLD',
-                        )
-            
-            armature.matrix_world = matrix_world
+        matrix_world = armature.convert_space(
+                    pose_bone = pose_bone,
+                    matrix = pose_bone.matrix_basis,
+                    from_space = 'LOCAL',
+                    to_space = 'WORLD',
+                    )
+        
+        return matrix_world
+
+    def get_matrix_local(self, point, matrix_world):
+
+        armature = bpy.data.objects["Armature"]
+        pose_bone = bpy.data.objects["Armature"].pose.bones[self.name + "-" + point]
+
+        matrix_local = armature.convert_space(
+                    pose_bone = pose_bone,
+                    matrix = matrix_world,
+                    from_space = 'WORLD',
+                    to_space = 'LOCAL',
+                    )
+        
+        return matrix_local
+
+        
+        
           
 class Ear():
 
