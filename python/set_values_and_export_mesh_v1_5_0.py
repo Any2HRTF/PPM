@@ -53,6 +53,9 @@ arg_depth_farthest = argv[argv.index("--") + 17]
 
 arg_shade_smooth = argv[argv.index("--") + 18]
 
+arg_coord_sys_type = argv[argv.index("--") + 19]
+
+
 def select(label, action):
     if action:
         bpy.ops.object.select_all(action='DESELECT')
@@ -88,6 +91,9 @@ class Bone():
         else:
             axis_idx = "error"
 
+        if arg_coord_sys_type == 'global':
+            self.set_to_world_coordinate_system(point, True)
+
         bpy.data.objects["Armature"].pose.bones[self.name + "-" + point].rotation_quaternion[axis_idx] = float(val)
 
     def location(self, point, axis, val):
@@ -100,6 +106,9 @@ class Bone():
             axis_idx = 2
         else:
             axis_idx = "error"
+
+        if arg_coord_sys_type == 'global':
+            self.set_to_world_coordinate_system(point, True) 
 
         bpy.data.objects["Armature"].pose.bones[self.name + "-" + point].location[axis_idx] = float(val)
 
@@ -114,8 +123,26 @@ class Bone():
         else:
             axis_idx = "error"
 
+        if arg_coord_sys_type == 'global':
+            self.set_to_world_coordinate_system(point, True) 
+
         bpy.data.objects["Armature"].pose.bones[self.name + "-" + point].scale[axis_idx] = float(val)
 
+    def set_to_world_coordinate_system(self, point, state):
+
+        # apply pose manipulation based on global coordinate system
+        if arg_coord_sys_type == 'global':
+            armature = bpy.data.objects["Armature"]
+            pose_bone = bpy.data.objects["Armature"].pose.bones[self.name + "-" + point]
+
+            matrix_world = armature.convert_space(
+                        pose_bone = pose_bone,
+                        matrix = pose_bone.matrix_basis,
+                        from_space = 'POSE',
+                        to_space = 'WORLD',
+                        )
+            
+            armature.matrix_world = matrix_world
           
 class Ear():
 
@@ -411,11 +438,8 @@ class Ear():
 
     def loadAll(self):
 
-        #print("Locating instructions... ", end="", flush=True)
         os.chdir(os.path.join(self.path,'parameters'))
-        #print("Done")
-        #print("Loaded Instructions from {}".format(self.path))
-        #print("Exporting to {}".format(self.path))
+
         for file in glob.glob("*.txt"):
 
             name = file.split('.')[0]
