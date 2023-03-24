@@ -99,6 +99,9 @@ class Bone():
 
     def location(self, point, axis, val):
 
+        armature = bpy.data.objects["Armature"]
+        pose_bone = bpy.data.objects["Armature"].pose.bones[self.name + "-" + point]
+
         if axis == 'X':
             axis_idx = 0
         elif axis == 'Y':
@@ -109,9 +112,9 @@ class Bone():
             axis_idx = "error"
 
         if arg_coord_sys_type == 'global':
-            mtx_world = self.get_matrix_world(point)
-            mtx_world.translation[axis_idx] = float(val)
-            mtx_local = self.get_matrix_local(point,mtx_world)
+            mtx_world = self.get_matrix_world(armature, pose_bone)         
+            mtx_world.translation[axis_idx] += float(val)
+            mtx_local = self.get_matrix_local(armature, pose_bone, mtx_world)
 
             bpy.data.objects["Armature"].pose.bones[self.name + "-" + point].matrix_basis = mtx_local
 
@@ -135,10 +138,10 @@ class Bone():
 
         #     vec_world_position, vec_world_rotation, _ = mtx_world.decompose()
         #     vec_world_scale = mtx_world.to_scale()
-        #     # vec_world_scale[axis_idx] = float(val)
+        #     vec_world_scale[axis_idx] = float(val)
 
-        #     if self.name=='Size':
-        #         print(vec_world_scale)
+        #     # if self.name=='Size':
+        #     #     print(vec_world_scale)
 
         #     mtx_world = Matrix.LocRotScale(vec_world_position, vec_world_rotation, vec_world_scale)
 
@@ -149,6 +152,9 @@ class Bone():
         #     # print('\n')
 
         #     mtx_local = self.get_matrix_local(point,mtx_world)
+        #     if self.name=='Size':
+        #         mtx_local_scale = mtx_local.to_scale()
+        #         print(mtx_local_scale)
         #     bpy.data.objects["Armature"].pose.bones[self.name + "-" + point].matrix_basis = mtx_local
 
         # else:
@@ -156,10 +162,7 @@ class Bone():
 
         bpy.data.objects["Armature"].pose.bones[self.name + "-" + point].scale[axis_idx] = float(val)
 
-    def get_matrix_world(self, point):
-
-        armature = bpy.data.objects["Armature"]
-        pose_bone = bpy.data.objects["Armature"].pose.bones[self.name + "-" + point]
+    def get_matrix_world(self, armature, pose_bone):
 
         matrix_world = armature.convert_space(
                     pose_bone = pose_bone,
@@ -170,10 +173,7 @@ class Bone():
         
         return matrix_world
 
-    def get_matrix_local(self, point, matrix_world):
-
-        armature = bpy.data.objects["Armature"]
-        pose_bone = bpy.data.objects["Armature"].pose.bones[self.name + "-" + point]
+    def get_matrix_local(self, armature, pose_bone, matrix_world):
 
         matrix_local = armature.convert_space(
                     pose_bone = pose_bone,
