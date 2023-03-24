@@ -81,6 +81,9 @@ class Bone():
 
     def rotation(self, point, axis, val):
 
+        # armature = bpy.data.objects["Armature"]
+        # pose_bone = bpy.data.objects["Armature"].pose.bones[self.name + "-" + point]
+
         if axis == 'W':
             axis_idx = 0
         elif axis == 'X':
@@ -123,6 +126,9 @@ class Bone():
 
     def scaling(self, point, axis, val):
 
+        armature = bpy.data.objects["Armature"]
+        pose_bone = bpy.data.objects["Armature"].pose.bones[self.name + "-" + point]
+
         if axis == 'X':
             axis_idx = 0
         elif axis == 'Y':
@@ -132,35 +138,18 @@ class Bone():
         else:
             axis_idx = "error"
 
-        # if arg_coord_sys_type == 'global':
+        if arg_coord_sys_type == 'global':
             
-        #     mtx_world = self.get_matrix_world(point)
+            mtx_world = self.get_matrix_world(armature, pose_bone)
+            vec_world_position, vec_world_rotation, vec_world_scale = mtx_world.decompose()
+            vec_world_scale[axis_idx] += float(val)
+            mtx_world = Matrix.LocRotScale(vec_world_position, vec_world_rotation, vec_world_scale)
+            mtx_local = self.get_matrix_local(armature, pose_bone, mtx_world)
 
-        #     vec_world_position, vec_world_rotation, _ = mtx_world.decompose()
-        #     vec_world_scale = mtx_world.to_scale()
-        #     vec_world_scale[axis_idx] = float(val)
+            bpy.data.objects["Armature"].pose.bones[self.name + "-" + point].matrix_basis = mtx_local
 
-        #     # if self.name=='Size':
-        #     #     print(vec_world_scale)
-
-        #     mtx_world = Matrix.LocRotScale(vec_world_position, vec_world_rotation, vec_world_scale)
-
-        #     # mtx_world_scale = Matrix.Diagonal(vec_world_scale).to_4x4()
-        #     # print(mtx_world_position)
-        #     # print(mtx_world_rotation)
-        #     # print(mtx_world_scale)
-        #     # print('\n')
-
-        #     mtx_local = self.get_matrix_local(point,mtx_world)
-        #     if self.name=='Size':
-        #         mtx_local_scale = mtx_local.to_scale()
-        #         print(mtx_local_scale)
-        #     bpy.data.objects["Armature"].pose.bones[self.name + "-" + point].matrix_basis = mtx_local
-
-        # else:
-        #     bpy.data.objects["Armature"].pose.bones[self.name + "-" + point].scale[axis_idx] = float(val)
-
-        bpy.data.objects["Armature"].pose.bones[self.name + "-" + point].scale[axis_idx] = float(val)
+        else:
+            bpy.data.objects["Armature"].pose.bones[self.name + "-" + point].scale[axis_idx] = float(val)
 
     def get_matrix_world(self, armature, pose_bone):
 
