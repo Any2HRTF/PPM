@@ -77,7 +77,10 @@ class Bone():
 
         self.name = name
         self.rot_flag = False
-        self.position_initial = []
+        self.mtx_world_ini = []
+        self.position_ini = []
+        self.rotation_ini = []
+        # self.scale_ini = []
         ear.bones.append(self)
         ear.bonesLookup[self.name] = self
 
@@ -100,7 +103,8 @@ class Bone():
         if arg_coord_sys_type == 'global':
             
             if axis == 'Z' and self.rot_flag == False:
-                
+            
+
                 # if self.name == 'Size':
                 #     print(pose_bone.rotation_quaternion)
                 #     print(pose_bone.location)
@@ -109,23 +113,20 @@ class Bone():
                 # if self.name == 'Size':
                 #     print(pose_bone.matrix.to_4x4())
 
-                mtx_world = self.get_matrix_world(pose_bone)
+                # mtx_world = self.get_matrix_world(pose_bone)
                 # mtx_world = pose_bone.matrix_basis
 
-
-                # if self.name == 'Size':
-                #     print(mtx_world)
-                
-                vec_world_position, vec_world_rotation, vec_world_scale = mtx_world.decompose()
-                if self.name == 'Size':
-                    print(vec_world_position)
-
-                vec_world_rotation_modified = vec_world_rotation.copy()
+                # mtx_world = self.mtx_world_ini              
+                # vec_world_position, vec_world_rotation, vec_world_scale = mtx_world.decompose()
+                vec_world_rotation_modified = self.rotation_ini.copy()
                 vec_world_rotation_modified[0:4] = pose_bone.rotation_quaternion[0:4]
                 vec_world_rotation_modified[axis_idx] = float(val)
 
-                T0 = Matrix.Translation(self.position_initial)
-                T1 = Matrix.Translation(-self.position_initial)
+                if self.name == 'Size':
+                    print('Rotation (mod): ' + str(vec_world_rotation_modified))
+
+                T0 = Matrix.Translation(self.position_ini)
+                T1 = Matrix.Translation(-self.position_ini)
                 if self.name == 'Size':
                     print(T0)
                     print(T1)
@@ -145,22 +146,27 @@ class Bone():
                 # if self.name == 'Size':
                 #     print(vec_world_rotation_modified)
 
-                # vec_world_rotation_new = Quaternion(vec_world_rotation) @ \
+                # vec_world_rotation_new = Quaternion(self.rotation_ini) @ \
                 #                          Quaternion(vec_world_rotation_modified)
-
+                
                 vec_world_rotation_new = Quaternion(vec_world_rotation_modified)
+
+                # if self.name == 'Size':
+                #     print(Quaternion(self.rotation_ini))
+
+                # vec_world_rotation_new = Quaternion(vec_world_rotation_modified)
 
                 # if self.name == 'Size':
                 #     print(vec_world_rotation_new)
                 
                 # vec_world_rotation_new = mtx_world_rotation_new.to_quaternion()
 
-                new_loc = mtx_world @ (self.position_initial - Vector([0,0,0])) + Vector([0,0,0])
+                # new_loc = mtx_world @ (self.position_initial - Vector([0,0,0])) + Vector([0,0,0])
                 # if self.name == 'Size':
                 #     print(new_loc)
 
                 # make a matrix out of the new location 
-                new_loc_matrix = Matrix.Translation(new_loc)
+                # new_loc_matrix = Matrix.Translation(new_loc)
                 # if self.name == 'Size':
                 #     print(new_loc_matrix)
 
@@ -189,12 +195,15 @@ class Bone():
                 #     print(mat_scl)
 
 
-                bpy.data.objects["Armature"].matrix_world = T0 @ vec_world_rotation_new.to_matrix().to_4x4() @ T1 @ obj.matrix_world
+                # bpy.data.objects["Armature"].matrix_world = T0 @ vec_world_rotation_new.to_matrix().to_4x4() @ T1 @ obj.matrix_world
+                obj.matrix_world = T0 @ vec_world_rotation_new.to_matrix().to_4x4() @ T1 @ self.mtx_world_ini
 
-                vec_world_position_new, _, _ = mtx_world.decompose()
+                vec_world_position_new, vec_world_rotation_new, vec_world_scale_new = obj.matrix_world.decompose()
                 if self.name == 'Size':
-                    print('New position: ')
-                    print(vec_world_position_new)
+                    print('New world matrix: ')
+                    print('Location: ' + str(vec_world_position_new))
+                    print('Rotation: ' + str(vec_world_rotation_new))
+                    print('Scale: ' + str(vec_world_scale_new))
 
                 # if self.name == 'Size':
                 #     print(bpy.data.objects["Armature"].matrix_world.__class__)
@@ -213,12 +222,29 @@ class Bone():
                 #     print(mtx_local_new)
 
             else:
-                if axis == 'W':
-                    mtx_world = self.get_matrix_world(pose_bone)
-                    vec_world_position, _, _ = mtx_world.decompose()
-                    self.position_initial = vec_world_position
+                if axis == 'W' and self.rot_flag==False:
+                    
+                    # obj_local_bb_center, obj_global_bb_center = self.get_bounding_box_center(obj)
+                    # if self.name=='Size':
+                    #     print('Pose-bone location before bounding-box adjustment: ' + str(pose_bone.location))
+                    # pose_bone.matrix @= Matrix.Translation(obj_global_bb_center)
+                    # if self.name=='Size':
+                    #     print('Pose-bone location after bounding-box adjustment: ' + str(pose_bone.location))
+
+                    mtx_world_ini = self.get_matrix_world(pose_bone)
+                    vec_world_position_ini, vec_world_rotation_ini, vec_world_scale_ini = mtx_world_ini.decompose()
+                    
+                    self.mtx_world_ini = Matrix(mtx_world_ini)
+                    # self.rotation_initial = vec_world_rotation
+                    self.position_ini = Vector(vec_world_position_ini)
+                    self.rotation_ini = Vector(vec_world_rotation_ini)
+                    # self.scale_ini = vec_world_scale_ini
+
                     if self.name == 'Size':
-                        print(self.position_initial)
+                        print(self.mtx_world_ini)
+                        print('Position (initial): ' + str(vec_world_position_ini))
+                        print('Rotation (initial): ' + str(vec_world_rotation_ini))
+                        print('Scale (initial): ' + str(vec_world_scale_ini))
 
                 pose_bone.rotation_quaternion[axis_idx] = float(val)
 
@@ -301,6 +327,17 @@ class Bone():
         
         return matrix_local
 
+    def get_bounding_box_center(self, obj):
+
+        local_boundingbox_center = 1/8 * sum((Vector(vec) for vec in obj.bound_box), Vector())
+        global_boundingbox_center = obj.matrix_world @ local_boundingbox_center
+
+        if self.name=='Size':
+            print('Bounding box center:')
+            print('Local: ' + str(local_boundingbox_center))
+            print('Global:' + str(global_boundingbox_center))
+
+        return local_boundingbox_center, global_boundingbox_center
         
         
           
