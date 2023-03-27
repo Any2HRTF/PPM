@@ -194,6 +194,7 @@ else % itr > 1
             ylabel ('Mean minimum pointwise distance')
             grid minor
             axis square
+            axis vis3d
             if strcmp(ppm.modify.type,'Shape key')
                 title(sprintf('Parameter Nr. %d: %s, %s',ppm.modify.idx,...
                     ppm.modify.type,...
