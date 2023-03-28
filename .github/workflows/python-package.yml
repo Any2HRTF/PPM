@@ -32,3 +32,7 @@ jobs:
         pip install build
     - name: Build package
       run: python -m build
+
+    - uses: actions/upload-artifact@v3
+      with:
+        path: dist/*
