@@ -1,0 +1,19 @@
+[project]
+name = "ppm"
+description = "PPM - PPM Python Package"
+version = "0.0.1"
+authors = [
+    { name = "Felix Perfler", email = "felix.perfler@oeaw.ac.at" }
+]
+dependencies = [
+    "bpy",
+    "numpy",
+    "opencv-python",
+    "pyntcloud"
+]
+
+[tool.setuptools.packages.find]
+where = ["ppm"]
+
+[tool.setuptools.package-data]
+"ppm.resources" = ["*.blend", "*.csv"]

@@ -8,3 +8,10 @@
 /result/SOU_LS_KU100_left_ear_adapt_ppm_v1.blend
 /result/blender_bones_data.ply
 /result/blender_bones_data.txt
+
+.DS_Store
+
+# python
+
+*.pyc
+
