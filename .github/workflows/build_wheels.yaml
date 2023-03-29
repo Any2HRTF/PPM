@@ -33,13 +33,15 @@ jobs:
     - run: ls ./dist
     - name: Get python package version
       id: get_version
-      uses: battila7/get-version-action@v2
+      run: |
+        WHEEL=$(ls result/*.blend)
+        echo $WHEEL
     - name: Upload release binary
       uses: actions/upload-release-asset@v1.0.2
       env:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.get_release.outputs.upload_url }}
-        asset_path: ${{ github.workspace }}/dist/ppm-${{ steps.get_version.outputs.version-without-v }}-py3-none-any.whl
-        asset_name: ppm-${{ steps.get_version.outputs.version-without-v }}-py3-none-any.whl
+        asset_path: ${{ github.workspace }}/dist/${{ steps.get_version.WHEEL }}
+        asset_name: ${{ steps.get_version.WHEEL }}
         asset_content_type: application/zip
