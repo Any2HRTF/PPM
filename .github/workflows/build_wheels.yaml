@@ -26,11 +26,6 @@ jobs:
       run: |
         python setup.py sdist
         python setup.py bdist_wheel --universal
-    - name: Copy wheels
-      uses: actions/upload-artifact@v3
-      with:
-        name: wheel
-        path: ./dist/*.whl
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
       env:
