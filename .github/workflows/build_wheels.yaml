@@ -1,7 +1,7 @@
 name: Build Python Wheels
 
 
-on: [push]
+on: [release]
 
 permissions:
   contents: read # to fetch code (actions/checkout)
@@ -27,4 +27,11 @@ jobs:
     - name: Copy wheels
       uses: actions/upload-artifact@v3
       with:
+        name: wheel
         path: ./dist/*.whl
+    - name: Release with Notes
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./dist/*.whl
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
