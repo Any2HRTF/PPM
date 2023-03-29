@@ -3,7 +3,7 @@ name: Build Python Wheels
 
 on:
   release:
-    types: [created]
+    types: [published]
 
 permissions:
   contents: read # to fetch code (actions/checkout)
