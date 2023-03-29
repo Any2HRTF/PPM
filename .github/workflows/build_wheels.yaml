@@ -23,13 +23,7 @@ jobs:
       run: |
         python setup.py sdist
         python setup.py bdist_wheel --universal
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Upload wheels
+      uses: actions/upload-artifact@v3
       with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./dist/
-        asset_name: wheel.zip
-        asset_content_type: application/zip
-
+        path: ./dist/*.whl
