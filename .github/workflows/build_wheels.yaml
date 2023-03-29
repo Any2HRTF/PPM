@@ -30,6 +30,7 @@ jobs:
       run: |
         python setup.py sdist
         python setup.py bdist_wheel --universal
+    - run: echo ls
     - name: Upload release binary
       uses: actions/upload-release-asset@v1.0.2
       env:
