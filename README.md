@@ -1,3 +1,5 @@
+[![Build Python Wheels](https://github.com/Any2HRTF/PPM/actions/workflows/build_wheels.yaml/badge.svg)](https://github.com/Any2HRTF/PPM/actions/workflows/build_wheels.yaml)
+
 # Installation
 
 Download the Python wheel from the [releases page](https://github.com/Any2HRTF/PPM/releases). Then use pip to install the package in a virtual environment with Python 3.10:
