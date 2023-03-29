@@ -4,10 +4,14 @@ on:
   release:
     types: [published]
 
+permission
+
+  contents: read # to fetch code (actions/checkout)
+
 jobs:
   build_wheels:
-    name: Build wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+    name: Build wheel for ${{ matrix.python }}-${{ matrix.buildplat[1] }}
+    runs-on: ${{ matrix.buildplat[0] }}
     strategy:
       matrix:
         buildplat:
@@ -23,19 +27,34 @@ jobs:
             python: "pp39"
           - buildplat: [ ubuntu-20.04, musllinux_x86_64 ]
             python: "pp39"
-
+    env:
+      IS_32_BIT: ${{ matrix.buildplat[1] == 'win32' }}
+      IS_PUSH: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
+      IS_SCHEDULE_DISPATCH: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@b2ea4c3e3f3f1c3d1d8b0b1b3f3f6ff54d15d7dc # v2.3.5
+        with:
+          fetch-depth: 0
 
-      # Used to host cibuildwheel
-      - uses: actions/setup-python@v3
+      # Used to push the built wheels
+      - uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435 # v4.5.0
+        with:
+          python-version: "3.x"
+
+      - name: setup rtools for 32-bit
+        run: |
+          echo "PLAT=i686" >> $env:GITHUB_ENV
+          echo "PATH=$env:RTOOLS40_HOME\mingw32\bin;$env:PATH" >> $env:GITHUB_ENV
+          gfortran --version
+        if: ${{ matrix.buildplat[1] == 'win32' }}
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.12.1
+        uses: pypa/cibuildwheel@02ad79a31bf7aa0eee07f690509048d2fb9fd445 # v2.12.1
         env:
           CIBW_BUILD: ${{ matrix.python }}-${{ matrix.buildplat[1] }}
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
         with:
           name: ${{ matrix.python }}-${{ startsWith(matrix.buildplat[1], 'macosx') && 'macosx' || matrix.buildplat[1] }}
           path: ./wheelhouse/*.whl
