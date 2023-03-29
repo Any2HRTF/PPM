@@ -16,13 +16,12 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: build wheels
-        uses: pypa/cibuildwheel@v2.11.2
+        run: python -m cibuildwheel --output-dir wheelhouse
         env:
-          CIBW_TEST_COMMAND: pytest --pyargs refnx.reflect.test.test_reflect
           CIBW_ARCHS_MACOS: "x86_64 arm64"
           CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="10.13"
 
       - uses: actions/upload-artifact@v3
         with:
-          name: refnx-wheels
+          name: wheels
           path: ./wheelhouse/*.whl
