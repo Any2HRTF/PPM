@@ -2,7 +2,7 @@ name: Build Python Wheels
 
 on:
   release:
-    types: [published]
+    types: [pushed]
 
 permissions:
   contents: read # to fetch code (actions/checkout)
@@ -32,9 +32,7 @@ jobs:
       IS_SCHEDULE_DISPATCH: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@b2ea4c3e3f3f1c3d1d8b0b1b3f3f6ff54d15d7dc # v2.3.5
-        with:
-          fetch-depth: 0
+        uses: actions/checkout@v3
 
       # Used to push the built wheels
       - uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435 # v4.5.0
