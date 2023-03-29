@@ -1,8 +1,9 @@
 name: Build Python Wheels
 
 on:
-  release:
-    types: [push]
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read # to fetch code (actions/checkout)
