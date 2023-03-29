@@ -1,9 +1,11 @@
 name: Build Python Wheels
 
 
-on:
-  release:
-    types: [published]
+# on:
+#   release:
+#     types: [published]
+
+on: [push]
 
 jobs:
   deploy:
@@ -33,13 +35,14 @@ jobs:
     - run: ls ./dist
     - name: Get python package version
       id: get_version
-      run: echo "$(ls dist/*.whl)" >> $WHEEL
+      run: |
+        echo ::set-output name=WHEEL::$(ls ./dist/*.whl)
     - name: Upload release binary
       uses: actions/upload-release-asset@v1.0.2
       env:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.get_release.outputs.upload_url }}
-        asset_path: ${{ github.workspace }}/${{ steps.get_version.WHEEL }}
-        asset_name: ${{ steps.get_version.WHEEL }}
+        asset_path: ${{ github.workspace }}/${{ steps.get_version.outputs.WHEEL }}
+        asset_name: ${{ steps.get_version.outputs.WHEEL }}
         asset_content_type: application/zip
