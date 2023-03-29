@@ -27,7 +27,7 @@ jobs:
     - name: Build package
       run: python -m build
     - name: Copy wheels
-      - uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v3
+      with:
         name: ${{ matrix.os }}
-        with:
-          path: ./dist/*.whl
+        path: ./dist/*.whl
