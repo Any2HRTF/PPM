@@ -33,15 +33,13 @@ jobs:
     - run: ls ./dist
     - name: Get python package version
       id: get_version
-      run: |
-        WHEEL=$(ls dist/*.whl)
-        echo $WHEEL
+      run: echo "$(ls dist/*.whl)" >> $WHEEL
     - name: Upload release binary
       uses: actions/upload-release-asset@v1.0.2
       env:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.get_release.outputs.upload_url }}
-        asset_path: ${{ github.workspace }}/$WHEEL
-        asset_name: $WHEEL
+        asset_path: ${{ github.workspace }}/${{ steps.get_version.WHEEL }}
+        asset_name: ${{ steps.get_version.WHEEL }}
         asset_content_type: application/zip
