@@ -4,7 +4,7 @@ on:
   release:
     types: [published]
 
-permission:
+permissions:
   contents: read # to fetch code (actions/checkout)
 
 jobs:
