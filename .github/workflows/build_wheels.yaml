@@ -1,42 +1,23 @@
 name: Build Python Wheels
 
-on:
-  push:
-    branches:
-      - main
+
+on: [push]
 
 permissions:
   contents: read # to fetch code (actions/checkout)
 
 jobs:
-  build_wheels:
-    name: Build wheel for ${{ matrix.python }}-${{ matrix.buildplat[1] }}
-    runs-on: ${{ matrix.buildplat[0] }}
-    strategy:
-      matrix:
-        buildplat:
-          - [ubuntu-20.04, manylinux_x86_64]
-          - [ubuntu-20.04, musllinux_x86_64]
-          - [macos-12, macosx_*]
-          - [windows-2019, win_amd64]
-          - [windows-2019]
-        python: ["cp39", "cp310", "cp311", "pp39"]
+  build_wheels_macos:
+    name: Build wheels on macos-11
+    runs-on: macos-11
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      # Used to push the built wheels
-      - uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435 # v4.5.0
-        with:
-          python-version: "3.x"
+      - uses: actions/checkout@v3
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@02ad79a31bf7aa0eee07f690509048d2fb9fd445 # v2.12.1
+        uses: pypa/cibuildwheel@v2.12.1
         env:
-          CIBW_BUILD: ${{ matrix.python }}-${{ matrix.buildplat[1] }}
-          CIBW_BUILD_FRONTEND: "build"
+          CIBW_ARCHS_MACOS: x86_64 arm64
 
-      - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+      - uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.python }}-${{ startsWith(matrix.buildplat[1], 'macosx') && 'macosx' || matrix.buildplat[1] }}
           path: ./wheelhouse/*.whl
