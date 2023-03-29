@@ -15,4 +15,7 @@
 
 *.pyc
 
+/dist
+
+*.egg-info
 
