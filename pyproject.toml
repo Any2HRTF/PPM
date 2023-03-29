@@ -15,13 +15,8 @@ dependencies = [
 ]
 
 
-[tool.setuptools.package-data]
-"arippm.resources" = ["*.blend", "*.csv"]
-
-[tool.setuptools.packages.find]
-where = ["ppm"]
-
 [tool.cibuildwheel]
+build = "ppm"
 skip = "cp36-* cp37-* pp37-* *-manylinux_i686 *_ppc64le *_s390x *-musllinux_aarch64"
 build-verbosity = "3"
 
