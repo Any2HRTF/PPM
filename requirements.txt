@@ -1,0 +1,5 @@
+bpy
+numpy
+opencv-python
+pyntcloud
+matplotlib
