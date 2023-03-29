@@ -13,3 +13,9 @@ dependencies = [
     "pyntcloud",
     "matplotlib"
 ]
+
+[tool.setuptools.package-data]
+"ppm.resources" = ["*.blend", "*.csv"]
+
+[tool.setuptools.packages.find]
+where = ["ppm"]
