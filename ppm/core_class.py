@@ -42,8 +42,9 @@ class PPM(BaseBlenderObject):
         for param_name, value in ppm_params.iterrows():
             self._params[self.name][param_name] = value.values[0]
 
-        self._get_ppm_params()
-        self.set_ppm_params(self._params[self.name])
+        if from_blender_file is not None:
+            self._get_ppm_params()
+            self.set_ppm_params(self._params[self.name])
 
     def get_ppm_params(self):
 
