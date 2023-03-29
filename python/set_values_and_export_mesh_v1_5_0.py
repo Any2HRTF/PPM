@@ -243,7 +243,6 @@ class Bone():
             axis_idx = "error"
 
         if arg_coord_sys_type == 'global':
-
             mtx_world = self.get_matrix_world(pose_bone)  
             vec_world_location, vec_world_rotation, vec_world_scale = mtx_world.decompose()
             vec_world_location[axis_idx] += float(val)
@@ -253,7 +252,8 @@ class Bone():
             pose_bone.location[axis_idx] = float(val)
 
     def scaling(self, point, axis, val):
-
+        
+        obj = bpy.data.objects["Armature"]
         pose_bone = bpy.data.objects["Armature"].pose.bones[self.name + "-" + point]
 
         if axis == 'X':
@@ -265,27 +265,11 @@ class Bone():
         else:
             axis_idx = "error"
 
-        if arg_coord_sys_type == 'global':
-
-            if axis == 'X':
-                axis_idx = 0
-            elif axis == 'Z':
-                axis_idx = 1
-            elif axis == 'Y':
-                axis_idx = 2
-            else:
-                axis_idx = "error"
-         
+        if arg_coord_sys_type == 'global':       
             mtx_world = self.get_matrix_world(pose_bone)
             vec_world_location, vec_world_rotation, vec_world_scale = mtx_world.decompose()
             vec_world_scale[axis_idx] *= float(val)
-            mtx_world = Matrix.LocRotScale(vec_world_location, vec_world_rotation, vec_world_scale)
-            mtx_local = self.get_matrix_local(pose_bone, mtx_world)
-
-            # pose_bone.matrix_basis = mtx_local
-
-            if self.name=='Size':
-                print(mtx_local.translation)
+            obj.matrix_world = Matrix.LocRotScale(vec_world_location, vec_world_rotation, vec_world_scale)
 
         else:
             pose_bone.scale[axis_idx] = float(val)
