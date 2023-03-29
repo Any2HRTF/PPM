@@ -1,7 +1,10 @@
 name: Build Python Wheels
 
 
-on: [release]
+on:
+  push:
+    tags:
+    - '*'
 
 permissions:
   contents: read # to fetch code (actions/checkout)
@@ -38,7 +41,7 @@ jobs:
         tag_name: ${{ github.ref }}
         release_name: Release ${{ github.ref }}
         draft: false
-        prerelease: true
+        prerelease: false
     - name: upload wheel artifact
       uses: actions/upload-release-asset@v1
       env:
