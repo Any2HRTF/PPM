@@ -1,7 +1,7 @@
 name: Build Python Wheels
 
 
-on: [release]
+on: [push]
 
 permissions:
   contents: read # to fetch code (actions/checkout)
