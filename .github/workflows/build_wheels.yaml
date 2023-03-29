@@ -1,11 +1,10 @@
 name: Build Python Wheels
 
 
-# on:
-#   release:
-#     types: [published]
+on:
+  release:
+    types: [published]
 
-on: [push]
 
 jobs:
   deploy:
