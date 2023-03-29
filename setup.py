@@ -11,6 +11,9 @@ setup(
     author_email='felix.perfler@oeaw.ac.at',
     license='The MIT License',
     packages=find_packages(),
+    package_data={
+        'ppm': ['resources/*.csv', 'resources/*.blend'],
+    },
     include_package_data=True,
     python_requires='>3.10',
     zip_safe=False,
