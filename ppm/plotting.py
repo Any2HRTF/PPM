@@ -5,7 +5,22 @@ import numpy as np
 from .geometric_metrics import _hausdorff_dist
 
 def plot(ppm, return_fig:bool=False, *args, **kwargs) -> plt.figure:
+    """Plot the image of the ear
 
+    Parameters:
+    -----------
+        ppm: PPM
+            PPM object
+        return_fig: bool
+            return the figure object
+        resolution: int
+            resolution of the image
+        cam_location: np.array
+            camera location
+    Returns:
+    --------
+        plt.figure: figure object if return_fig is True
+    """
 
     if 'cam_loc' not in kwargs:
         kwargs['cam_loc'] = np.array([-10,200,5])
@@ -39,6 +54,15 @@ def plot(ppm, return_fig:bool=False, *args, **kwargs) -> plt.figure:
     plt.show()
 
 def plot_hausdorff(ppm, ppm_target):
+    """Plot the hausdorff distance between two point clouds 
+
+    Parameters:
+    -----------
+        ppm: PPM
+            PPM object
+        ppm_target: PPM
+            PPM object
+    """
 
     ppm_pts = ppm.get_point_cloud()
     ppm_target_pts = ppm_target.get_point_cloud()

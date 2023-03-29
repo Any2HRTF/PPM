@@ -134,7 +134,7 @@ class BaseBlenderObject():
         bpy.data.objects[selection].modifiers["Decimate"].show_render = state
         bpy.data.objects[selection].modifiers["Decimate"].show_viewport = state
     
-    def _select(self, label, action):
+    def __select(self, label, action):
         """Select object in blender"""
         if action:
             bpy.ops.object.select_all(action='DESELECT')
@@ -150,20 +150,20 @@ class BaseBlenderObject():
             bpy.ops.object.select_all(action='DESELECT')
 
 
-    def get_pc(self, selection: str) -> np.ndarray:
+    def _get_pc(self, selection: str) -> np.ndarray:
         """Get point cloud from blender"""
 
-        cloud = PyntCloud.from_file(self._export_pc(selection))
+        cloud = PyntCloud.from_file(self.__export_pc(selection))
         cloud = cloud.points.values
 
 
         return cloud.astype(np.float32)
 
-    def _export_pc(self, selection: str):
+    def __export_pc(self, selection: str):
         """Export point cloud from blender"""
 
         target_file_ply = self.blender_tmp_dir + f'/pc_{str(uuid.uuid4())}.ply'
-        self._select(selection, True)
+        self.__select(selection, True)
         with redirect_stdout(io.StringIO()):
             bpy.ops.export_mesh.ply(
                 filepath=target_file_ply,
@@ -172,26 +172,26 @@ class BaseBlenderObject():
                 use_uv_coords=False,
                 use_colors=False
             )
-        self._select(selection, False)
+        self.__select(selection, False)
 
         return target_file_ply
 
-    def export_mesh(self, selection: str):
+    def __export_mesh(self, selection: str):
         r"""Export mesh from blender"""
 
         target_file_stl = self.blender_tmp_dir + f'/mesh_{str(uuid.uuid4())}.stl'
-        self._select(selection, True)
+        self.__select(selection, True)
         with redirect_stdout(io.StringIO()):
             bpy.ops.export_mesh.stl(
                 filepath=target_file_stl,
                 use_selection=True,
                 use_scene_unit=True
             )
-        self._select(selection, False)
+        self.__select(selection, False)
 
         return target_file_stl
 
-    def get_image(self, path_to_img, img_size=256):
+    def _get_image(self, path_to_img, img_size=256):
         r"""Get image"""
 
         # read in using cv2
@@ -202,7 +202,7 @@ class BaseBlenderObject():
 
         return img
 
-    def get_depth(self, path_to_depth, img_size=256):
+    def _get_depth(self, path_to_depth, img_size=256):
         r"""Get depth image"""
 
         depth = cv2.imread(path_to_depth, cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)

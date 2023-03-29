@@ -3,11 +3,19 @@ import bpy
 import uuid
 from pandas import read_csv
 import numpy as np
+os.environ["OPENCV_IO_ENABLE_OPENEXR"]="1"
 
 from .blender.blender_support_classes import BaseBlenderObject, Bone
 
 
 class PPM(BaseBlenderObject):
+    """PPM class
+
+    Parameters:
+    -----------
+        name (str): Name of the PPM object
+        from_blender_file (str): Path to a blender file to load the PPM from; if None, the standard PPM is loaded
+    """
     def __init__(self, name="PPM", from_blender_file=None):
         DIRNAME = os.path.join(os.path.dirname(__file__))
 
@@ -38,28 +46,47 @@ class PPM(BaseBlenderObject):
         Bone("Size", self)
 
         ppm_params = read_csv(f'{DIRNAME}/resources/PPM_params_default_v1.csv', index_col=0)
-        self._params = { self.name: {} }
+        self.__params = { self.name: {} }
         for param_name, value in ppm_params.iterrows():
-            self._params[self.name][param_name] = value.values[0]
+            self.__params[self.name][param_name] = value.values[0]
 
         if from_blender_file is not None:
-            self._get_ppm_params()
-            self.set_ppm_params(self._params[self.name])
+            self.__get_ppm_params()
 
     def get_ppm_params(self):
+        """Get PPM parameters from Blender
+        
+        Returns:
+        -------
+            dict: Dictionary of parameters
+        """
 
-        return self._params
-    
+        return self.__params[self.name]
+
     def set_ppm_params(self, params):
-        # TODO: check if params are valid
-        self._set_ppm_params(params)
+        """Set PPM parameters in Blender
+        
+        Parameters:
+        ----------
+            params (dict): Dictionary of parameters to set
+            
+            Example:
+                {
+                    'Location_Antitragus-End_X':-10,
+                    'Location_Antitragus-End_Y':-10,
+                    'Location_Antitragus-End_Z':-10
+                }
+        """
 
-    def _shape_key(self, name: str, val: float):
+        # TODO: check if params are valid
+        self.__set_ppm_params(params)
+
+    def __shape_key(self, name: str, val: float):
         bpy.data.shape_keys["Key.002"].key_blocks[name].value = val
 
-    def _get_ppm_params(self):
+    def __get_ppm_params(self):
         """Get PPM parameters from Blender"""
-        for line, _ in self._params[self.name].items():
+        for line, _ in self.__params[self.name].items():
             transform = line.split('_')[0]
             line = '_'.join(line.split('_')[1:])
             
@@ -70,13 +97,13 @@ class PPM(BaseBlenderObject):
                 obj = bpy.data.objects["Armature"].pose.bones[nm + "-" + pnt]
 
                 if ax == 'W':
-                    self._params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.rotation_quaternion.w
+                    self.__params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.rotation_quaternion.w
                 elif ax == 'X':
-                    self._params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.rotation_quaternion.x
+                    self.__params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.rotation_quaternion.x
                 elif ax == 'Y':
-                    self._params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.rotation_quaternion.y
+                    self.__params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.rotation_quaternion.y
                 elif ax == 'Z':
-                    self._params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.rotation_quaternion.z
+                    self.__params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.rotation_quaternion.z
 
             elif transform == "Location":
                 nm = line.split('-')[0]
@@ -85,11 +112,11 @@ class PPM(BaseBlenderObject):
                 obj = bpy.data.objects["Armature"].pose.bones[nm + "-" + pnt]
 
                 if ax == 'X':
-                    self._params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.location.x
+                    self.__params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.location.x
                 elif ax == 'Y':
-                    self._params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.location.y
+                    self.__params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.location.y
                 elif ax == 'Z':
-                    self._params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.location.z
+                    self.__params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.location.z
                 else:
                     pass
 
@@ -100,24 +127,24 @@ class PPM(BaseBlenderObject):
                 obj = bpy.data.objects["Armature"].pose.bones[nm + "-" + pnt]
 
                 if ax == 'X':
-                    self._params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.scale.x
+                    self.__params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.scale.x
                 elif ax == 'Y':
-                    self._params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.scale.y
+                    self.__params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.scale.y
                 elif ax == 'Z':
-                    self._params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.scale.z
+                    self.__params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.scale.z
                 else:
                     pass
 
             elif transform == "Shape":
                 nm = '_'.join(line.split('_')[1:])
                 obj = bpy.data.shape_keys["Key.002"].key_blocks[nm]
-                self._params[self.name][transform + '_' +line] = obj.value
+                self.__params[self.name][transform + '_' +line] = obj.value
 
-    def _set_ppm_params(self, params:dict):
+    def __set_ppm_params(self, params:dict):
         """Set PPM parameters in Blender"""
         for line, value in params.items():
 
-            self._params[self.name][line] = value
+            self.__params[self.name][line] = value
 
             transform = line.split('_')[0]
             line = '_'.join(line.split('_')[1:])
@@ -153,30 +180,76 @@ class PPM(BaseBlenderObject):
                         'Z', value)
 
             elif transform == "Shape":
-                self._shape_key('_'.join(line.split('_')[1:]), value)
+                self.__shape_key('_'.join(line.split('_')[1:]), value)
 
     def get_image(self, *args, **kwargs):
-        """Get image of the ear"""
+        """Get image of the ear
+
+        Parameters:
+        -----------
+            resolution: int
+                resolution of the image
+            cam_location: np.array
+                camera location
+        
+        Returns:
+        --------
+            np.array: (num_cam_location, resolution, resolution)
+        """
         path_to_img, _ = super()._render(
                             *args, **kwargs
                             )
-        
-        return super().get_image(path_to_img, kwargs['resolution'])
+        self.__set_ppm_params(self.__params[self.name])
+        return super()._get_image(path_to_img, kwargs['resolution'])
 
     def get_depth(self, *args, **kwargs):
-        """Get image of the ear"""
+        """Get image of the ear
+        
+        Parameters:
+        -----------
+            resolution: int
+                resolution of the image
+            cam_location: np.array
+                camera location
+        
+        Returns:
+        --------
+            np.array: (num_cam_location, resolution, resolution)
+        """
         _, path_to_img = super()._render(
                             *args, **kwargs)
-
-        return super().get_depth(path_to_img, kwargs['resolution'])
+        self.__set_ppm_params(self.__params[self.name])
+        return super()._get_depth(path_to_img, kwargs['resolution'])
 
     def get_point_cloud(self):
-        """Get point cloud of the ear"""
-        return super().get_pc(self.PPM_BLENDER_NAME)
+        """Get point cloud of the ear
+        
+        Returns:
+        --------
+            np.array: (num_points, 3)
+        """
+        self.__set_ppm_params(self.__params[self.name])
+        return super()._get_pc(self.PPM_BLENDER_NAME)
 
     def render(
             self,
             *args, **kwargs) -> tuple:
+        """Render image and depth of the ear
+
+        Parameters:
+        -----------
+            resolution: int
+                resolution of the image
+            cam_location: np.array
+                camera location
+
+        Returns:
+        --------
+            np.array: (num_cam_location, resolution, resolution)
+            np.array: (num_cam_location, resolution, resolution)
+        """
+
+        self.__set_ppm_params(self.__params[self.name])
 
         cam_loc = kwargs['cam_loc']
         # kwargs.pop('cam_loc', None)
@@ -192,7 +265,7 @@ class PPM(BaseBlenderObject):
             path_to_img, path_to_depth = super()._render(
                         *args, **kwargs)
 
-            image[i,...] = super().get_image(path_to_img, kwargs['resolution'])
-            depth_image[i,...] = super().get_depth(path_to_depth, kwargs['resolution'])
+            image[i,...] = super()._get_image(path_to_img, kwargs['resolution'])
+            depth_image[i,...] = super()._get_depth(path_to_depth, kwargs['resolution'])
 
         return image, depth_image
