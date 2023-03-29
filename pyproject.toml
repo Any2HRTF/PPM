@@ -18,10 +18,14 @@ dependencies = [
 requires = [ "setuptools", "cython", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.package-data]
+"arippm.resources" = ["*.blend", "*.csv"]
+
+[tool.setuptools.packages.find]
+where = ["ppm"]
+
 [tool.cibuildwheel]
 skip = "pp* cp36-* cp37-* *-musllinux*"
-test-requires = ["pytest"]
-test-command = "pytest --pyargs refnx.reflect.test.test_reflect"
 manylinux-x86_64-image = "manylinux2014"
 
 [tool.cibuildwheel.macos]
