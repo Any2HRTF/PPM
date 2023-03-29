@@ -2,7 +2,7 @@ name: Build Python Wheels
 
 on:
   release:
-    types: [pushed]
+    types: [push]
 
 permissions:
   contents: read # to fetch code (actions/checkout)
