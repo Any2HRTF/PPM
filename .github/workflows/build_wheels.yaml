@@ -34,7 +34,7 @@ jobs:
         uses: pypa/cibuildwheel@02ad79a31bf7aa0eee07f690509048d2fb9fd445 # v2.12.1
         env:
           CIBW_BUILD: ${{ matrix.python }}-${{ matrix.buildplat[1] }}
-          CIBW_PACKAGE_DIR: ./ppm
+          CIBW_BUILD_FRONTEND: "build"
 
       - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
         with:
