@@ -34,7 +34,7 @@ jobs:
     - name: Get python package version
       id: get_version
       run: |
-        WHEEL=$(ls result/*.blend)
+        WHEEL=$(ls dist/*.whl)
         echo $WHEEL
     - name: Upload release binary
       uses: actions/upload-release-asset@v1.0.2
