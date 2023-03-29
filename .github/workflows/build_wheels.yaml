@@ -30,10 +30,6 @@ jobs:
       run: |
         python setup.py sdist
         python setup.py bdist_wheel --universal
-    - name: Upload wheels
-      uses: actions/upload-artifact@v3
-      with:
-        path: dist/*
     - name: Upload release binary
       uses: actions/upload-release-asset@v1.0.2
       env:
