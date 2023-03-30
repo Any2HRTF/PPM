@@ -10,6 +10,7 @@ setup(
     author='Felix Perfler',
     author_email='felix.perfler@oeaw.ac.at',
     license='The MIT License',
+    readme='README.md',
     packages=find_packages(),
     package_data={
         'ppm': ['resources/*.csv', 'resources/*.blend'],

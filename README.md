@@ -44,7 +44,7 @@ plot_hausdorff(ppm_target, ppm)
 
 resulting in the following plot:
 
-![Hausdorff distance](https://github.com/Any2HRTF/PPM/blob/main/doc/hs_plot.png "Hausdorff distance")
+![Hausdorff distance](https://github.com/Any2HRTF/PPM/blob/main/docs/hs_plot.png "Hausdorff distance")
 
 Realisations can also be rendered or plotted (from various positions if cam_loc is set).
 
@@ -52,10 +52,14 @@ Realisations can also be rendered or plotted (from various positions if cam_loc 
 plot(ppm_target)
 ```
 
-![PPM plot](https://github.com/Any2HRTF/PPM/blob/main/doc/render.png "PPM plot")]
-
-In ''geometric_metrics'' the Hausdorff distance between two PPMs can be calculated.
+The point cloud of a PPM can be accessed via the ``get_point_cloud`` function.
 
 ```python
-hausdorff_distance(ppm_target, ppm, 'gen')
+ppm.get_point_cloud()
+```
+
+Using the function ``hausdorff_distance`` the Hausdorff distance between two PPMs can be calculated.
+
+```python
+hausdorff_distance(ppm, ppm1)
 ```

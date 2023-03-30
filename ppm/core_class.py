@@ -144,6 +144,9 @@ class PPM(BaseBlenderObject):
         """Set PPM parameters in Blender"""
         for line, value in params.items():
 
+            if line not in self.__params[self.name]:
+                raise Exception(f"Parameter {line} is not valid")
+
             self.__params[self.name][line] = value
 
             transform = line.split('_')[0]
