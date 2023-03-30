@@ -124,7 +124,7 @@ class Bone():
                     # world location of the spatial reference point for rotation
                     self.head_ini = self.mtx_world_ini @ Vector(pose_bone.head)
 
-                    if self.name == 'Size':
+                    if self.name == 'Tragus' and point == 'Start':
                         print('World matrix (initial): ' + str(self.mtx_world_ini) + '\n')
                         print('Location world (initial): ' + str(vec_world_location_ini))
                         print('Rotation world (initial): ' + str(vec_world_rotation_ini))
@@ -156,7 +156,6 @@ class Bone():
 
                 # translation matrix to translate spatial point of reference for rotation 
                 # to centre of world coordinate system
-                # T0 = Matrix.Translation(-self.head_ini)
                 T0 = Matrix.Translation(-self.head_ini)
 
                 if self.name == 'Size':
@@ -164,36 +163,89 @@ class Bone():
                     print(T0)
                     print('\n')
 
-                mtx_scale_world_ini = Matrix.Scale(self.scale_world_ini[0],4,(1,0,0)) @ \
-                                      Matrix.Scale(self.scale_world_ini[1],4,(0,1,0)) @ \
-                                      Matrix.Scale(self.scale_world_ini[2],4,(0,0,1))
-                
-                if self.name=='Size':
-                    print('World scale matrix:')
-                    print(Matrix(mtx_scale_world_ini).to_4x4())
-                    print('\n')
-
                 # translate global rotation point (i.e. pose_bone.tail in global coordinates) 
                 # to centre of global coordinate system, and rotate as per mtx_world_rotation_modified
-
-                # vec_world_location_modified = mtx_world_rotation_modified @ (self.head_ini - self.location_world_ini) + self.head_ini
-                # mtx_world_location_modified = Matrix.Translation(vec_world_location_modified)
-                # if self.name == 'Size':
-                #     print('mtx_world_location_modified')
-                #     print(mtx_world_location_modified)
                 
-                # # this simple translation works
+                # simple translation
                 obj.matrix_world = T0 @\
                                    obj.matrix_world
-                # if self.name == 'Size':
-                #      print('obj.matrix_world (after T0)')
-                #      print(obj.matrix_world)
-
-                # now rotate about translated global rotation point
-                obj.matrix_world = mtx_world_rotation_modified @ obj.matrix_world
+                if self.name == 'Tragus' and point == 'Start':
+                     print('obj.matrix_world (after T0)')
+                     print(obj.matrix_world)
 
                 if self.name == 'Size':
-                    print('pose_bone.tail')
+                    # now rotate about translated global rotation point
+                    obj.matrix_world = mtx_world_rotation_modified @ obj.matrix_world
+                else:
+                    
+                    # raise NotImplementedError('Global rotation of pose bones is not yet implemented.')
+                    print('ERROR: Global rotation of pose bones is not yet implemented.')
+
+                    # >>
+
+                    # # mtx_world_ini_inv = Matrix(self.mtx_world_ini).inverted()
+                    # pose_bone_rot_mod = mtx_world_rotation_modified
+                    # _, pose_bone_rot_mod_global, _ = pose_bone_rot_mod.decompose()
+
+                    # if self.name == 'Tragus' and point == 'Start':
+                    #     # print('mtx_world_ini_inv')
+                    #     # print(mtx_world_ini_inv)
+                    #     print('pose_bone_rot_mod')
+                    #     print(pose_bone_rot_mod)
+                    #     print('pose_bone_rot_mod_global')
+                    #     print(pose_bone_rot_mod_global)
+
+                    #     # pose_bone.rotation_quaternion = vec_world_rotation_modified.to_matrix().inverted().to_quaternion()
+                    #     # pose_bone.rotation_quaternion = pose_bone_rot_mod_global
+
+                    #     world = obj.matrix_world @ pose_bone.matrix
+                    #     world_rest = obj.matrix_world @ pose_bone.matrix_basis
+
+                    #     _loc, rot, _scale = world.decompose()
+                    #     _loc, rot_rest, _scale = world_rest.decompose()
+
+                    #     print('rot.rotation_difference(rot_rest)')
+                    #     print(pose_bone_rot_mod.to_quaternion().rotation_difference(self.rotation_world_ini))
+
+                    #<<
+
+                    # mtx_world_pose_bone = self.get_matrix_world(pose_bone)
+                    # vec_world_location_pose_bone, vec_world_rotation_pose_bone, vec_world_scale_pose_bone = mtx_world_pose_bone.decompose()
+                    # if self.name == 'Tragus' and point == 'Start':
+                    #     print('vec_world_rotation_pose_bone')
+                    #     print(vec_world_rotation_pose_bone)
+
+                    # # print(vec_world_rotation_pose_bone)   
+                    
+                                   
+                    # mtx_world_rotation_pose_bone_mod = Matrix.LocRotScale(Vector(vec_world_location_pose_bone), 
+                    #                                       Quaternion(vec_world_rotation_modified), 
+                    #                                       Vector(vec_world_scale_pose_bone))
+                    # pose_bone.matrix = mtx_world_rotation_pose_bone_mod
+
+                    
+                    
+                    
+
+
+
+                    # # simply rotate pose bone
+                    # mtx_local_pose_bone_mod = Quaternion(vec_world_rotation_pose_bone).to_matrix() @ Quaternion(vec_world_rotation_pose_bone).to_matrix()
+                    # print(mtx_local_pose_bone_mod)
+
+                    # pose_bone.rotation_quaternion = mtx_local_pose_bone_mod.to_quaternion()
+
+                    # pose_bone.rotation_quaternion = Matrix(Quaternion(vec_world_rotation_pose_bone).to_matrix().to_4x4() @ \
+                    #                                        Matrix(vec_world_rotation_pose_bone)).to_quaternion()
+                    # obj.matrix_world = obj.matrix_world @ pose_bone.matrix
+
+                    if self.name == 'Tragus' and point == 'Start':
+                        print('pose_bone.rotation_quaternion')
+                        print(pose_bone.rotation_quaternion)
+
+
+                if self.name == 'Size':
+                    print('pose_bone.head')
                     print(pose_bone.head)
 
                 # # calculate new backwards translation matrix (because the translated global rotation point has been rotated, too)
@@ -206,8 +258,12 @@ class Bone():
                 #      print('T1_rot')
                 #      print(T1_rot)
 
-                # 
+                #
+                # if self.name == 'Size':
                 T1 = Matrix.Translation(self.head_ini)
+                # else:
+                    # T1 = Matrix.Translation(self.location_world_ini)
+
                 obj.matrix_world = T1 @ obj.matrix_world
 
                 # T2 = Matrix.Translation(-self.location_world_ini)
@@ -238,7 +294,7 @@ class Bone():
                 # obj.matrix_world = Matrix.LocRotScale( self.location_world_ini, Quaternion(self.rotation_world_ini), self.scale_world_ini )
 
                 vec_world_location_new, vec_world_rotation_new, vec_world_scale_new = obj.matrix_world.decompose()
-                if self.name == 'Size':
+                if self.name == 'Tragus' and point == 'Start':
                     print('Modified world matrix: ')
                     print('Location: ' + str(vec_world_location_new))
                     print('Rotation: ' + str(vec_world_rotation_new))
