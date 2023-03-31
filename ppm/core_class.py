@@ -243,16 +243,28 @@ class PPM(BaseBlenderObject):
         self.__set_ppm_params(self.__params[self.name])
         return super()._get_pc(self.PPM_BLENDER_NAME)
     
-    def save_ply(self, path_to_ply):
+    def save_ply(self, path_to_ply, save_as_npy=False):
         """Save point cloud of the ear in .ply format
         
         Parameters:
         -----------
             path_to_ply: str
                 path to save .ply file
+                *.ply or *.npy is appended to the path if not already specified
         """
         self.__set_ppm_params(self.__params[self.name])
-        super()._export_pc(self.PPM_BLENDER_NAME, path_to_ply)
+        if not path_to_ply.endswith('.ply') and not save_as_npy:
+            path_to_ply += '.ply'
+        if save_as_npy:
+            if path_to_ply.endswith('.ply'):
+                path_to_ply = path_to_ply[:-4] + '.npy'
+            if not path_to_ply.endswith('.npy'):
+                path_to_ply += '.npy'
+        
+        if save_as_npy:
+            np.save(path_to_ply, super()._get_pc(self.PPM_BLENDER_NAME))
+        else:
+            super()._export_pc(self.PPM_BLENDER_NAME, path_to_ply)
 
     def render(
             self,
