@@ -81,9 +81,11 @@ def plot_hausdorff(ppm, ppm_target):
     ax1.set_yticks([0,1,max(hs_dist)])
     
 
+    C = 255 - np.round((hs_dist - np.min(hs_dist)) / (np.max(hs_dist) - np.min(hs_dist)) * 255).astype(int)
+
     ax2 = plt.subplot(122, projection='3d')
-    ax2.scatter(ppm_pts[:,0],ppm_pts[:,1],ppm_pts[:,2], color='lightgoldenrodyellow', alpha=0.1)
-    ax2.scatter(ppm_target_pts[:,0],ppm_target_pts[:,1],ppm_target_pts[:,2], color='darkolivegreen', alpha=0.01)
+    ax2.scatter(ppm_pts[:,0],ppm_pts[:,1],ppm_pts[:,2], color='black', alpha=0.1)
+    ax2.scatter(ppm_target_pts[:,0],ppm_target_pts[:,1],ppm_target_pts[:,2], c=C, cmap='gist_heat', alpha=0.05)
     ax2.axis('off')
 
 

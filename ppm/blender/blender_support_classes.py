@@ -85,7 +85,9 @@ class BaseBlenderObject():
 
         self.name = name
 
-        self.blender_tmp_dir = blender_tmp_dir
+        self.blender_tmp_dir_parent = blender_tmp_dir
+
+        self.blender_tmp_dir = os.path.join(f'{self.blender_tmp_dir_parent}/tmp_' + str(uuid.uuid4()))
 
         if not os.path.exists(self.blender_tmp_dir):
             os.makedirs(self.blender_tmp_dir)
@@ -101,8 +103,8 @@ class BaseBlenderObject():
 
 
     def __del__(self):
-        if os.path.exists(self.blender_tmp_dir):
-            shutil.rmtree(self.blender_tmp_dir)
+        if os.path.exists(self.blender_tmp_dir_parent):
+            shutil.rmtree(self.blender_tmp_dir_parent)
 
     def _load_blender_file(self, path_to_file, selection):
 
