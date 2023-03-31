@@ -162,6 +162,8 @@ class Bone():
 
                 else:
                     
+                    print('WARNING: Setting for global rotation of local PPM parameters is not yet working!')
+
                     if self.name == 'Tragus' and point == 'Start':
                         # mtx_world_mod = obj.matrix_world.to_4x4() @ vec_world_rotation_modified.to_matrix().to_4x4() @ pose_bone.matrix.to_4x4()
                         # mtx_local_mod = self.get_matrix_local(pose_bone, mtx_world_mod)
@@ -183,11 +185,14 @@ class Bone():
                         print('loc_bone_local: ' + str(loc_bone_local))
                         print('rot_bone_local: ' + str(rot_bone_local))
                         print('scl_bone_local: ' + str(scl_bone_local))
-                        rot_bone_local = vec_world_rotation_modified
+                        rot_bone_local_mod = vec_world_rotation_modified
+                        mtx_local_bone_mod = Matrix.LocRotScale(loc_bone_local, rot_bone_local_mod, scl_bone_local)
+                        
+                        # >> Back-transformation to pose quaternion does not work yet
+                        # mtx_pose_mod = self.mtx_world_ini.to_3x3().inverted() @ Quaternion(rot_bone_local).to_matrix() @ mtx_local_bone_mod.to_3x3()
 
-                        mtx_pose_mod = obj.matrix_world.to_3x3().inverted() @ rot_bone_local.to_matrix()
-
-                        pose_bone.rotation_quaternion = mtx_pose_mod.to_quaternion()
+                        # pose_bone.rotation_quaternion = mtx_pose_mod.to_quaternion()
+                        pose_bone.rotation_quaternion = rot_bone_local_mod
 
                         q_ref = Quaternion((0.707107, -0.185573, -0.671588, -0.115437)) # for rotation by +90 deg around global Z axis
                         print('pose_bone.rotation_quaternion.rotation_difference(q_ref): ')
