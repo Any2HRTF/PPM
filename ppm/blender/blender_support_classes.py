@@ -153,16 +153,17 @@ class BaseBlenderObject():
     def _get_pc(self, selection: str) -> np.ndarray:
         """Get point cloud from blender"""
 
-        cloud = PyntCloud.from_file(self.__export_pc(selection))
+        cloud = PyntCloud.from_file(self._export_pc(selection))
         cloud = cloud.points.values
 
 
         return cloud.astype(np.float32)
 
-    def __export_pc(self, selection: str):
+    def _export_pc(self, selection: str, target_file_ply=None):
         """Export point cloud from blender"""
 
-        target_file_ply = self.blender_tmp_dir + f'/pc_{str(uuid.uuid4())}.ply'
+        if target_file_ply is None:
+            target_file_ply = self.blender_tmp_dir + f'/pc_{str(uuid.uuid4())}.ply'
         self.__select(selection, True)
         with redirect_stdout(io.StringIO()):
             bpy.ops.export_mesh.ply(
