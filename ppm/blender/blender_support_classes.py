@@ -177,10 +177,11 @@ class BaseBlenderObject():
 
         return target_file_ply
 
-    def __export_mesh(self, selection: str):
+    def _export_mesh(self, selection: str, target_file_stl=None):
         r"""Export mesh from blender"""
 
-        target_file_stl = self.blender_tmp_dir + f'/mesh_{str(uuid.uuid4())}.stl'
+        if target_file_stl is None:
+            target_file_stl = self.blender_tmp_dir + f'/mesh_{str(uuid.uuid4())}.stl'
         self.__select(selection, True)
         with redirect_stdout(io.StringIO()):
             bpy.ops.export_mesh.stl(
