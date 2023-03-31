@@ -213,10 +213,10 @@ class PPM(BaseBlenderObject):
         --------
             np.array: (num_cam_location, resolution, resolution)
         """
+        self.__set_ppm_params(self.__params[self.name])
         path_to_img, _ = super()._render(
                             *args, **kwargs
                             )
-        self.__set_ppm_params(self.__params[self.name])
         return super()._get_image(path_to_img, kwargs['resolution'])
 
     def get_depth(self, *args, **kwargs):
@@ -233,9 +233,9 @@ class PPM(BaseBlenderObject):
         --------
             np.array: (num_cam_location, resolution, resolution)
         """
+        self.__set_ppm_params(self.__params[self.name])
         _, path_to_img = super()._render(
                             *args, **kwargs)
-        self.__set_ppm_params(self.__params[self.name])
         return super()._get_depth(path_to_img, kwargs['resolution'])
 
     def get_point_cloud(self):
@@ -300,6 +300,91 @@ class PPM(BaseBlenderObject):
         with open(path_to_params, 'w', encoding='utf8') as f:
             for key, value in self.__params[self.name].items():
                 f.write("%s,%s\n"%(key,value))
+
+    def save_png(self, path_to_png, save_as_npy=False, resolution=512, cam_location=None, cam_rotation=None, cam_location_ref=None):
+        """Save PNG of the ear
+        
+        Parameters:
+        -----------
+            path_to_png: str
+                path to save .png file
+                *.png or *.npy is appended to the path if not already specified
+            resolution: int
+                resolution of the image
+            cam_location: np.array
+                camera location
+            cam_rotation: np.array
+                camera rotation
+            cam_location_ref: np.array
+                camera location reference
+        """
+        self.__set_ppm_params(self.__params[self.name])
+        if not path_to_png.endswith('.png') and not save_as_npy:
+            path_to_png += '.png'
+        if save_as_npy:
+            if path_to_png.endswith('.png'):
+                path_to_png = path_to_png[:-4] + '.npy'
+            if not path_to_png.endswith('.npy'):
+                path_to_png += '.npy'
+
+        def f(ppm,**kwargs):
+            return  ppm._render(**{k:v for k, v in kwargs.items() if v is not None})
+
+        path_to_png_temp, _ = f(self,
+                                resolution=resolution,
+                                cam_location=cam_location,
+                                cam_rotation=cam_rotation,
+                                cam_location_ref=cam_location_ref)
+
+        if save_as_npy:
+            np.save(path_to_png, path_to_png_temp)
+        else:
+            super()._get_image(path_to_png_temp, resolution)
+            # move file to path_to_png
+            os.rename(path_to_png_temp, path_to_png)
+
+    def save_exr(self, path_to_exr, save_as_npy=False, resolution=512, cam_location=None, cam_rotation=None, cam_location_ref=None):
+        """Save EXR of the ear
+        
+        Parameters:
+        -----------
+            path_to_exr: str
+                path to save .exr file
+                *.exr or *.npy is appended to the path if not already specified
+            resolution: int
+                resolution of the image
+            cam_location: np.array
+                camera location
+            cam_rotation: np.array
+                camera rotation
+            cam_location_ref: np.array
+                camera location reference
+        """
+        self.__set_ppm_params(self.__params[self.name])
+        if not path_to_exr.endswith('.exr') and not save_as_npy:
+            path_to_exr += '.exr'
+        if save_as_npy:
+            if path_to_exr.endswith('.exr'):
+                path_to_exr = path_to_exr[:-4] + '.npy'
+            if not path_to_exr.endswith('.npy'):
+                path_to_exr += '.npy'
+
+        def f(ppm,**kwargs):
+            return  ppm._render(**{k:v for k, v in kwargs.items() if v is not None})
+
+        _, path_to_exr_temp = f(self,
+                                resolution=resolution,
+                                cam_location=cam_location,
+                                cam_rotation=cam_rotation,
+                                cam_location_ref=cam_location_ref)
+
+        if save_as_npy:
+            np.save(path_to_exr, path_to_exr_temp)
+        else:
+            super()._get_depth(path_to_exr_temp, resolution)
+            # move file to path_to_exr
+            os.rename(path_to_exr_temp, path_to_exr)
+
 
     def render(
             self,
