@@ -16,7 +16,7 @@ class PPM(BaseBlenderObject):
         name (str): Name of the PPM object
         from_blender_file (str): Path to a blender file to load the PPM from; if None, the standard PPM is loaded
     """
-    def __init__(self, name="PPM", from_blender_file=None):
+    def __init__(self, name="PPM", from_blender_file=None, from_csv_file=None):
         self.__DIRNAME = os.path.join(os.path.dirname(__file__))
 
         self.PPM_BLENDER_NAME = 'ARI_PPM_v1'
@@ -52,6 +52,11 @@ class PPM(BaseBlenderObject):
 
         if from_blender_file is not None:
             self.__get_ppm_params()
+
+        if from_csv_file is not None:
+            ppm_params = read_csv(from_csv_file, index_col=0)
+            for param_name, value in ppm_params.iterrows():
+                self.__params[self.name][param_name] = value.values[0]
 
     def get_ppm_params(self):
         """Get PPM parameters from Blender
@@ -279,6 +284,22 @@ class PPM(BaseBlenderObject):
         if not path_to_stl.endswith('.stl'):
             path_to_stl += '.stl'
         super()._export_mesh(self.PPM_BLENDER_NAME, path_to_stl)
+
+    def save_parameters(self, path_to_params):
+        """Save parameters of the ear
+        
+        Parameters:
+        -----------
+            path_to_params: str
+                path to save .csv file
+                *.csv  is appended to the path if not already specified
+        """
+        if not path_to_params.endswith('.csv'):
+            path_to_params += '.csv'
+
+        with open(path_to_params, 'w', encoding='utf8') as f:
+            for key, value in self.__params[self.name].items():
+                f.write("%s,%s\n"%(key,value))
 
     def render(
             self,
