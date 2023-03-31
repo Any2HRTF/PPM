@@ -18,10 +18,11 @@ class PPM(BaseBlenderObject):
     """
     def __init__(self, name="PPM", from_blender_file=None, from_csv_file=None):
         self.__DIRNAME = os.path.join(os.path.dirname(__file__))
+        self.__TEMP_DIR = os.path.join(f'{self.__DIRNAME}/resources/tmp/')
 
         self.PPM_BLENDER_NAME = 'ARI_PPM_v1'
     
-        super().__init__(os.path.join(f'{self.__DIRNAME}/resources/tmp_' + str(uuid.uuid4())), name)
+        super().__init__(self.__TEMP_DIR, name)
 
         if from_blender_file is not None:
             super()._load_blender_file(from_blender_file, self.PPM_BLENDER_NAME)
