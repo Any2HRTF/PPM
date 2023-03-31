@@ -17,18 +17,18 @@ class PPM(BaseBlenderObject):
         from_blender_file (str): Path to a blender file to load the PPM from; if None, the standard PPM is loaded
     """
     def __init__(self, name="PPM", from_blender_file=None):
-        DIRNAME = os.path.join(os.path.dirname(__file__))
+        self.__DIRNAME = os.path.join(os.path.dirname(__file__))
 
         self.PPM_BLENDER_NAME = 'ARI_PPM_v1'
     
-        super().__init__(os.path.join(f'{DIRNAME}/resources/tmp_' + str(uuid.uuid4())), name)
+        super().__init__(os.path.join(f'{self.__DIRNAME}/resources/tmp_' + str(uuid.uuid4())), name)
 
         if from_blender_file is not None:
             super()._load_blender_file(from_blender_file, self.PPM_BLENDER_NAME)
 
         else:
             # load standard ear
-            super()._load_blender_file(f'{DIRNAME}/resources/PPM_modified_v1.blend', self.PPM_BLENDER_NAME)
+            super()._load_blender_file(f'{self.__DIRNAME}/resources/PPM_modified_v1.blend', self.PPM_BLENDER_NAME)
 
         self.bones = []
         self.bones_lookup = {}
@@ -45,7 +45,7 @@ class PPM(BaseBlenderObject):
         Bone("Crus_superius_anthelicis", self)
         Bone("Size", self)
 
-        ppm_params = read_csv(f'{DIRNAME}/resources/PPM_params_default_v1.csv', index_col=0)
+        ppm_params = read_csv(f'{self.__DIRNAME}/resources/PPM_params_default_v1.csv', index_col=0)
         self.__params = { self.name: {} }
         for param_name, value in ppm_params.iterrows():
             self.__params[self.name][param_name] = value.values[0]
@@ -62,6 +62,15 @@ class PPM(BaseBlenderObject):
         """
 
         return self.__params[self.name]
+    
+    def reset_parameters(self):
+        """Reset PPM parameters to default"""
+        ppm_params = read_csv(f'{self.__DIRNAME}/resources/PPM_params_default_v1.csv', index_col=0)
+        self.__params = { self.name: {} }
+        for param_name, value in ppm_params.iterrows():
+            self.__params[self.name][param_name] = value.values[0]
+
+        self.__set_ppm_params(self.get_ppm_params())
 
     def set_ppm_params(self, params):
         """Set PPM parameters in Blender
