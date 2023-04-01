@@ -50,7 +50,7 @@ class PPM(BaseBlenderObject):
         Bone("Crus_superius_anthelicis", self)
         Bone("Size", self)
 
-        ppm_params = read_csv(f'{self.__DIRNAME}/resources/PPM_params_default_v1.csv', index_col=0)
+        ppm_params = read_csv(f'{self.__DIRNAME}/resources/PPM_params_default_v1.csv',  header=None, index_col=0)
         self.__params = {}
         for param_name, value in ppm_params.iterrows():
             self.__params[param_name] = value.values[0]
@@ -59,11 +59,11 @@ class PPM(BaseBlenderObject):
             self.__get_ppm_params()
 
         if from_csv_file is not None:
-            ppm_params = read_csv(from_csv_file, index_col=0)
+            ppm_params = read_csv(from_csv_file,  header=None, index_col=0)
             for param_name, value in ppm_params.iterrows():
                 self.__params[param_name] = value.values[0]
 
-    def get_ppm_params(self):
+    def get_parameters(self):
         """Get PPM parameters from Blender
         
         Returns:
@@ -71,11 +71,65 @@ class PPM(BaseBlenderObject):
             dict: Dictionary of parameters
         """
 
-        return self.__params
+        self.__get_ppm_params()
+
+        params = {
+            'Location' : {},
+            'Rotation' : {},
+            'Scale' : {},
+            'Shape_key' : {}
+        }
+
+        for param_name, value in self.__params.items():
+            if 'Location' in param_name:
+                param_name = '_'.join(param_name.split('_')[1:])
+                nm = param_name.split('-')[0]
+                pnt = param_name.split('-')[1].split('_')[0]
+                ax = param_name.split('_')[-1]
+
+                if nm in params['Location']:
+                    params['Location'][nm][ax] = value
+                else:
+                    params['Location'][nm] = {
+                        'point': pnt,
+                        ax: value,
+                    }
+            if 'Rotation' in param_name:
+                param_name = '_'.join(param_name.split('_')[1:])
+                nm = param_name.split('-')[0]
+                pnt = param_name.split('-')[1].split('_')[0]
+                ax = param_name.split('_')[-1]
+
+                if nm in params['Rotation']:
+                    params['Rotation'][nm][ax] = value
+                else:
+                    params['Rotation'][nm] = {
+                        'point': pnt,
+                        ax: value,
+                    }
+            if 'Scale' in param_name:
+                param_name = '_'.join(param_name.split('_')[1:])
+                nm = param_name.split('-')[0]
+                pnt = param_name.split('-')[1].split('_')[0]
+                ax = param_name.split('_')[-1]
+
+                if nm in params['Scale']:
+                    params['Scale'][nm][ax] = value
+                else:
+                    params['Scale'][nm] = {
+                        'point': pnt,
+                        ax: value,
+                    }
+            if 'Shape_key' in param_name:
+                param_name = '_'.join(param_name.split('_')[1:])
+                nm = '_'.join(param_name.split('_')[1:])
+                params['Shape_key'][nm] = value
+
+        return params
     
     def reset_parameters(self):
         """Reset PPM parameters to default"""
-        ppm_params = read_csv(f'{self.__DIRNAME}/resources/PPM_params_default_v1.csv', index_col=0)
+        ppm_params = read_csv(f'{self.__DIRNAME}/resources/PPM_params_default_v1.csv',  header=None, index_col=0)
         self.__params = {  }
         for param_name, value in ppm_params.iterrows():
             self.__params[param_name] = value.values[0]
