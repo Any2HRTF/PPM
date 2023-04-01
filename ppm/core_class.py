@@ -134,7 +134,7 @@ class PPM(BaseBlenderObject):
         for param_name, value in ppm_params.iterrows():
             self.__params[param_name] = value.values[0]
 
-        self.__set_ppm_params(self.get_ppm_params())
+        self.__set_ppm_params(self.__params)
 
     def set_ppm_params(self, params):
         """Set PPM parameters in Blender
