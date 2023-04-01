@@ -11,10 +11,9 @@
 
 .DS_Store
 
-# python
-
 *.pyc
-
 /dist
-
 *.egg-info
+__pycache__
+
+/docs/_build

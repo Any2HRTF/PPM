@@ -103,8 +103,8 @@ class BaseBlenderObject():
 
 
     def __del__(self):
-        if os.path.exists(self.blender_tmp_dir_parent):
-            shutil.rmtree(self.blender_tmp_dir_parent)
+        if os.path.exists(self.blender_tmp_dir):
+            shutil.rmtree(self.blender_tmp_dir)
 
     def _load_blender_file(self, path_to_file, selection):
 

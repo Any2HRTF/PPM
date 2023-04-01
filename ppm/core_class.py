@@ -15,8 +15,13 @@ class PPM(BaseBlenderObject):
     -----------
         name (str): Name of the PPM object
         from_blender_file (str): Path to a blender file to load the PPM from; if None, the standard PPM is loaded
+        from_csv_file (str): Path to a csv file to load the PPM parameters from; if None, the standard PPM is loaded
     """
     def __init__(self, name="PPM", from_blender_file=None, from_csv_file=None):
+
+        if from_blender_file and from_csv_file:
+            raise ValueError("Please only provide one of the parameters from_blender_file and from_csv_file")
+
         self.__DIRNAME = os.path.join(os.path.dirname(__file__))
         self.__TEMP_DIR = os.path.join(f'{self.__DIRNAME}/resources/tmp/')
 
