@@ -17,11 +17,17 @@ def plot(ppm, return_fig:bool=False, *args, **kwargs) -> plt.figure:
             resolution of the image
         cam_location: np.array
             camera location
+        title: str
+            title of the plot
     Returns:
     --------
         plt.figure: figure object if return_fig is True
     """
-
+    if 'title' in kwargs:
+        plt_title = kwargs['title']
+        del kwargs['title']
+    else:
+        plt_title = 'PPM'
     if 'cam_loc' not in kwargs:
         kwargs['cam_loc'] = np.array([-10,200,5])
     if 'resolution' not in kwargs:
@@ -47,7 +53,8 @@ def plot(ppm, return_fig:bool=False, *args, **kwargs) -> plt.figure:
     for ax in grid[nrows*ncols-img.shape[0]:]:
         ax.axis('off')
 
-    fig.suptitle(ppm.name)
+
+    fig.suptitle(plt_title, fontsize=16)
 
     if return_fig:
         return fig

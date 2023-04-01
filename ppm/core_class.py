@@ -13,11 +13,10 @@ class PPM(BaseBlenderObject):
 
     Parameters:
     -----------
-        name (str): Name of the PPM object
         from_blender_file (str): Path to a blender file to load the PPM from; if None, the standard PPM is loaded
         from_csv_file (str): Path to a csv file to load the PPM parameters from; if None, the standard PPM is loaded
     """
-    def __init__(self, name="PPM", from_blender_file=None, from_csv_file=None):
+    def __init__(self, from_blender_file=None, from_csv_file=None):
 
         if from_blender_file and from_csv_file:
             raise ValueError("Please only provide one of the parameters from_blender_file and from_csv_file")
@@ -27,7 +26,7 @@ class PPM(BaseBlenderObject):
 
         self.PPM_BLENDER_NAME = 'ARI_PPM_v1'
     
-        super().__init__(self.__TEMP_DIR, name)
+        super().__init__(self.__TEMP_DIR)
 
         if from_blender_file is not None:
             super()._load_blender_file(from_blender_file, self.PPM_BLENDER_NAME)
@@ -52,9 +51,9 @@ class PPM(BaseBlenderObject):
         Bone("Size", self)
 
         ppm_params = read_csv(f'{self.__DIRNAME}/resources/PPM_params_default_v1.csv', index_col=0)
-        self.__params = { self.name: {} }
+        self.__params = {}
         for param_name, value in ppm_params.iterrows():
-            self.__params[self.name][param_name] = value.values[0]
+            self.__params[param_name] = value.values[0]
 
         if from_blender_file is not None:
             self.__get_ppm_params()
@@ -62,7 +61,7 @@ class PPM(BaseBlenderObject):
         if from_csv_file is not None:
             ppm_params = read_csv(from_csv_file, index_col=0)
             for param_name, value in ppm_params.iterrows():
-                self.__params[self.name][param_name] = value.values[0]
+                self.__params[param_name] = value.values[0]
 
     def get_ppm_params(self):
         """Get PPM parameters from Blender
@@ -72,14 +71,14 @@ class PPM(BaseBlenderObject):
             dict: Dictionary of parameters
         """
 
-        return self.__params[self.name]
+        return self.__params
     
     def reset_parameters(self):
         """Reset PPM parameters to default"""
         ppm_params = read_csv(f'{self.__DIRNAME}/resources/PPM_params_default_v1.csv', index_col=0)
-        self.__params = { self.name: {} }
+        self.__params = {  }
         for param_name, value in ppm_params.iterrows():
-            self.__params[self.name][param_name] = value.values[0]
+            self.__params[param_name] = value.values[0]
 
         self.__set_ppm_params(self.get_ppm_params())
 
@@ -106,7 +105,7 @@ class PPM(BaseBlenderObject):
 
     def __get_ppm_params(self):
         """Get PPM parameters from Blender"""
-        for line, _ in self.__params[self.name].items():
+        for line, _ in self.__params.items():
             transform = line.split('_')[0]
             line = '_'.join(line.split('_')[1:])
             
@@ -117,13 +116,13 @@ class PPM(BaseBlenderObject):
                 obj = bpy.data.objects["Armature"].pose.bones[nm + "-" + pnt]
 
                 if ax == 'W':
-                    self.__params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.rotation_quaternion.w
+                    self.__params[transform + "_" + nm + "-" + pnt + "_" + ax] = obj.rotation_quaternion.w
                 elif ax == 'X':
-                    self.__params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.rotation_quaternion.x
+                    self.__params[transform + "_" + nm + "-" + pnt + "_" + ax] = obj.rotation_quaternion.x
                 elif ax == 'Y':
-                    self.__params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.rotation_quaternion.y
+                    self.__params[transform + "_" + nm + "-" + pnt + "_" + ax] = obj.rotation_quaternion.y
                 elif ax == 'Z':
-                    self.__params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.rotation_quaternion.z
+                    self.__params[transform + "_" + nm + "-" + pnt + "_" + ax] = obj.rotation_quaternion.z
 
             elif transform == "Location":
                 nm = line.split('-')[0]
@@ -132,11 +131,11 @@ class PPM(BaseBlenderObject):
                 obj = bpy.data.objects["Armature"].pose.bones[nm + "-" + pnt]
 
                 if ax == 'X':
-                    self.__params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.location.x
+                    self.__params[transform + "_" + nm + "-" + pnt + "_" + ax] = obj.location.x
                 elif ax == 'Y':
-                    self.__params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.location.y
+                    self.__params[transform + "_" + nm + "-" + pnt + "_" + ax] = obj.location.y
                 elif ax == 'Z':
-                    self.__params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.location.z
+                    self.__params[transform + "_" + nm + "-" + pnt + "_" + ax] = obj.location.z
                 else:
                     pass
 
@@ -147,27 +146,27 @@ class PPM(BaseBlenderObject):
                 obj = bpy.data.objects["Armature"].pose.bones[nm + "-" + pnt]
 
                 if ax == 'X':
-                    self.__params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.scale.x
+                    self.__params[transform + "_" + nm + "-" + pnt + "_" + ax] = obj.scale.x
                 elif ax == 'Y':
-                    self.__params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.scale.y
+                    self.__params[transform + "_" + nm + "-" + pnt + "_" + ax] = obj.scale.y
                 elif ax == 'Z':
-                    self.__params[self.name][transform + "_" + nm + "-" + pnt + "_" + ax] = obj.scale.z
+                    self.__params[transform + "_" + nm + "-" + pnt + "_" + ax] = obj.scale.z
                 else:
                     pass
 
             elif transform == "Shape":
                 nm = '_'.join(line.split('_')[1:])
                 obj = bpy.data.shape_keys["Key.002"].key_blocks[nm]
-                self.__params[self.name][transform + '_' +line] = obj.value
+                self.__params[transform + '_' +line] = obj.value
 
     def __set_ppm_params(self, params:dict):
         """Set PPM parameters in Blender"""
         for line, value in params.items():
 
-            if line not in self.__params[self.name]:
+            if line not in self.__params:
                 raise Exception(f"Parameter {line} is not valid")
 
-            self.__params[self.name][line] = value
+            self.__params[line] = value
 
             transform = line.split('_')[0]
             line = '_'.join(line.split('_')[1:])
@@ -219,7 +218,7 @@ class PPM(BaseBlenderObject):
         --------
             np.array: (num_cam_location, resolution, resolution)
         """
-        self.__set_ppm_params(self.__params[self.name])
+        self.__set_ppm_params(self.__params)
         path_to_img, _ = super()._render(
                             *args, **kwargs
                             )
@@ -239,7 +238,7 @@ class PPM(BaseBlenderObject):
         --------
             np.array: (num_cam_location, resolution, resolution)
         """
-        self.__set_ppm_params(self.__params[self.name])
+        self.__set_ppm_params(self.__params)
         _, path_to_img = super()._render(
                             *args, **kwargs)
         return super()._get_depth(path_to_img, kwargs['resolution'])
@@ -251,7 +250,7 @@ class PPM(BaseBlenderObject):
         --------
             np.array: (num_points, 3)
         """
-        self.__set_ppm_params(self.__params[self.name])
+        self.__set_ppm_params(self.__params)
         return super()._get_pc(self.PPM_BLENDER_NAME)
 
     def save_ply(self, path_to_ply, save_as_npy=False):
@@ -263,7 +262,7 @@ class PPM(BaseBlenderObject):
                 path to save .ply file
                 *.ply or *.npy is appended to the path if not already specified
         """
-        self.__set_ppm_params(self.__params[self.name])
+        self.__set_ppm_params(self.__params)
         if not path_to_ply.endswith('.ply') and not save_as_npy:
             path_to_ply += '.ply'
         if save_as_npy:
@@ -286,7 +285,7 @@ class PPM(BaseBlenderObject):
                 path to save .stl file
                 *.stl is appended to the path if not already specified
         """
-        self.__set_ppm_params(self.__params[self.name])
+        self.__set_ppm_params(self.__params)
         if not path_to_stl.endswith('.stl'):
             path_to_stl += '.stl'
         super()._export_mesh(self.PPM_BLENDER_NAME, path_to_stl)
@@ -304,7 +303,7 @@ class PPM(BaseBlenderObject):
             path_to_params += '.csv'
 
         with open(path_to_params, 'w', encoding='utf8') as f:
-            for key, value in self.__params[self.name].items():
+            for key, value in self.__params.items():
                 f.write("%s,%s\n"%(key,value))
 
     def save_png(self, path_to_png, save_as_npy=False, resolution=512, cam_location=None, cam_rotation=None, cam_location_ref=None):
@@ -324,7 +323,7 @@ class PPM(BaseBlenderObject):
             cam_location_ref: np.array
                 camera location reference
         """
-        self.__set_ppm_params(self.__params[self.name])
+        self.__set_ppm_params(self.__params)
         if not path_to_png.endswith('.png') and not save_as_npy:
             path_to_png += '.png'
         if save_as_npy:
@@ -366,7 +365,7 @@ class PPM(BaseBlenderObject):
             cam_location_ref: np.array
                 camera location reference
         """
-        self.__set_ppm_params(self.__params[self.name])
+        self.__set_ppm_params(self.__params)
         if not path_to_exr.endswith('.exr') and not save_as_npy:
             path_to_exr += '.exr'
         if save_as_npy:
@@ -410,7 +409,7 @@ class PPM(BaseBlenderObject):
             np.array: (num_cam_location, resolution, resolution)
         """
 
-        self.__set_ppm_params(self.__params[self.name])
+        self.__set_ppm_params(self.__params)
 
         cam_loc = kwargs['cam_loc']
         # kwargs.pop('cam_loc', None)

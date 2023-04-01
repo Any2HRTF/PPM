@@ -77,13 +77,11 @@ class Bone():
 class BaseBlenderObject():
     r"""BaseBlenderObject class.
 
-    Args:
-        name (str): Name of the BaseBlenderObject instance.
     """
 
-    def __init__(self, blender_tmp_dir, name="default") -> None:
+    def __init__(self, blender_tmp_dir, ) -> None:
 
-        self.name = name
+        self.name = f"{uuid.uuid4()}"
 
         self.blender_tmp_dir_parent = blender_tmp_dir
 
