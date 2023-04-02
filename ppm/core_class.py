@@ -87,13 +87,9 @@ class PPM(BaseBlenderObject):
                 pnt = param_name.split('-')[1].split('_')[0]
                 ax = param_name.split('_')[-1]
 
-                if nm in params['Location']:
-                    params['Location'][nm][ax] = value
-                else:
-                    params['Location'][nm] = {
-                        'point': pnt,
-                        ax: value,
-                    }
+                params['Location'][nm] = {
+                    pnt:{ax: value},
+                }
             if 'Rotation' in param_name:
                 param_name = '_'.join(param_name.split('_')[1:])
                 nm = param_name.split('-')[0]
