@@ -18,6 +18,11 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ github.token }}
   
+    - name: Set up LaTex
+      run: |
+        sudo apt-get update
+        sudo apt-get install texlive-latex-base texlive-latex-extra texlive-fonts-recommended texli
+
     - name: Set up Python
       uses: actions/setup-python@v1
       with:
