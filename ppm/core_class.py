@@ -87,9 +87,17 @@ class PPM(BaseBlenderObject):
                 pnt = param_name.split('-')[1].split('_')[0]
                 ax = param_name.split('_')[-1]
 
-                params['Location'][nm] = {
-                    pnt:{ax: value},
-                }
+                if nm in params['Location']:
+                    if pnt in params['Location'][nm]:
+                        params['Location'][nm][pnt][ax] = value
+                    else:
+                        params['Location'][nm][pnt] = {
+                            ax: value,
+                        }
+                else:
+                    params['Location'][nm] = {
+                        pnt:{ax: value},
+                    }
             if 'Rotation' in param_name:
                 param_name = '_'.join(param_name.split('_')[1:])
                 nm = param_name.split('-')[0]
@@ -97,25 +105,33 @@ class PPM(BaseBlenderObject):
                 ax = param_name.split('_')[-1]
 
                 if nm in params['Rotation']:
-                    params['Rotation'][nm][ax] = value
+                    if pnt in params['Rotation'][nm]:
+                        params['Rotation'][nm][pnt][ax] = value
+                    else:
+                        params['Rotation'][nm][pnt] = {
+                            ax: value,
+                        }
                 else:
                     params['Rotation'][nm] = {
-                        'point': pnt,
-                        ax: value,
+                        pnt:{ax: value},
                     }
             if 'Scale' in param_name:
                 param_name = '_'.join(param_name.split('_')[1:])
-                nm = param_name.split('-')[0]
-                pnt = param_name.split('-')[1].split('_')[0]
-                ax = param_name.split('_')[-1]
+                param_name = param_name.replace('-Bendy', '')
+                    
+                if 'Size' in param_name:
+                    nm = param_name.split('_')[0]
+                    ax = param_name.split('_')[-1]
 
-                if nm in params['Scale']:
-                    params['Scale'][nm][ax] = value
+                    if nm in params['Scale']:
+                        params['Scale'][nm][ax] = value
+                    else:
+                        params['Scale'][nm] = {
+                            ax: value,
+                        }
                 else:
-                    params['Scale'][nm] = {
-                        'point': pnt,
-                        ax: value,
-                    }
+                    params['Scale'][param_name] = value
+
             if 'Shape_key' in param_name:
                 param_name = '_'.join(param_name.split('_')[1:])
                 nm = '_'.join(param_name.split('_')[1:])
@@ -149,6 +165,54 @@ class PPM(BaseBlenderObject):
 
         # TODO: check if params are valid
         self.__set_ppm_params(params)
+
+    def set_parameter(self, type:str, name:str, point:str=None, w:float=None, x:float=None, y:float=None, z:float=None, value:float=None):
+        """Set PPM parameters in Blender
+        
+        Parameters:
+        ----------
+            type (str): Type of parameter to set
+            name (str): Name of bone to set
+            point (str): Point of bone to set
+            w (float): W value of quaternion
+            x (float): X value of quaternion
+            y (float): Y value of quaternion
+            z (float): Z value of quaternion
+        """
+
+        if type == 'Location':
+            if x is not None:
+                self.__params[f'{type}_{name}-{point}_X'] = x
+            if y is not None:
+                self.__params[f'{type}_{name}-{point}_Y'] = y
+            if z is not None:
+                self.__params[f'{type}_{name}-{point}_Z'] = z
+            self.__set_ppm_params(self.__params)
+        elif type == 'Rotation':
+            self.__params[f'{type}_{name}-{point}_W'] = w
+            self.__params[f'{type}_{name}-{point}_X'] = x
+            self.__params[f'{type}_{name}-{point}_Y'] = y
+            self.__params[f'{type}_{name}-{point}_Z'] = z
+            self.__set_ppm_params(self.__params)
+        elif type == 'Scale':
+            if name == 'Size':
+                if value is not None:
+                    self.__params[f'{type}_{name}-Bendy_X'] = value
+                    self.__params[f'{type}_{name}-Bendy_Y'] = value
+                    self.__params[f'{type}_{name}-Bendy_Z'] = value
+                else:
+                    if x is not None:
+                        self.__params[f'{type}_{name}-Bendy_X'] = x
+                    if y is not None:
+                        self.__params[f'{type}_{name}-Bendy_Y'] = y
+                    if z is not None:
+                        self.__params[f'{type}_{name}-Bendy_Z'] = z
+            else:
+                self.__params[f'{type}_{name}-Bendy'] = value
+            self.__set_ppm_params(self.__params)
+        elif type == 'Shape_key':
+            self.__params[f'{type}_{name}'] = value
+            self.__set_ppm_params(self.__params)
 
     def __shape_key(self, name: str, val: float):
         bpy.data.shape_keys["Key.002"].key_blocks[name].value = val
