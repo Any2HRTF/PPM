@@ -31,9 +31,14 @@ jobs:
         pip install sphinx
         pip install -r requirements.txt
     - name: Build 
+      if: always()
       run: |
         cd docs
         make latexpdf
+    - name: compile Latex
+      run: |
+        cd ${{ github.workspace }}/docs/_build/latex
+        pdflatex ppm.tex
     - run: ls ./dist
     - name: Upload PDF
       uses: actions/upload-release-asset@v1.0.2
