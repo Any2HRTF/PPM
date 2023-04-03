@@ -148,23 +148,33 @@ class PPM(BaseBlenderObject):
 
         self.__set_ppm_params(self.__params)
 
-    def set_ppm_params(self, params):
+    def set_parameters(self, params):
         """Set PPM parameters in Blender
         
         Parameters:
         ----------
             params (dict): Dictionary of parameters to set
-            
-            Example:
-                {
-                    'Location_Antitragus-End_X':-10,
-                    'Location_Antitragus-End_Y':-10,
-                    'Location_Antitragus-End_Z':-10
-                }
         """
 
         # TODO: check if params are valid
-        self.__set_ppm_params(params)
+        for type_of_param, type_params in params.items():
+            for name, name_params in type_params.items():
+                if type_of_param == 'Location':
+                    for point, point_params in name_params.items():
+                        for axis, value in point_params.items():
+                            self.set_parameter(type_of_param, name, point, **{axis.lower(): value})
+                if type_of_param == 'Rotation':
+                    for point, point_params in name_params.items():
+                        for axis, value in point_params.items():
+                            self.set_parameter(type_of_param, name, point, **{axis.lower(): value})
+                if type_of_param == 'Scale':
+                    if name == 'Size':
+                        for axis, value in name_params.items():
+                            self.set_parameter(type_of_param, name, **{axis.lower(): value})
+                    else:
+                        self.set_parameter(type_of_param, name, value=name_params)
+                if type_of_param == 'Shape_key':
+                    self.set_parameter(type_of_param, name, value=name_params)
 
     def set_parameter(self, type:str, name:str, point:str=None, w:float=None, x:float=None, y:float=None, z:float=None, value:float=None):
         """Set PPM parameters in Blender
@@ -178,6 +188,7 @@ class PPM(BaseBlenderObject):
             x (float): X value of quaternion
             y (float): Y value of quaternion
             z (float): Z value of quaternion
+            value (float): Value of parameter to set
         """
 
         if type == 'Location':
@@ -189,10 +200,14 @@ class PPM(BaseBlenderObject):
                 self.__params[f'{type}_{name}-{point}_Z'] = z
             self.__set_ppm_params(self.__params)
         elif type == 'Rotation':
-            self.__params[f'{type}_{name}-{point}_W'] = w
-            self.__params[f'{type}_{name}-{point}_X'] = x
-            self.__params[f'{type}_{name}-{point}_Y'] = y
-            self.__params[f'{type}_{name}-{point}_Z'] = z
+            if w is not None:
+                self.__params[f'{type}_{name}-{point}_W'] = w
+            if x is not None:
+                self.__params[f'{type}_{name}-{point}_X'] = x
+            if y is not None:
+                self.__params[f'{type}_{name}-{point}_Y'] = y
+            if z is not None:
+                self.__params[f'{type}_{name}-{point}_Z'] = z
             self.__set_ppm_params(self.__params)
         elif type == 'Scale':
             if name == 'Size':
