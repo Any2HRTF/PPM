@@ -19,7 +19,7 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
   
     - name: Setup TeX Live
-      uses: teatimeguest/setup-texlive-action@v2
+      run: apt install texlive-latex-extra
 
     - name: Set up Python
       uses: actions/setup-python@v1
