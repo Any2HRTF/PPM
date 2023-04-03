@@ -56,7 +56,6 @@ arg_shade_smooth = argv[argv.index("--") + 18]
 
 arg_coord_sys_type = argv[argv.index("--") + 19]
 
-
 def select(label, action):
     if action:
         bpy.ops.object.select_all(action='DESELECT')
@@ -69,7 +68,6 @@ def select(label, action):
 def setDir(folder, file, extension):
     target_file = os.path.join(folder, '{}.{}'.format(file, extension))
     return target_file
-
 
 class Bone():
 
@@ -162,7 +160,7 @@ class Bone():
 
                 else:
                     
-                    print('WARNING: Setting for global rotation of local PPM parameters is not yet working!')
+                    # print('WARNING: Setting for global rotation of local PPM parameters is not yet working!')
 
                     if self.name == 'Tragus' and point == 'Start':
                         # mtx_world_mod = obj.matrix_world.to_4x4() @ vec_world_rotation_modified.to_matrix().to_4x4() @ pose_bone.matrix.to_4x4()
@@ -186,20 +184,85 @@ class Bone():
                         print('rot_bone_local: ' + str(rot_bone_local))
                         print('scl_bone_local: ' + str(scl_bone_local))
                         rot_bone_local_mod = vec_world_rotation_modified
-                        mtx_local_bone_mod = Matrix.LocRotScale(loc_bone_local, rot_bone_local_mod, scl_bone_local)
+                        print("rot_bone_local_mod:\n" + str(rot_bone_local_mod) + '\n')
+                        bone_matrix_local_mod = Matrix.LocRotScale(loc_bone_local, rot_bone_local_mod, scl_bone_local)
+
+                        print("Possible matrices:\n")
+                        bone_matrix_local = pose_bone.bone.matrix_local # describes the bones location, rotation and scaling relative to the armature object (local space)
+                        bone_matrix_parent = pose_bone.bone.parent.matrix.to_4x4()
+                        bone_matrix_channel = pose_bone.matrix_channel
+                        bone_head_local = pose_bone.head
+                        bone_head_local_mod = rot_bone_local_mod.to_matrix().to_4x4()@ Matrix.Translation(pose_bone.head)
+                        obj_matrix_local = obj.matrix_local
+                        obj_matrix_global = obj.matrix_world # world-space transformation matrix
                         
-                        # >> Back-transformation to pose quaternion does not work yet
-                        # mtx_pose_mod = self.mtx_world_ini.to_3x3().inverted() @ Quaternion(rot_bone_local).to_matrix() @ mtx_local_bone_mod.to_3x3()
+                        print('bone_matrix_local:\n' + str(bone_matrix_local))
+                        print('bone_matrix_channel:\n' + str(bone_matrix_channel))
+                        print('bone_head_local:\n' + str(bone_head_local))
+                        print('bone_head_local_mod:\n' + str(bone_head_local_mod))
+                        print('bone_matrix_local_mod:\n' + str(bone_matrix_local_mod))
+                        print('bone_matrix_parent:\n' + str(bone_matrix_parent))
+                        print('obj_matrix_local:\n' + str(obj_matrix_local))
+                        print('obj_matrix_global:\n' + str(obj_matrix_global))
 
-                        # pose_bone.rotation_quaternion = mtx_pose_mod.to_quaternion()
-                        pose_bone.rotation_quaternion = rot_bone_local_mod
+                        # # >> Back-transformation to pose quaternion does not work yet
+                        # # mtx_pose_mod = self.mtx_world_ini.to_3x3().inverted() @ Quaternion(rot_bone_local).to_matrix() @ mtx_local_bone_mod.to_3x3()
 
-                        q_ref = Quaternion((0.707107, -0.185573, -0.671588, -0.115437)) # for rotation by +90 deg around global Z axis
+                        # # inv(matrix_local) * matrix * p
+                        # # bone_matrix_pose = bone_matrix_local.inverted @ bone_matrix_parent.inverted() @ bone_matrix_local_mod
+
+                        # # bone_matrix_pose = obj.matrix_world @ \
+                        # #                    bone_matrix_channel @ \
+                        # #                    Matrix.Translation(pose_bone.tail).to_4x4() @ \
+                        # #                    bone_head_local_mod @ \
+                        # #                    bone_matrix_local_mod @ \
+                        # #                    obj.matrix_world.inverted()
+
+                        # # pose_bone.rotation_quaternion = mtx_pose_mod.to_quaternion()
+                        # # pose_bone.rotation_quaternion = rot_bone_local_mod
+
+                        diff_child_parent = bone_matrix_local.inverted() @ bone_matrix_parent
+                        print('diff_child_parent.to_quaternion()' + str(diff_child_parent.to_quaternion()))
+
+                        diff_child_animated_parent = bone_matrix_local_mod.inverted() @ bone_matrix_parent
+                        print('diff_child_animated_parent.to_quaternion()' + str(diff_child_animated_parent.to_quaternion()))
+
+                        diff_difference = diff_child_animated_parent.to_quaternion().rotation_difference(diff_child_parent.to_quaternion())
+                        print('diff_difference' + str(diff_difference))
+
+                        # # diff_difference2 = diff_child_parent.inverted() @ diff_child_animated_parent
+                        # # print('diff_difference2.to_quaternion()' + str(diff_difference2.to_quaternion()))
+
+                        # # v = bone_head_local_mod.translation - pose_bone.head
+                        # # bv = Matrix.Translation(pose_bone.tail) @ Matrix.Translation(pose_bone.head)
+
+                        # # apply global rotation to pose bone
+
+                        # # print('v' + str(v))
+                        # # print('bv' + str(bv))
+
+                        # # rd = bv.rotation_difference(v)
+
+                        # # M = (
+                        # #     Matrix.Translation(pose_bone.head) @
+                        # #     rd.to_matrix().to_4x4() @
+                        # #     Matrix.Translation(-pose_bone.head)
+                        # #     )
+                        # # pose_bone.matrix = M @ pose_bone.matrix
+
+                        # pose_bone.rotation_quaternion = diff_difference @ pose_bone.rotation_quaternion
+
+                        pose_bone.rotation_quaternion = diff_difference @ obj_matrix_global.to_quaternion()
+                        # pose_bone.rotation_quaternion = diff_difference @ pose_bone.rotation_quaternion
+                        print('\n pose_bone.rotation_quaternion: ' + str(pose_bone.rotation_quaternion) + '\n')
+               
+                        q_ref = Quaternion((0.92388, -0.100431, -0.363461, -0.065241)) # for rotation by +45 deg along global Z axis
+                        print('q_ref: ' + str(q_ref))
                         print('pose_bone.rotation_quaternion.rotation_difference(q_ref): ')
-                        print(pose_bone.rotation_quaternion.rotation_difference(q_ref))
+                        print(str(pose_bone.rotation_quaternion.rotation_difference(q_ref)) + '\n')
                         # pose_bone.rotation_quaternion = q_ref.rotation_difference(pose_bone.rotation_quaternion)
 
-                        print('\n pose_bone.rotation_quaternion: ' + str(pose_bone.rotation_quaternion) + '\n')
+                        
 
                 
                 
