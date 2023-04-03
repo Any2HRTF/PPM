@@ -77,13 +77,11 @@ class Bone():
 class BaseBlenderObject():
     r"""BaseBlenderObject class.
 
-    Args:
-        name (str): Name of the BaseBlenderObject instance.
     """
 
-    def __init__(self, blender_tmp_dir, name="default") -> None:
+    def __init__(self, blender_tmp_dir, ) -> None:
 
-        self.name = name
+        self.name = f"{uuid.uuid4()}"
 
         self.blender_tmp_dir_parent = blender_tmp_dir
 
@@ -103,8 +101,8 @@ class BaseBlenderObject():
 
 
     def __del__(self):
-        if os.path.exists(self.blender_tmp_dir_parent):
-            shutil.rmtree(self.blender_tmp_dir_parent)
+        if os.path.exists(self.blender_tmp_dir):
+            shutil.rmtree(self.blender_tmp_dir)
 
     def _load_blender_file(self, path_to_file, selection):
 
