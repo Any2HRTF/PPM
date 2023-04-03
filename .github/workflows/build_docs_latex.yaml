@@ -36,11 +36,12 @@ jobs:
         cd docs
         make latexpdf
     - name: compile Latex
+      if: always()
       run: |
         cd ${{ github.workspace }}/docs/_build/latex
         pdflatex ppm.tex
-    - run: ls ./dist
     - name: Upload PDF
+      if: always()
       uses: actions/upload-release-asset@v1.0.2
       env:
         GITHUB_TOKEN: ${{ github.token }}
