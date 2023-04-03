@@ -8,6 +8,7 @@ platex
 uplatex
 tex
 xetex
+latexmk
 #
 # Then get the rest of required LaTeX
 amsmath
