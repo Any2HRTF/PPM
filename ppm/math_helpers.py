@@ -62,6 +62,7 @@ def euler_to_quaternion(euler_matrix:np.array, sequence:str='ZYX') -> np.array:
         raise NotImplementedError("Sequence 'YXZ' not implemented yet.")
     
     elif sequence.lower() == 'yzy':
+        '''Kanye ass sequence'''
         # TODO
         raise NotImplementedError("Sequence 'YZY' not implemented yet.")
     
