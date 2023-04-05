@@ -6,6 +6,7 @@ import numpy as np
 os.environ["OPENCV_IO_ENABLE_OPENEXR"]="1"
 
 from .blender.blender_support_classes import BaseBlenderObject, Bone
+from .math_helpers import euler_to_quaternion
 
 
 class PPM(BaseBlenderObject):
@@ -176,7 +177,7 @@ class PPM(BaseBlenderObject):
                 if type_of_param == 'Shape_key':
                     self.set_parameter(type_of_param, name, value=name_params)
 
-    def set_parameter(self, type:str, name:str, point:str=None, w:float=None, x:float=None, y:float=None, z:float=None, value:float=None):
+    def set_parameter(self, type:str, name:str, point:str=None, w:float=None, x:float=None, y:float=None, z:float=None, sequence=None, value:float=None):
         """Set PPM parameters in Blender
         
         Parameters:
@@ -188,7 +189,8 @@ class PPM(BaseBlenderObject):
             x (float): X value of quaternion
             y (float): Y value of quaternion
             z (float): Z value of quaternion
-            value (float): Value of parameter to set
+            sequence (str): Rotation sequence (e.g. 'ZYX'). Only applicable for Rotation type with value given as Euler angles
+            value (float or np.array()): Value of parameter to set
         """
 
         if type == 'Location':
@@ -200,14 +202,32 @@ class PPM(BaseBlenderObject):
                 self.__params[f'{type}_{name}-{point}_Z'] = z
             self.__set_ppm_params(self.__params)
         elif type == 'Rotation':
-            if w is not None:
-                self.__params[f'{type}_{name}-{point}_W'] = w
-            if x is not None:
-                self.__params[f'{type}_{name}-{point}_X'] = x
-            if y is not None:
-                self.__params[f'{type}_{name}-{point}_Y'] = y
-            if z is not None:
-                self.__params[f'{type}_{name}-{point}_Z'] = z
+            if sequence is not None:
+                if value is not None:
+                    q = euler_to_quaternion(value, sequence)
+                    self.__params[f'{type}_{name}-{point}_W'] = q[0]
+                    self.__params[f'{type}_{name}-{point}_X'] = q[1]
+                    self.__params[f'{type}_{name}-{point}_Y'] = q[2]
+                    self.__params[f'{type}_{name}-{point}_Z'] = q[3]
+                else:
+                    if w is not None:
+                        self.__params[f'{type}_{name}-{point}_W'] = w
+                    if x is not None:
+                        self.__params[f'{type}_{name}-{point}_X'] = x
+                    if y is not None:
+                        self.__params[f'{type}_{name}-{point}_Y'] = y
+                    if z is not None:
+                        self.__params[f'{type}_{name}-{point}_Z'] = z
+
+            else:
+                if w is not None:
+                    self.__params[f'{type}_{name}-{point}_W'] = w
+                if x is not None:
+                    self.__params[f'{type}_{name}-{point}_X'] = x
+                if y is not None:
+                    self.__params[f'{type}_{name}-{point}_Y'] = y
+                if z is not None:
+                    self.__params[f'{type}_{name}-{point}_Z'] = z
             self.__set_ppm_params(self.__params)
         elif type == 'Scale':
             if name == 'Size':
