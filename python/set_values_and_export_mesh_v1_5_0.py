@@ -205,57 +205,35 @@ class Bone():
                     self.pose_bone_location_mod = pose_bone.location.copy()
 
                 self.pose_bone_location_mod[axis_idx] += float(val)
-                if self.name == 'Helix_middle' and point == 'Start':
-                    print('self.pose_bone_location_mod: ' + str(self.pose_bone_location_mod))
 
                 if axis=='Z':
                     
-                    # pose_bone.location = self.pose_bone_location_mod
-                    # if self.name == 'Helix_middle' and point == 'Start':
-                    #     print('pose_bone.location: ' + str(pose_bone.location))
-
-                    # transform pose_bone.matrix to global coordinates
+                    # transform pose_bone.matrix to world coordinates
                     mtx_world = obj.matrix_world @ pose_bone.matrix
-                    if self.name == 'Helix_middle' and point == 'Start':
-                        print('mtx_world: \n' + str(mtx_world) + '\n')
 
+                    # decompose world matrix
                     vec_world_location, vec_world_rotation, vec_world_scale = mtx_world.decompose()
-                    if self.name == 'Helix_middle' and point == 'Start':
-                        print('vec_world_location: \n' + str(vec_world_location))
-                        print('vec_world_rotation: \n' + str(vec_world_rotation))
-                        print('vec_world_scale: \n' + str(vec_world_scale) + '\n')
 
-                    # change location in global coordinates
+                    # change location in world coordinates
                     vec_world_location_mod = vec_world_location.copy()
-                    # vec_world_location_mod[axis_idx] += float(val)
                     vec_world_location_mod = vec_world_location_mod + self.pose_bone_location_mod
 
-                    # compose new global matrix
+                    # compose new world matrix
                     mtx_world_mod = Matrix.LocRotScale(vec_world_location_mod, vec_world_rotation, vec_world_scale)
-                    if self.name == 'Helix_middle' and point == 'Start':
-                        print('mtx_world_mod: \n' + str(mtx_world_mod) + '\n')
                     
-                    T1 = Matrix.Translation(vec_world_location-vec_world_location_mod)
-
                     try:
-                        if pose_bone.location is not self.pose_bone_location_ini:
-                            pose_bone.matrix = obj.matrix_world.inverted() @ mtx_world_mod
+                        # transform modified world matrix back to pose matrix
+                        pose_bone.matrix = obj.matrix_world.inverted() @ mtx_world_mod
 
-                            # T2 = Matrix.Translation(self.pose_bone_location_ini-pose_bone.location)
-                            if self.name == 'Helix_middle' and point == 'Start':
-                                print('Location pose_bone.location-pose_bone.location_ini: ' + str(pose_bone.location-self.pose_bone_location_ini))
-
-                            # pose_bone.matrix = T2 @ pose_bone.matrix
+                        # translate object to compensate for change in pose_bone.location
+                        T = Matrix.Translation(self.pose_bone_location_ini-pose_bone.location)
+                        obj.matrix_world = obj.matrix_world @ T
                             
-
-                    except:
-                        if self.name == 'Helix_middle' and point == 'Start':
-                            print('EXCEPTION: pose_bone.matrix = obj.matrix_world.inverted() @ mtx_world_mod')
-                            print('obj.matrix_world' + str(obj.matrix_world))
-
-                    self.pose_bone_location_mod = self.pose_bone_location_ini
+                    except Exception: # if obj.matrix_world is singular
+                        pass
 
         else:
+            
             pose_bone.location[axis_idx] = float(val)
 
     def scaling(self, point, axis, val):
