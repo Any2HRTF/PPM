@@ -117,13 +117,13 @@ class Bone():
                     # world location of the spatial reference point for rotation
                     self.head_ini = self.mtx_world_ini @ Vector(pose_bone.head)
 
-                    if self.name == 'Tragus' and point == 'Start':
-                        print('World matrix (initial): ' + str(self.mtx_world_ini) + '\n')
-                        print('Location world (initial): ' + str(vec_world_location_ini))
-                        print('Rotation world (initial): ' + str(vec_world_rotation_ini))
-                        print('Rotation local (initial): ' + str(pose_bone.rotation_quaternion))
-                        print('Scale world (initial): ' + str(vec_world_scale_ini))
-                        print('Head world (initial): ' + str(self.head_ini) + '\n')
+                    # if self.name == 'Tragus' and point == 'Start':
+                    #     print('World matrix (initial): ' + str(self.mtx_world_ini) + '\n')
+                    #     print('Location world (initial): ' + str(vec_world_location_ini))
+                    #     print('Rotation world (initial): ' + str(vec_world_rotation_ini))
+                    #     print('Rotation local (initial): ' + str(pose_bone.rotation_quaternion))
+                    #     print('Scale world (initial): ' + str(vec_world_scale_ini))
+                    #     print('Head world (initial): ' + str(self.head_ini) + '\n')
 
                     pose_bone.rotation_quaternion[axis_idx] = float(val)
 
@@ -158,161 +158,16 @@ class Bone():
                     T1 = Matrix.Translation(self.head_ini)
                     obj.matrix_world = T1 @ obj.matrix_world
 
-                else:
+                # else:
                     
-                    # print('WARNING: Setting for global rotation of local PPM parameters is not yet working!')
-
-                    if self.name == 'Tragus' and point == 'Start':
-                        # mtx_world_mod = obj.matrix_world.to_4x4() @ vec_world_rotation_modified.to_matrix().to_4x4() @ pose_bone.matrix.to_4x4()
-                        # mtx_local_mod = self.get_matrix_local(pose_bone, mtx_world_mod)
-                        # rot_world = mtx_local_mod.decompose()[1]
-                        # print(rot_world)
-                        # pose_bone.rotation_quaternion = rot_world
-
-                        # # mtx_world_mod = self.get_matrix_world(pose_bone)
-                        # pb_mtx_world_mod = pose_bone.rotation_quaternion.to_matrix().to_4x4() @ obj.matrix_world
-                        # pb_loc_world, pb_rot_world, pb_scl_world = pb_mtx_world_mod.decompose()
-                        
-                        # pb_rot_world_mod = vec_world_rotation_modified @ pb_rot_world
-                        # print('pb_rot_world: ' + str(pb_rot_world))
-                        # print('vec_world_rotation_modified: ' + str(vec_world_rotation_modified))
-
-                        # mtx_world_mod = Matrix.LocRotScale(pb_loc_world, pb_rot_world_mod, pb_scl_world)
-
-                        # # rotate child bones relative to parent bone and global coordinate system
-                        # for child_bone in pose_bone.children:
-                        #     child_bone.matrix = mtx_world_rotation_modified @ child_bone.matrix
-
-                        # # rotate parent bone relative to global coordinate system
-                        # pose_bone.parent.matrix = mtx_world_rotation_modified @ pose_bone.parent.matrix
-
-                        # rotate pose bone relative to global coordinate system with rotation of parent bone
-                        # pose_bone.matrix = mtx_world_rotation_modified @ pose_bone.parent.matrix @ pose_bone.matrix
-                                              
-                        
-
-                        loc_bone_local, rot_bone_local, scl_bone_local = pose_bone.bone.matrix_local.decompose()
-                        print('loc_bone_local: ' + str(loc_bone_local))
-                        print('rot_bone_local: ' + str(rot_bone_local))
-                        print('scl_bone_local: ' + str(scl_bone_local))
-                        rot_bone_local_mod = vec_world_rotation_modified @ rot_bone_local
-                        print("rot_bone_local_mod:\n" + str(rot_bone_local_mod) + '\n')
-                        bone_matrix_local_mod = Matrix.LocRotScale(loc_bone_local, rot_bone_local_mod, scl_bone_local)
-
-                        print("Possible matrices:\n")
-                        bone_matrix_local = pose_bone.bone.matrix_local # describes the bones location, rotation and scaling relative to the armature object (local space)
-                        bone_matrix_basis = pose_bone.matrix_basis
-                        bone_matrix_parent = pose_bone.bone.parent.matrix.to_4x4()
-                        bone_matrix_channel = pose_bone.matrix_channel
-                        bone_head_local = pose_bone.head
-                        bone_head_local_mod = rot_bone_local_mod.to_matrix().to_4x4() @ Matrix.Translation(pose_bone.head)
-                        obj_matrix_local = obj.matrix_local
-                        obj_matrix_global = obj.matrix_world # world-space transformation matrix
-                        
-                        print('bone_matrix_local:\n' + str(bone_matrix_local))
-                        print('bone_matrix_channel:\n' + str(bone_matrix_channel))
-                        print('bone_head_local:\n' + str(bone_head_local))
-                        print('bone_head_local_mod:\n' + str(bone_head_local_mod))
-                        print('bone_matrix_local_mod:\n' + str(bone_matrix_local_mod))
-                        print('bone_matrix_parent:\n' + str(bone_matrix_parent))
-                        print('obj_matrix_local:\n' + str(obj_matrix_local))
-                        print('obj_matrix_global:\n' + str(obj_matrix_global))
-                        
-                        # bone_matrix_pose = bone_matrix_local.inverted() @ bone_matrix_parent.inverted() @ bone_matrix_local_mod
-                        # correct solution is Quaternion (w=-0.4739, x=-0.7805, y=0.3437, z=0.2194)
-                        # calculate correct solution
-
-                        # # >> Back-transformation to pose quaternion does not work yet
-                        # # mtx_pose_mod = self.mtx_world_ini.to_3x3().inverted() @ Quaternion(rot_bone_local).to_matrix() @ mtx_local_bone_mod.to_3x3()
-
-                        # # inv(matrix_local) @ matrix @ p
-                        # # bone_matrix_pose = bone_matrix_local.inverted @ bone_matrix_parent.inverted() @ bone_matrix_local_mod
-
-                        # # bone_matrix_pose = obj.matrix_world @ \
-                        # #                    bone_matrix_channel @ \
-                        # #                    Matrix.Translation(pose_bone.tail).to_4x4() @ \
-                        # #                    bone_head_local_mod @ \
-                        # #                    bone_matrix_local_mod @ \
-                        # #                    obj.matrix_world.inverted()
-
-                        # pose_bone.rotation_quaternion = mtx_pose_mod.to_quaternion()
-                        # # pose_bone.rotation_quaternion = rot_bone_local_mod
-
-                        diff_child_parent = bone_matrix_local.inverted() @ bone_matrix_parent
-                        print('diff_child_parent.to_quaternion()' + str(diff_child_parent.to_quaternion()))
-
-                        diff_child_animated_parent = bone_matrix_local_mod.inverted() @ bone_matrix_parent
-                        print('diff_child_animated_parent.to_quaternion()' + str(diff_child_animated_parent.to_quaternion()))
-
-                        diff_difference = diff_child_animated_parent.to_quaternion().rotation_difference(diff_child_parent.to_quaternion())
-                        print('diff_difference' + str(diff_difference))
-
-                        # calculate pose matrix from local matrix
-                        # mtx_pose_mod = bone_matrix_local_mod.inverted() @ bone_matrix_parent.inverted() @ bone_matrix_local.inverted()
-                        # pose_bone.matrix = mtx_pose_mod
-
-                        # mtx_rotation = bone_head_local @ bone_head_local_mod.to_translation().to_track_quat('Z', 'Y').to_matrix().to_4x4()
-
-                        # # diff_difference2 = diff_child_parent.inverted() @ diff_child_animated_parent
-                        # # print('diff_difference2.to_quaternion()' + str(diff_difference2.to_quaternion()))
-
-                        # # v = bone_head_local_mod.translation - pose_bone.head
-                        # # bv = Matrix.Translation(pose_bone.tail) @ Matrix.Translation(pose_bone.head)
-
-                        # # apply global rotation to pose bone
-
-                        # # print('v' + str(v))
-                        # # print('bv' + str(bv))
-
-                        # # rd = bv.rotation_difference(v)
-
-                        # # M = (
-                        # #     Matrix.Translation(pose_bone.head) @
-                        # #     rd.to_matrix().to_4x4() @
-                        # #     Matrix.Translation(-pose_bone.head)
-                        # #     )
-                        # # pose_bone.matrix = M @ pose_bone.matrix
-
-                        # pose_bone.rotation_quaternion = diff_difference @ pose_bone.rotation_quaternion
-
-
-                        # mtx_pose = self.get_mat_pose(pose_bone, bone_matrix_parent, bone_matrix_local_mod)
-                        # pose_bone.rotation_quaternion = mtx_pose.to_quaternion()
-
-                        # >> very close to actual result
-                        # rotate pose bone relative to global coordinate system
-                        pose_bone.matrix = mtx_world_rotation_modified @ pose_bone.matrix
-                        # << very close to actual result
-                                                              
-                        q_ref = Quaternion((0.92388, -0.100431, -0.363461, -0.065241)) # for rotation by +45 deg along global Z axis
-                        print('q_ref: ' + str(q_ref))
-                        print('pose_bone.rotation_quaternion.rotation_difference(q_ref): ')
-                        print(str(pose_bone.rotation_quaternion.rotation_difference(q_ref)) + '\n')                
-
-
-                        # pose_bone.rotation_quaternion = q_ref.rotation_difference(pose_bone.rotation_quaternion) @ pose_bone.rotation_quaternion
-
-                        # pose_bone.rotation_quaternion = diff_difference @ pose_bone.rotation_quaternion
-
-                        # pose_bone.rotation_quaternion = diff_difference @ obj_matrix_global.to_quaternion()
-                        # pose_bone.rotation_quaternion = mtx_rotation.to_quaternion()
-                        # pose_bone.rotation_quaternion = diff_difference @ pose_bone.rotation_quaternion
-                        print('\n pose_bone.rotation_quaternion: ' + str(pose_bone.rotation_quaternion) + '\n')
-
-                        # q = pose_bone.rotation_quaternion
-                        # q = q_ref.rotation_difference(q)
-                        # pose_bone.rotation_quaternion = q
-
-                        
-
-                
+                    # print('WARNING: Setting for global rotation of local PPM parameters is not yet working!')                       
                 
                 vec_world_location_new, vec_world_rotation_new, vec_world_scale_new = obj.matrix_world.decompose()
-                if self.name == 'Tragus' and point == 'Start':
-                    print('Modified world matrix: ')
-                    print('Location: ' + str(vec_world_location_new))
-                    print('Rotation: ' + str(vec_world_rotation_new))
-                    print('Scale: ' + str(vec_world_scale_new) + '\n')
+                # if self.name == 'Tragus' and point == 'Start':
+                #     print('Modified world matrix: ')
+                #     print('Location: ' + str(vec_world_location_new))
+                #     print('Rotation: ' + str(vec_world_rotation_new))
+                #     print('Scale: ' + str(vec_world_scale_new) + '\n')
             
                 self.rot_flag = True
                 self.location_world_ini = []
@@ -336,10 +191,69 @@ class Bone():
             axis_idx = "error"
 
         if arg_coord_sys_type == 'global':
-            mtx_world = self.get_matrix_world(pose_bone)  
-            vec_world_location, vec_world_rotation, vec_world_scale = mtx_world.decompose()
-            vec_world_location[axis_idx] += float(val)
-            obj.matrix_world = Matrix.LocRotScale(vec_world_location, vec_world_rotation, vec_world_scale)
+            
+            if self.name == 'Size':
+                mtx_world = self.get_matrix_world(pose_bone)  
+                vec_world_location, vec_world_rotation, vec_world_scale = mtx_world.decompose()
+                vec_world_location[axis_idx] += float(val)
+                obj.matrix_world = Matrix.LocRotScale(vec_world_location, vec_world_rotation, vec_world_scale)
+
+            else:
+                
+                if axis=='X':
+                    self.pose_bone_location_ini = pose_bone.location.copy()
+                    self.pose_bone_location_mod = pose_bone.location.copy()
+
+                self.pose_bone_location_mod[axis_idx] += float(val)
+                if self.name == 'Helix_middle' and point == 'Start':
+                    print('self.pose_bone_location_mod: ' + str(self.pose_bone_location_mod))
+
+                if axis=='Z':
+                    
+                    # pose_bone.location = self.pose_bone_location_mod
+                    # if self.name == 'Helix_middle' and point == 'Start':
+                    #     print('pose_bone.location: ' + str(pose_bone.location))
+
+                    # transform pose_bone.matrix to global coordinates
+                    mtx_world = obj.matrix_world @ pose_bone.matrix
+                    if self.name == 'Helix_middle' and point == 'Start':
+                        print('mtx_world: \n' + str(mtx_world) + '\n')
+
+                    vec_world_location, vec_world_rotation, vec_world_scale = mtx_world.decompose()
+                    if self.name == 'Helix_middle' and point == 'Start':
+                        print('vec_world_location: \n' + str(vec_world_location))
+                        print('vec_world_rotation: \n' + str(vec_world_rotation))
+                        print('vec_world_scale: \n' + str(vec_world_scale) + '\n')
+
+                    # change location in global coordinates
+                    vec_world_location_mod = vec_world_location.copy()
+                    # vec_world_location_mod[axis_idx] += float(val)
+                    vec_world_location_mod = vec_world_location_mod + self.pose_bone_location_mod
+
+                    # compose new global matrix
+                    mtx_world_mod = Matrix.LocRotScale(vec_world_location_mod, vec_world_rotation, vec_world_scale)
+                    if self.name == 'Helix_middle' and point == 'Start':
+                        print('mtx_world_mod: \n' + str(mtx_world_mod) + '\n')
+                    
+                    T1 = Matrix.Translation(vec_world_location-vec_world_location_mod)
+
+                    try:
+                        if pose_bone.location is not self.pose_bone_location_ini:
+                            pose_bone.matrix = obj.matrix_world.inverted() @ mtx_world_mod
+
+                            # T2 = Matrix.Translation(self.pose_bone_location_ini-pose_bone.location)
+                            if self.name == 'Helix_middle' and point == 'Start':
+                                print('Location pose_bone.location-pose_bone.location_ini: ' + str(pose_bone.location-self.pose_bone_location_ini))
+
+                            # pose_bone.matrix = T2 @ pose_bone.matrix
+                            
+
+                    except:
+                        if self.name == 'Helix_middle' and point == 'Start':
+                            print('EXCEPTION: pose_bone.matrix = obj.matrix_world.inverted() @ mtx_world_mod')
+                            print('obj.matrix_world' + str(obj.matrix_world))
+
+                    self.pose_bone_location_mod = self.pose_bone_location_ini
 
         else:
             pose_bone.location[axis_idx] = float(val)
@@ -366,78 +280,6 @@ class Bone():
 
         else:
             pose_bone.scale[axis_idx] = float(val)
-
-    # ported from blenkernel/intern/armature.c to python
-    # --------------------------------------------------------------------
-    def get_mat_offs(self, bone):        
-        mat_offs = bone.matrix.to_4x4()
-        mat_offs.translation = bone.head
-        mat_offs.translation.y += bone.parent.length
-
-        return mat_offs
-
-    def get_mat_rest(self, pose_bone, mat_pose_parent):
-        bone = pose_bone.bone
-
-        if pose_bone.parent:
-            mat_offs = self.get_mat_offs(bone)
-
-            # --------- rotscale       
-            if (not bone.use_inherit_rotation and 
-                not bone.use_inherit_scale):                
-                mat_rotscale = bone.parent.matrix_local@mat_offs
-
-            elif not bone.use_inherit_rotation:                        
-                mat_size = Matrix.Identity(4)
-                for i in range(3):
-                    mat_size[i][i] = mat_pose_parent.col[i].magnitude
-                mat_rotscale = mat_size @ bone.parent.matrix_local @ mat_offs
-
-            elif not bone.use_inherit_scale:
-                mat_rotscale = mat_pose_parent.normalized()@mat_offs
-
-            else:
-                mat_rotscale = mat_pose_parent @ mat_offs
-
-            # --------- location     
-            if not bone.use_local_location:
-                mat_a = Matrix.Translation(
-                    mat_pose_parent@mat_offs.translation)
-
-                mat_b = mat_pose_parent.copy()
-                mat_b.translation = Vector()
-
-                mat_loc = mat_a @ mat_b
-
-            elif (not bone.use_inherit_rotation or 
-                not bone.use_inherit_scale):                  
-                mat_loc = mat_pose_parent @ mat_offs
-
-            else:
-                mat_loc = mat_rotscale.copy()
-
-        else:    
-            mat_rotscale = bone.matrix_local
-            if not bone.use_local_location:
-                mat_loc = Matrix.Translation(bone.matrix_local.translation)
-            else:
-                mat_loc = mat_rotscale.copy()      
-
-        return mat_rotscale, mat_loc
-
-    def get_mat_pose(self, pose_bone, mat_pose_parent=None, mat_basis=None):
-        if pose_bone.parent and not mat_pose_parent:
-            mat_pose_parent = pose_bone.parent.matrix
-        if not mat_basis:
-            mat_basis = pose_bone.matrix_basis
-
-        mat_rotscale, mat_loc = self.get_mat_rest(pose_bone, mat_pose_parent)    
-        mat_pose = mat_rotscale @ mat_basis
-        mat_pose.translation = mat_loc @ mat_basis.translation
-
-        return mat_pose 
-    
-    # --------------------------------------------------------------------
 
     def get_matrix_world(self, pose_bone):
 
