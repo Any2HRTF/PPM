@@ -75,6 +75,7 @@ class Bone():
 
         self.name = name
         self.rot_flag = False
+        self.scl_flag = False
         ear.bones.append(self)
         ear.bonesLookup[self.name] = self
 
@@ -234,7 +235,7 @@ class Bone():
 
         else:
             
-            pose_bone.location[axis_idx] = float(val)
+            pose_bone.location[axis_idx] += float(val)
 
     def scaling(self, point, axis, val):
         
@@ -250,14 +251,45 @@ class Bone():
         else:
             axis_idx = "error"
 
-        if arg_coord_sys_type == 'global':       
-            mtx_world = self.get_matrix_world(pose_bone)
-            vec_world_location, vec_world_rotation, vec_world_scale = mtx_world.decompose()
-            vec_world_scale[axis_idx] *= float(val)
-            obj.matrix_world = Matrix.LocRotScale(vec_world_location, vec_world_rotation, vec_world_scale)
+        if self.name=='Size':
+            print('axis = '+ str(axis))
+
+        if arg_coord_sys_type == 'global':  
+            
+            if self.name == 'Size'  and self.scl_flag == False:
+                if axis=='X':
+                    self.pose_bone_scale_ini = pose_bone.scale.copy()
+                    self.pose_bone_scale_mod = pose_bone.scale.copy()
+
+                self.pose_bone_scale_mod[axis_idx] = float(val)
+
+                if axis=='Z':
+                    print('self.pose_bone_scale_mod: \n' + str(self.pose_bone_scale_mod))
+
+                    mtx_world = self.get_matrix_world(pose_bone)
+                    vec_world_location, vec_world_rotation, vec_world_scale = mtx_world.decompose()
+                    print('vec_world_scale: \n' + str(vec_world_scale))
+                    
+                    # change scale in world coordinates
+                    vec_world_scale_mod = vec_world_scale.copy()
+                    vec_world_scale_mod = vec_world_scale * self.pose_bone_scale_mod
+                    print('vec_world_scale_mod: \n' + str(vec_world_scale_mod))
+
+                    obj.matrix_world = Matrix.LocRotScale(vec_world_location, vec_world_rotation, vec_world_scale_mod)
+                    print('obj.matrix_world: \n' + str(obj.matrix_world))
+
+                    # pose_bone.scale = self.get_matrix_local(pose_bone, mtx_world_mod).decompose()[2]
+                    # print('pose_bone.scale: \n' + str(pose_bone.scale))
+
+                    # # pose_bone.matrix = obj.matrix_world.inverted() @ mtx_world_mod
+
+                    self.pose_bone_scale_mod = self.pose_bone_scale_ini
+                    self.scl_flag = True
 
         else:
-            pose_bone.scale[axis_idx] = float(val)
+
+            pose_bone.scale[axis_idx] *= float(val)
+
 
     def get_matrix_world(self, pose_bone):
 
