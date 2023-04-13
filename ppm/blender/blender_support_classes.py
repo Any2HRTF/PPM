@@ -10,6 +10,7 @@ import cv2
 from pyntcloud import PyntCloud
 import bpy
 import mathutils
+from mathutils import Vector, Matrix, Quaternion, Euler
 os.environ["OPENCV_IO_ENABLE_OPENEXR"]="1"
 
 class Bone():
@@ -26,6 +27,42 @@ class Bone():
         blender_object.bones.append(self)
         blender_object.bones_lookup[self.name] = self
 
+        if 'Size' not in self.name:
+            try:
+                pose_bone = bpy.data.objects["Armature"].pose.bones[self.name + "-" + 'Start']
+            except:
+                pose_bone = bpy.data.objects["Armature"].pose.bones[self.name + "-" + 'End']
+
+            self.pose_bone_location_ini = pose_bone.location.copy()
+            self.pose_bone_location_mod = pose_bone.location.copy()
+
+        
+    
+    def get_matrix_world(self, pose_bone):
+
+        armature = bpy.data.objects["Armature"]
+
+        matrix_world = armature.convert_space(
+                    pose_bone = pose_bone,
+                    matrix = pose_bone.matrix_basis,
+                    from_space = 'POSE',
+                    to_space = 'WORLD',
+                    )
+        
+        return matrix_world
+
+    def get_matrix_local(self, pose_bone, matrix_world):
+
+        armature = bpy.data.objects["Armature"]
+
+        matrix_local = armature.convert_space(
+                    pose_bone = pose_bone,
+                    matrix = matrix_world,
+                    from_space = 'WORLD',
+                    to_space = 'POSE',
+                    )
+        
+        return matrix_local
 
     def rotation(self, point, axis, val):
         r"""Rotate bone."""
@@ -44,8 +81,10 @@ class Bone():
         bpy.data.objects["Armature"].pose.bones[self.name + \
             "-" + point].rotation_quaternion[axis_idx] = float(val)
 
-    def location(self, point, axis, val):
-        r"""Move bone."""
+    def location(self, point, axis, val, coordinate_system:str='global'):
+
+        obj = bpy.data.objects["Armature"]
+        pose_bone = bpy.data.objects["Armature"].pose.bones[self.name + "-" + point]
 
         if axis == 'X':
             axis_idx = 0
@@ -56,8 +95,34 @@ class Bone():
         else:
             axis_idx = "error"
 
-        bpy.data.objects["Armature"].pose.bones[self.name + \
-            "-" + point].location[axis_idx] = float(val)
+        if coordinate_system == 'global':
+            
+            if self.name == 'Size':
+                mtx_world = self.get_matrix_world(pose_bone)  
+                vec_world_location, vec_world_rotation, vec_world_scale = mtx_world.decompose()
+                vec_world_location[axis_idx] += float(val)
+                obj.matrix_world = Matrix.LocRotScale(vec_world_location, vec_world_rotation, vec_world_scale)
+
+            else:
+                self.pose_bone_location_mod[axis_idx] += float(val)
+                # transform pose_bone.matrix to world coordinates
+                mtx_world = obj.matrix_world @ pose_bone.matrix
+
+                # decompose world matrix
+                vec_world_location, vec_world_rotation, vec_world_scale = mtx_world.decompose()
+
+                # change location in world coordinates
+                vec_world_location_mod = vec_world_location.copy()
+                vec_world_location_mod = vec_world_location_mod + self.pose_bone_location_mod
+
+                # compose new world matrix
+                mtx_world_mod = Matrix.LocRotScale(vec_world_location_mod, vec_world_rotation, vec_world_scale)
+                
+                # transform modified world matrix back to pose matrix
+                pose_bone.matrix = obj.matrix_world.inverted() @ mtx_world_mod
+        else:
+            
+            pose_bone.location[axis_idx] += float(val)
 
     def scaling(self, point, axis, val):
         r"""Scale bone."""

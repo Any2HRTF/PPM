@@ -19,12 +19,17 @@ setup(
     python_requires='>3.10',
     zip_safe=False,
     install_requires=[
-        "bpy",
         "numpy",
+        "bpy",
         "opencv-python",
         "pyntcloud",
         "matplotlib"
     ],
+    # extras_require={
+    #     "plotting": [
+    #         "matplotlib",
+    #     ],
+    # },
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
