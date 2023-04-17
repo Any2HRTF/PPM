@@ -208,19 +208,15 @@ class Bone():
                     # compose new world matrix
                     mtx_world_mod = Matrix.LocRotScale(vec_world_location_mod, vec_world_rotation, vec_world_scale)
                     
-                    try:
+                    if obj.matrix_world.determinant() != 0:
                         # transform modified world matrix back to pose matrix
                         pose_bone.matrix = obj.matrix_world.inverted() @ mtx_world_mod
 
                         # translate object to compensate for change in pose_bone.location
                         T = Matrix.Translation(self.pose_bone_location_ini-pose_bone.location)
                         obj.matrix_world = obj.matrix_world @ T
-                            
-                    except Exception: # if obj.matrix_world is singular
-                        pass
 
         else:
-            
             pose_bone.location[axis_idx] += float(val)
 
     def scaling(self, point, axis, val):
@@ -243,7 +239,7 @@ class Bone():
 
             # if axis=='X':
             #             self.scale_world_ini = Vector((0, 0, 0))
-
+            
             # mtx_world = self.get_matrix_world_from_local(pose_bone)
             # vec_world_position, vec_world_rotation, vec_world_scale = mtx_world.decompose()
             # vec_world_scale[axis_idx] *= float(val)
