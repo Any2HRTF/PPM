@@ -234,46 +234,17 @@ class Bone():
             axis_idx = "error"
 
         if arg_coord_sys_type == 'global':  
+           
+            if self.name == 'Size':
+                mtx_world = self.get_matrix_world_from_local(pose_bone)
+                vec_world_position, vec_world_rotation, vec_world_scale = mtx_world.decompose()
+                vec_world_scale[axis_idx] *= float(val)
+                mtx_world_mod = Matrix.LocRotScale(vec_world_position, vec_world_rotation, vec_world_scale)
+                mtx_local = self.get_matrix_local(pose_bone, mtx_world_mod)
+                pose_bone.matrix_basis = mtx_local
 
-            warnings.warn('WARNING: Manipulation of PPM scale parameters in global coordinates is not yet working!')  
-
-            # if axis=='X':
-            #             self.scale_world_ini = Vector((0, 0, 0))
-            
-            # mtx_world = self.get_matrix_world_from_local(pose_bone)
-            # vec_world_position, vec_world_rotation, vec_world_scale = mtx_world.decompose()
-            # vec_world_scale[axis_idx] *= float(val)
-            # mtx_world_mod = Matrix.LocRotScale(vec_world_position, vec_world_rotation, vec_world_scale)
-            # mtx_local = self.get_matrix_local(pose_bone, mtx_world_mod)
-            # pose_bone.matrix_basis = mtx_local
-
-            # if self.name == 'Size':
-            #     print('pose_bone.scale = ' + str(pose_bone.scale))
-
-            # if self.name == 'Size'  and self.scl_flag == False:
-            #     if axis=='X':
-            #         self.pose_bone_scale_ini = pose_bone.scale.copy()
-            #         self.pose_bone_scale_mod = pose_bone.scale.copy()
-
-            #     self.pose_bone_scale_mod[axis_idx] = float(val)
-
-            #     if axis=='Z':
-            #         mtx_world = self.get_matrix_world_from_local(pose_bone)
-            #         vec_world_location, vec_world_rotation, vec_world_scale = mtx_world.decompose()
-            #         print('vec_world_scale: \n' + str(vec_world_scale))
-                    
-            #         # change scale in world coordinates
-            #         vec_world_scale_mod = vec_world_scale.copy()
-            #         vec_world_scale_mod = vec_world_scale_mod * self.pose_bone_scale_mod
-            #         print('vec_world_scale_mod: \n' + str(vec_world_scale_mod))
-
-            #         obj.matrix_world = Matrix.LocRotScale(vec_world_location, vec_world_rotation, vec_world_scale_mod)
-            #         print('obj.matrix_world: \n' + str(obj.matrix_world))
-
-            #         # pose_bone.matrix = obj.matrix_world.inverted() @ matrix_world_mod
-
-            #         # self.pose_bone_scale_mod = self.pose_bone_scale_ini
-            #         self.scl_flag = True
+            else:
+                warnings.warn('WARNING: Manipulation of local PPM scale parameters in global coordinates is not yet working!')  
 
         else:
 
