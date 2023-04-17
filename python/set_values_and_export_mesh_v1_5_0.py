@@ -26,6 +26,7 @@ import math
 # import mathutils
 from mathutils import Vector, Matrix, Quaternion, Euler
 import numpy as np
+import warnings
 
 stdout = io.StringIO()
 
@@ -106,7 +107,7 @@ class Bone():
                     # if self.name=='Size':
                     #     print('Pose-bone location after bounding-box adjustment: ' + str(pose_bone.location))
 
-                    mtx_world_ini = self.get_matrix_world(pose_bone)
+                    mtx_world_ini = self.get_matrix_world_from_pose(pose_bone)
                     vec_world_location_ini, vec_world_rotation_ini, vec_world_scale_ini = mtx_world_ini.decompose()
                     
                     self.mtx_world_ini = Matrix(mtx_world_ini)
@@ -117,14 +118,6 @@ class Bone():
 
                     # world location of the spatial reference point for rotation
                     self.head_ini = self.mtx_world_ini @ Vector(pose_bone.head)
-
-                    # if self.name == 'Tragus' and point == 'Start':
-                    #     print('World matrix (initial): ' + str(self.mtx_world_ini) + '\n')
-                    #     print('Location world (initial): ' + str(vec_world_location_ini))
-                    #     print('Rotation world (initial): ' + str(vec_world_rotation_ini))
-                    #     print('Rotation local (initial): ' + str(pose_bone.rotation_quaternion))
-                    #     print('Scale world (initial): ' + str(vec_world_scale_ini))
-                    #     print('Head world (initial): ' + str(self.head_ini) + '\n')
 
                     pose_bone.rotation_quaternion[axis_idx] = float(val)
 
@@ -159,17 +152,9 @@ class Bone():
                     T1 = Matrix.Translation(self.head_ini)
                     obj.matrix_world = T1 @ obj.matrix_world
 
-                # else:
-                    
-                    # print('WARNING: Setting for global rotation of local PPM parameters is not yet working!')                       
-                
-                vec_world_location_new, vec_world_rotation_new, vec_world_scale_new = obj.matrix_world.decompose()
-                # if self.name == 'Tragus' and point == 'Start':
-                #     print('Modified world matrix: ')
-                #     print('Location: ' + str(vec_world_location_new))
-                #     print('Rotation: ' + str(vec_world_rotation_new))
-                #     print('Scale: ' + str(vec_world_scale_new) + '\n')
-            
+                else:
+                    warnings.warn('WARNING: Manipulation of local PPM rotation parameters in global coordinates is not yet working!')                       
+                            
                 self.rot_flag = True
                 self.location_world_ini = []
 
@@ -194,10 +179,11 @@ class Bone():
         if arg_coord_sys_type == 'global':
             
             if self.name == 'Size':
-                mtx_world = self.get_matrix_world(pose_bone)  
+                mtx_world = self.get_matrix_world_from_pose(pose_bone)  
                 vec_world_location, vec_world_rotation, vec_world_scale = mtx_world.decompose()
-                vec_world_location[axis_idx] += float(val)
-                obj.matrix_world = Matrix.LocRotScale(vec_world_location, vec_world_rotation, vec_world_scale)
+                vec_world_location_mod = vec_world_location.copy()
+                vec_world_location_mod[axis_idx] += float(val)
+                obj.matrix_world = Matrix.LocRotScale(vec_world_location_mod, vec_world_rotation, vec_world_scale)
 
             else:
                 
@@ -251,47 +237,54 @@ class Bone():
         else:
             axis_idx = "error"
 
-        if self.name=='Size':
-            print('axis = '+ str(axis))
-
         if arg_coord_sys_type == 'global':  
-            
-            if self.name == 'Size'  and self.scl_flag == False:
-                if axis=='X':
-                    self.pose_bone_scale_ini = pose_bone.scale.copy()
-                    self.pose_bone_scale_mod = pose_bone.scale.copy()
 
-                self.pose_bone_scale_mod[axis_idx] = float(val)
+            warnings.warn('WARNING: Manipulation of PPM scale parameters in global coordinates is not yet working!')  
 
-                if axis=='Z':
-                    print('self.pose_bone_scale_mod: \n' + str(self.pose_bone_scale_mod))
+            # if axis=='X':
+            #             self.scale_world_ini = Vector((0, 0, 0))
 
-                    mtx_world = self.get_matrix_world(pose_bone)
-                    vec_world_location, vec_world_rotation, vec_world_scale = mtx_world.decompose()
-                    print('vec_world_scale: \n' + str(vec_world_scale))
+            # mtx_world = self.get_matrix_world_from_local(pose_bone)
+            # vec_world_position, vec_world_rotation, vec_world_scale = mtx_world.decompose()
+            # vec_world_scale[axis_idx] *= float(val)
+            # mtx_world_mod = Matrix.LocRotScale(vec_world_position, vec_world_rotation, vec_world_scale)
+            # mtx_local = self.get_matrix_local(pose_bone, mtx_world_mod)
+            # pose_bone.matrix_basis = mtx_local
+
+            # if self.name == 'Size':
+            #     print('pose_bone.scale = ' + str(pose_bone.scale))
+
+            # if self.name == 'Size'  and self.scl_flag == False:
+            #     if axis=='X':
+            #         self.pose_bone_scale_ini = pose_bone.scale.copy()
+            #         self.pose_bone_scale_mod = pose_bone.scale.copy()
+
+            #     self.pose_bone_scale_mod[axis_idx] = float(val)
+
+            #     if axis=='Z':
+            #         mtx_world = self.get_matrix_world_from_local(pose_bone)
+            #         vec_world_location, vec_world_rotation, vec_world_scale = mtx_world.decompose()
+            #         print('vec_world_scale: \n' + str(vec_world_scale))
                     
-                    # change scale in world coordinates
-                    vec_world_scale_mod = vec_world_scale.copy()
-                    vec_world_scale_mod = vec_world_scale * self.pose_bone_scale_mod
-                    print('vec_world_scale_mod: \n' + str(vec_world_scale_mod))
+            #         # change scale in world coordinates
+            #         vec_world_scale_mod = vec_world_scale.copy()
+            #         vec_world_scale_mod = vec_world_scale_mod * self.pose_bone_scale_mod
+            #         print('vec_world_scale_mod: \n' + str(vec_world_scale_mod))
 
-                    obj.matrix_world = Matrix.LocRotScale(vec_world_location, vec_world_rotation, vec_world_scale_mod)
-                    print('obj.matrix_world: \n' + str(obj.matrix_world))
+            #         obj.matrix_world = Matrix.LocRotScale(vec_world_location, vec_world_rotation, vec_world_scale_mod)
+            #         print('obj.matrix_world: \n' + str(obj.matrix_world))
 
-                    # pose_bone.scale = self.get_matrix_local(pose_bone, mtx_world_mod).decompose()[2]
-                    # print('pose_bone.scale: \n' + str(pose_bone.scale))
+            #         # pose_bone.matrix = obj.matrix_world.inverted() @ matrix_world_mod
 
-                    # # pose_bone.matrix = obj.matrix_world.inverted() @ mtx_world_mod
-
-                    self.pose_bone_scale_mod = self.pose_bone_scale_ini
-                    self.scl_flag = True
+            #         # self.pose_bone_scale_mod = self.pose_bone_scale_ini
+            #         self.scl_flag = True
 
         else:
 
             pose_bone.scale[axis_idx] *= float(val)
 
 
-    def get_matrix_world(self, pose_bone):
+    def get_matrix_world_from_pose(self, pose_bone):
 
         armature = bpy.data.objects["Armature"]
 
@@ -303,7 +296,33 @@ class Bone():
                     )
         
         return matrix_world
+    
+    def get_matrix_world_from_local(self, pose_bone):
 
+        armature = bpy.data.objects["Armature"]
+
+        matrix_world = armature.convert_space(
+                    pose_bone = pose_bone,
+                    matrix = pose_bone.matrix_basis,
+                    from_space = 'LOCAL',
+                    to_space = 'WORLD',
+                    )
+
+        return matrix_world
+
+    def get_matrix_pose(self, pose_bone, matrix_world):
+
+        armature = bpy.data.objects["Armature"]
+
+        matrix_pose = armature.convert_space(
+                    pose_bone = pose_bone,
+                    matrix = matrix_world,
+                    from_space = 'WORLD',
+                    to_space = 'POSE',
+                    )
+        
+        return matrix_pose
+    
     def get_matrix_local(self, pose_bone, matrix_world):
 
         armature = bpy.data.objects["Armature"]
@@ -312,7 +331,7 @@ class Bone():
                     pose_bone = pose_bone,
                     matrix = matrix_world,
                     from_space = 'WORLD',
-                    to_space = 'POSE',
+                    to_space = 'LOCAL',
                     )
         
         return matrix_local
