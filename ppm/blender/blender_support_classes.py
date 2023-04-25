@@ -7,8 +7,8 @@ from contextlib import redirect_stdout
 import shutil
 import numpy as np
 import cv2
-from pyntcloud import PyntCloud
 import bpy
+import bmesh
 import mathutils
 from mathutils import Vector, Matrix, Quaternion, Euler
 os.environ["OPENCV_IO_ENABLE_OPENEXR"]="1"
@@ -215,14 +215,41 @@ class BaseBlenderObject():
             bpy.ops.object.select_all(action='DESELECT')
 
 
-    def _get_pc(self, selection: str) -> np.ndarray:
+   def _get_pc(self, selection: str) -> np.ndarray:
         """Get point cloud from blender"""
 
-        cloud = PyntCloud.from_file(self._export_pc(selection))
-        cloud = cloud.points.values
+        self.__select(selection, True)
+
+        if bpy.ops.object.mode_set.poll():
+            bpy.ops.object.mode_set(mode='OBJECT')
+
+        context = bpy.context
+        context.window.cursor_set('WAIT')
+        obs = context.selected_objects
+
+        depsgraph = context.evaluated_depsgraph_get()
+        bm = bmesh.new()
+
+        for ob in obs:
+            ob_eval = ob.evaluated_get(depsgraph)
+
+            try:
+                me = ob_eval.to_mesh()
+            except RuntimeError:
+                continue
+
+            me.transform(ob.matrix_world)
+            bm.from_mesh(me)
+            ob_eval.to_mesh_clear()
+
+        # save mesh
+        mesh = np.array([vert.co for vert in bm.verts])
+
+        bm.free()
+
+        return mesh
 
 
-        return cloud.astype(np.float32)
 
     def _export_pc(self, selection: str, target_file_ply=None):
         """Export point cloud from blender"""
