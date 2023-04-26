@@ -215,7 +215,7 @@ class BaseBlenderObject():
             bpy.ops.object.select_all(action='DESELECT')
 
 
-   def _get_pc(self, selection: str) -> np.ndarray:
+    def _get_pc(self, selection: str) -> np.ndarray:
         """Get point cloud from blender"""
 
         self.__select(selection, True)
