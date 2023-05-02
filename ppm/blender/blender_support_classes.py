@@ -81,7 +81,7 @@ class Bone():
         bpy.data.objects["Armature"].pose.bones[self.name + \
             "-" + point].rotation_quaternion[axis_idx] = float(val)
 
-    def location(self, point, axis, val, coordinate_system:str='global'):
+    def location(self, point, axis, val, coordinate_system:str='local'):
 
         obj = bpy.data.objects["Armature"]
         pose_bone = bpy.data.objects["Armature"].pose.bones[self.name + "-" + point]
@@ -95,7 +95,7 @@ class Bone():
         else:
             axis_idx = "error"
 
-        if coordinate_system == 'global':
+        if coordinate_system == 'local':
             
             if self.name == 'Size':
                 mtx_world = self.get_matrix_world(pose_bone)  
