@@ -17,7 +17,7 @@ class PPM(BaseBlenderObject):
         from_blender_file (str): Path to a blender file to load the PPM from; if None, the standard PPM is loaded
         from_csv_file (str): Path to a csv file to load the PPM parameters from; if None, the standard PPM is loaded
     """
-    def __init__(self, from_blender_file=None, from_csv_file=None):
+    def __init__(self, from_blender_file=None, from_csv_file=None, from_parameter_dict=None):
 
         if from_blender_file and from_csv_file:
             raise ValueError("Please only provide one of the parameters from_blender_file and from_csv_file")
@@ -63,6 +63,9 @@ class PPM(BaseBlenderObject):
             ppm_params = read_csv(from_csv_file,  header=None, index_col=0)
             for param_name, value in ppm_params.iterrows():
                 self.__params[param_name] = value.values[0]
+        if from_parameter_dict is not None:
+            for param_name, value in from_parameter_dict.items():
+                self.__params[param_name] = value
 
     def get_parameters(self):
         """Get PPM parameters from Blender
