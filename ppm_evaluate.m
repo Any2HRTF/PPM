@@ -86,26 +86,26 @@ pc_target_temp = pcread(fullfile(p.Results.path_pc_target, p.Results.name_pc_tar
 ppm.evaluate.pc_target = double(pc_target_temp.Location);
 
 %% Load result point clouds exported in the corresponding iterations
-pc_result = dir(fullfile(ppm.ini.path.result,'pc'));
+pc_result = dir(fullfile(strrep(ppm.ini.path.result,'"',''),'pc'));
 pc_result_name = {pc_result(3:end).name};
 
 if itr==1
     try
-        pc_result_temp = pcread(fullfile(fullfile(ppm.ini.path.result,'pc'), ...
+        pc_result_temp = pcread(fullfile(fullfile(strrep(ppm.ini.path.result,'"',''),'pc'), ...
             [num2str(p.Results.sample_start_idx),'.ply']));
     catch
         error(['Input error. Result point cloud ', ...
-            fullfile(fullfile(ppm.ini.path.result,'ply'), [num2str(p.Results.sample_start_idx),'.ply']),...
+            fullfile(fullfile(strrep(ppm.ini.path.result,'"',''),'ply'), [num2str(p.Results.sample_start_idx),'.ply']),...
             ' does not exist. Consider specifying ''sample_start_idx''.'])
     end
     ppm.evaluate.pc_result = pc_result_temp.Location;
 else % itr>1
     try
-        pc_result_temp = pcread(fullfile(fullfile(ppm.ini.path.result,'pc'), ...
+        pc_result_temp = pcread(fullfile(fullfile(strrep(ppm.ini.path.result,'"',''),'pc'), ...
             [num2str(p.Results.sample_start_idx),'.ply']));
     catch
         error(['Input error. Result point cloud ', ...
-            fullfile(fullfile(ppm.ini.path.result,'ply'), [num2str(p.Results.sample_start_idx),'.ply']),...
+            fullfile(fullfile(strrep(ppm.ini.path.result,'"',''),'ply'), [num2str(p.Results.sample_start_idx),'.ply']),...
             ' does not exist. Consider specifying ''sample_start_idx''.'])
     end
     ppm.evaluate.pc_result = pc_result_temp.Location;
@@ -114,7 +114,7 @@ else % itr>1
         size(ppm.evaluate.pc_result,2),itr); 
     pc_result_mtx(:,:,1) = ppm.evaluate.pc_result;
     for idx=p.Results.sample_start_idx+1:p.Results.sample_start_idx+itr-1
-        pc_result_temp = pcread(fullfile(fullfile(ppm.ini.path.result,'pc'),...
+        pc_result_temp = pcread(fullfile(fullfile(strrep(ppm.ini.path.result,'"',''),'pc'),...
             pc_result_name{idx-p.Results.sample_start_idx+1}));
         pc_result_mtx(:,:,idx-p.Results.sample_start_idx+1) = pc_result_temp.Location;
     end
