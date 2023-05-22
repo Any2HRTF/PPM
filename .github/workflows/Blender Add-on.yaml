@@ -1,4 +1,4 @@
-name: make Blender Add-on release
+name: Make Blender Add-on release
 
 on:
     release:
