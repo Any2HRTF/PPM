@@ -1,4 +1,4 @@
-name: Build Python Wheels
+name: Build Python Wheel
 
 
 on:
