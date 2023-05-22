@@ -217,7 +217,7 @@ class Bone():
                         obj.matrix_world = obj.matrix_world @ T
 
         else:
-            pose_bone.location[axis_idx] += float(val)
+            pose_bone.location[axis_idx] = float(val)
 
     def scaling(self, point, axis, val):
         
@@ -248,7 +248,7 @@ class Bone():
 
         else:
 
-            pose_bone.scale[axis_idx] *= float(val)
+            pose_bone.scale[axis_idx] = float(val)
 
 
     def get_matrix_world_from_pose(self, pose_bone):
