@@ -407,7 +407,7 @@ if ~ismember(p.Results.rotation_mode,{'quaternion','XYZ','XZY','YXZ','YZX','ZXY'
 end
 
 %% Fetch parameter values of Blender file if not done yet
-if ~exist(fullfile(ppm.ini.path.result,'parameters'),'dir')
+if ~exist(fullfile(strrep(ppm.ini.path.result,'"',''),'parameters'),'dir')
     ppm = ppm_get_values(ppm,...
         'sample_start_idx',p.Results.sample_start_idx);
 end
