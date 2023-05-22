@@ -189,7 +189,7 @@ def hausdorff_distance(P,Q):
         # Calculate the minimum distance from points in P to Q
         dist[p, 0] = np.min(np.sum((P[p, :] - Q)**2, axis=1))
 
-    return dist
+    return np.sqrt(dist)
 
 def check_if_nomats(obj):
     if len(obj.data.materials)==0:
