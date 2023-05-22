@@ -82,7 +82,12 @@ end
 set(0, 'DefaultFigureRenderer', 'opengl');
 
 %% Load specified target point cloud
-pc_target_temp = pcread(fullfile(p.Results.path_pc_target, p.Results.name_pc_target));
+if ~exist(fullfile(p.Results.path_pc_target, ...
+    p.Results.name_pc_target),'file')
+    error('Path error: File ''name_pc_target'' does not exist in ''path_pc_target''.')
+end
+pc_target_temp = pcread(fullfile(p.Results.path_pc_target, ...
+    p.Results.name_pc_target));
 ppm.evaluate.pc_target = double(pc_target_temp.Location);
 
 %% Load result point clouds exported in the corresponding iterations
