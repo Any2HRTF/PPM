@@ -80,10 +80,11 @@ end
 
 %% Create .txt file containing the current parameter values
 if ~exist(fullfile(ppm.ini.path.result,'parameters'),'dir')
-    mkdir(fullfile(ppm.ini.path.result,'parameters'))
+    mkdir(fullfile(strrep(ppm.ini.path.result,'"',''),'parameters'))
 end
 
-writecell(ppm.parameters, fullfile(ppm.ini.path.result,'parameters','blender_bones_data.txt'));
+writecell(ppm.parameters, fullfile(strrep(ppm.ini.path.result,'"',''),...
+    'parameters','blender_bones_data.txt'));
 
 %% Fetch parameter values from the specified Blender file
 
@@ -91,6 +92,11 @@ writecell(ppm.parameters, fullfile(ppm.ini.path.result,'parameters','blender_bon
 parsePool = [p.Results.pc, p.Results.mesh];
 parsePoolString = {'TRUE','FALSE'};
 parsedStrings = parsePoolString((parsePool==0)+1);
+
+% resolve issues with paths containing spaces
+dquotes = '"';
+ppm.ini.blender_file = strcat(dquotes, ppm.ini.blender_file, dquotes);
+ppm.ini.path.result = strcat(dquotes, ppm.ini.path.result, dquotes);
 
 switch ppm.ini.verbose_level
     case 0
@@ -136,7 +142,7 @@ switch ppm.ini.verbose_level
         end
 end
 
-parameters = importdata(fullfile(ppm.ini.path.result,'parameters',...
+parameters = importdata(fullfile(strrep(ppm.ini.path.result,'"',''),'parameters',...
                         [num2str(p.Results.sample_start_idx),'.txt']));
 ppm.parameters(:,4) = num2cell(parameters.data);
 
@@ -175,4 +181,5 @@ else
 
 end
 
-delete(fullfile(ppm.ini.path.result,'parameters','blender_bones_data.txt'))
+delete(fullfile(fullfile(strrep(ppm.ini.path.result,'"',''),...
+    'parameters','blender_bones_data.txt')))
