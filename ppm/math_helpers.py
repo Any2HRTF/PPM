@@ -1,4 +1,50 @@
 import numpy as np
+from scipy.spatial.distance import directed_hausdorff
+from .core_class import PPM
+
+def minimal_distances(P:PPM, Q:PPM) -> np.array:
+    """Calculates the minimal distances between two point clouds.
+
+    Parameters
+    ----------
+    P : PPM
+        PPM realisation P.
+    Q : PPM
+        PPM realisation Q.
+
+    Returns
+    -------
+    np.array
+        Minimal distances between the two point clouds of the PPMs.
+    """
+    P_points = P.get_point_cloud()
+    Q_points = Q.get_point_cloud()
+    
+    dist = np.zeros(P_points.shape[0], dtype=np.float32)
+    for idx_pred in range(dist.shape[0]):
+        dist[idx_pred] = np.min(np.sum((P_points[idx_pred, :] - Q_points)**2, axis=1))
+
+    return np.sqrt(dist)
+
+def hausdorff_distance(P:PPM, Q:PPM) -> np.float32:
+    """Calculates the Hausdorff distance between two point clouds.
+
+    Parameters
+    ----------
+    P : PPM
+        PPM realisation P.
+    Q : PPM
+        PPM realisation Q.
+
+    Returns
+    -------
+    np.float32
+        Hausdorff distance between the two point clouds.
+    """
+    P_points = P.get_point_cloud()
+    Q_points = Q.get_point_cloud()
+
+    return directed_hausdorff(P_points, Q_points)[0]
 
 def euler_to_quaternion(euler_matrix:np.array, sequence:str='ZYX') -> np.array:
     """Transforms a rotation matrix into a quaternion.
