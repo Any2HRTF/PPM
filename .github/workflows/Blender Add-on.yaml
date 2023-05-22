@@ -5,27 +5,27 @@ on:
       types: [published]
 
 jobs:
-deploy:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v1
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+        - uses: actions/checkout@v1
 
-    - name: Get release
-    id: get_release
-    uses: bruceadams/get-release@v1.3.2
-    env:
-        GITHUB_TOKEN: ${{ github.token }}
+        - name: Get release
+          id: get_release
+          uses: bruceadams/get-release@v1.3.2
+          env:
+            GITHUB_TOKEN: ${{ github.token }}
 
-    - name: Make zip
-    run: |
-        zip -r 'Blender Add-on.zip' 'Blender Add-on'
+        - name: Make zip
+          run: |
+            zip -r 'Blender Add-on.zip' 'Blender Add-on'
 
-    - name: Upload release asset
-    uses: actions/upload-release-asset@v1∂
-        id: upload-release-asset
-        with:
-        upload_url: ${{ steps.get_release.outputs.upload_url }}
-        asset_path: './Blender Add-on.zip'
-        asset_name: 'Blender Add-on.zip'
-        asset_content_type: 'application/zip'
-        github_token: ${{ github.token }}
+        - name: Upload release asset
+          uses: actions/upload-release-asset@v1∂
+          id: upload-release-asset
+          with:
+            upload_url: ${{ steps.get_release.outputs.upload_url }}
+            asset_path: './Blender Add-on.zip'
+            asset_name: 'Blender Add-on.zip'
+            asset_content_type: 'application/zip'
+            github_token: ${{ github.token }}
