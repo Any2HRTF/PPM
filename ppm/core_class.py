@@ -4,12 +4,10 @@ import csv
 import numpy as np
 from contextlib import redirect_stdout
 
-
 import bpy
 import bmesh
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
-
 
 class PPM():
     """PPM class
@@ -23,6 +21,9 @@ class PPM():
 
         if from_blender_file is not None and from_csv_file is not None:
             raise Exception('Either load from blender file or from csv file.')
+        
+        if backend is not 'blender' and from_blender_file is not None:
+            raise Exception('Blender backend not selected.')
 
         self.backend = backend
 
@@ -31,16 +32,46 @@ class PPM():
 
         if self.backend is 'blender':
             if from_blender_file is not None:
-                if self.backend is not 'blender':
-                    raise Exception('Blender backend not selected.')
-                bpy.ops.wm.open_mainfile(filepath=from_blender_file)
+                with redirect_stdout(io.StringIO()):
+                    bpy.ops.wm.open_mainfile(filepath=from_blender_file)
             else:
-                bpy.ops.wm.open_mainfile(filepath=f'{CURRENT_DIR}/resources/PPM_modified_v1.blend')
+                with redirect_stdout(io.StringIO()):
+                    bpy.ops.wm.open_mainfile(filepath=f'{CURRENT_DIR}/resources/PPM_modified_v1.blend')
             self.__get_parameters_from_blender()
         
         # rerun fct to load parameters from csv file
         if from_csv_file is not None:
             self.__parameters = self.__load_parameters_from_csv(from_csv_file)
+
+    @property
+    def points(self):
+        return self.get_point_cloud()
+
+    @property
+    def parameters(self):
+        return self.__parameters
+    
+    @parameters.setter
+    def parameters(self, parameters):
+        for parameter_name, parameter in parameters.items():
+            for point_name, point in parameter.items():
+                if point_name == 'Shape_key':
+                    self.__parameters[parameter_name][point_name] = point
+                else:
+                    for type_name, type in point.items():
+                        if type_name == 'Scale' and parameter_name is not 'Size':
+                            self.__parameters[parameter_name][point_name][type_name] = type
+                        else:
+                            for axis_name, axis in type.items():
+                                self.__parameters[parameter_name][point_name][type_name][axis_name] = axis
+
+    def set_parameter(self, parameter, point, type, axis, value):
+        if point == 'Shape_key':
+            self.__parameters[parameter][point] = value
+        elif type == 'Scale' and parameter is not 'Size':
+            self.__parameters[parameter][point][type] = value
+        else:
+            self.__parameters[parameter][point][type][axis] = value
 
     def __load_parameters_from_csv(self, csv_file=None) -> dict:
 
@@ -183,7 +214,6 @@ class PPM():
                                     2 if axis == 'Z' else
                                     None]
 
-
     def __get_point_cloud_blender(self):
 
         obj = bpy.data.objects['ARI_PPM_v1']
@@ -308,3 +338,20 @@ class PPM():
         with open(file_path, 'w', newline='') as csvfile:
             for key, value in export_dict.items():
                 csvfile.write(f'{key},{value}\n')
+
+    def __render_blender(self, file_path):
+        pass
+
+    def render(self, file_path):
+        """Renders the PPM.
+
+        Parameters
+        ----------
+        file_path : str
+            Path to the rendered image.
+        """
+        if self.backend == 'blender':
+            self.__set_parameters_in_blender()
+            self.__render_blender(file_path)
+        else:
+            raise NotImplementedError
