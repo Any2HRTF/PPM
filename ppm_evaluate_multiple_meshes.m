@@ -3,7 +3,7 @@
 %
 % Related functions : ppm_initialize, ppm_get_values, ppm_evaluate
 
-% #Author: Florian Pausch (2022)
+% #Author: Florian Pausch (2023)
 
 clear; close all; clc
 
@@ -27,7 +27,7 @@ mesh_target = {
     'NH1060_target.ply',...
     'NH1061_target.ply'};
 
-sel = 4; % select meshes to be evaluated
+sel = 4:6; % select meshes to be evaluated
 
 wb = waitbar(0,sprintf('Evaluating mesh %s/%s...',...
     num2str(1),num2str(numel(sel))));
@@ -39,7 +39,7 @@ for idx=sel
     ppm = ppm_initialize(...
         'path_blender_file',ppm_path,...
         'name_blender_file',mesh_ppm{idx},...
-        'verbose_level',2,...
+        'verbose_level',0,...
         'auto_delete',true);
 
     %% Get parameter values from the specified blender file
@@ -56,7 +56,7 @@ for idx=sel
         figure('units','normalized','outerposition',[0.19,0.05,0.62,0.91])
         tiledlayout(numel(sel),2)
     end
-    ppm_plot_hd(ppm,...
+    ppm_plot_distance(ppm,...
         'caxis_min',0,...
         'caxis_max',5);
 
