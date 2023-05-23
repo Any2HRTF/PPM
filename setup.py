@@ -9,30 +9,22 @@ setup(
     url='https://github.com/Any2HRTF/PPM',
     author='Felix Perfler',
     author_email='felix.perfler@oeaw.ac.at',
-    license='The MIT License',
+    license='EUPL-1.2',
     readme='README.md',
     packages=find_packages(),
     package_data={
         'ppm': ['resources/*.csv', 'resources/*.blend'],
     },
     include_package_data=True,
-    python_requires='>3.10',
+    python_requires='<3.10',
     zip_safe=False,
     install_requires=[
         "numpy",
-        "bpy",
-        "opencv-python",
-        "pyntcloud",
-        "matplotlib"
+        "bpy"
     ],
-    # extras_require={
-    #     "plotting": [
-    #         "matplotlib",
-    #     ],
-    # },
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: European Union Public Licence 1.2 (EUPL 1.2)",
         "Operating System :: OS Independent",
     ]
 )
