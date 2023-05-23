@@ -2,7 +2,6 @@ function [dist_dir1, dist_dir2, hd] = hausdorff_dist(P,Q)
 %hausdorff_dist - Calculate the directed minimum pointwise distance between  
 % two sets of points P and Q in Euclidian space [1, 2]. The Hausdorff
 % distance corresponds to the larger supremum of dist_dir1 and dist_dir2. 
-% Function adapted from [3].
 %
 %   Usage: 
 %
@@ -24,11 +23,8 @@ function [dist_dir1, dist_dir2, hd] = hausdorff_dist(P,Q)
 %     (These), Gauthier-Villars, Paris, 1905; Ann.Fac.Sci.de Toulouse, 7 
 %     (1905), 264–315.
 % [2] Hausdorff, F., Set Theory, Chelsea Publishing Company, New York, 1957
-% [3] Zachary Danziger (2022). Hausdorff Distance 
-%     (https://www.mathworks.com/matlabcentral/fileexchange/26738-hausdorff-distance), 
-%     MATLAB Central File Exchange. Retrieved February 18, 2022. 
 
-% #Author: Florian Pausch (2022)   
+% #Author: Florian Pausch (2023)   
 
 % Calculate the minimum pointwise distance between P and Q
 dist_dir1 = zeros(size(P,1),1);
