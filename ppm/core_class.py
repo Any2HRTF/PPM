@@ -1,7 +1,13 @@
 import os
+import csv
 import numpy as np
 
-from .math_helpers import euler_to_quaternion
+import bpy
+import bmesh
+
+# from .math_helpers import euler_to_quaternion
+
+CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 class PPM():
@@ -12,19 +18,172 @@ class PPM():
         from_blender_file (str): Path to a blender file to load the PPM from; if None, the standard PPM is loaded
         from_csv_file (str): Path to a csv file to load the PPM parameters from; if None, the standard PPM is loaded
     """
-    def __init__(self, from_blender_file=None, from_csv_file=None, from_parameter_dict=None, backend='blender'):
+    def __init__(self, from_blender_file=None, from_csv_file=None, backend='blender'):
+
+        if from_blender_file is not None and from_csv_file is not None:
+            raise Exception('Either load from blender file or from csv file.')
 
         self.backend = backend
-        if self.backend == 'blender':
-            import bpy
-            import bmesh
 
+        # load init parameters
+        self.parameters = self.__load_parameters_from_csv()
+
+        if self.backend is 'blender':
+            if from_blender_file is not None:
+                if self.backend is not 'blender':
+                    raise Exception('Blender backend not selected.')
+                bpy.ops.wm.open_mainfile(filepath=from_blender_file)
+            else:
+                bpy.ops.wm.open_mainfile(filepath=f'{CURRENT_DIR}/resources/PPM_modified_v1.blend')
+            self.__get_parameters_from_blender()
+
+            self.__set_parameters_in_blender()  
+        
+        # rerun fct to load parameters from csv file
+        if from_csv_file is not None:
+            self.parameters = self.__load_parameters_from_csv(from_csv_file)
+
+    def __load_parameters_from_csv(self, csv_file=None) -> dict:
+
+        if csv_file is None:
+            csv_file = f'{CURRENT_DIR}/resources/PPM_params_default_v1.csv'
+
+        with open(csv_file, newline='', encoding='utf-8') as csvfile:
+            reader = csv.reader(csvfile)
+            parameters = {}
+            for row in reader:
+                if 'Shape_key' in row[0]:
+                    type = 'Shape_key'
+                    name = row[0].replace('Shape_key_', '')
+                    point = None
+                    axis = None
+                elif 'Scale' in row[0]:
+                    type = 'Scale'
+                    name = '_'.join(row[0].split('-')[0].split('_')[1:])
+                    point = '_'.join(row[0].split('-')[1].split('_'))
+                    if 'Size' in row[0]:
+                        axis = point.split('_')[-1]
+                        point = point.split('_')[0]
+                    else:
+                        axis = None
+                else:
+                    type = row[0].split('_')[0]
+                    name = '_'.join(row[0].split('-')[0].split('_')[1:])
+                    point = '_'.join(row[0].split('-')[1].split('_')[:-1])
+                    axis = row[0].split('_')[-1]
+                    
+                value = float(row[1])
+
+                if type  == 'Scale':
+                    pass
+                
+                if name not in parameters:
+                    parameters[name] = {}
+                if point is not None:
+                    if point not in parameters[name]:
+                        parameters[name][point] = {}
+                    if axis is not None:
+                        if type not in parameters[name][point]:
+                            parameters[name][point][type] = {}
+                        parameters[name][point][type][axis] = value
+                    else:
+                        parameters[name][point][type] = value
+                else:
+                    if axis is not None:
+                        if type not in parameters[name]:
+                            parameters[name][type] = {}
+                        parameters[name][type][axis] = value
+                    else:
+                        parameters[name][type] = value            
+
+        return parameters
+            
+    def reset_parameters(self):
+        """Resets the PPM parameters to the default parameters.
+        """
+        self.parameters = self.__load_parameters_from_csv()
 
     def __set_parameters_in_blender(self):
-        pass
+        obj = bpy.data.objects["Armature"]
+
+        for parameter_name, parameter in self.parameters.items():
+            # shape keys
+            if 'Shape_key' in parameter.keys():
+                bpy.data.shape_keys['Key.002'].key_blocks[parameter_name].value = self.parameters[parameter_name]['Shape_key']
+            else:
+                for point_name, point in parameter.items():
+                    # scale
+                    if 'Scale' in point.keys():
+                        if 'Size' in parameter_name:
+                            for axis, axis_value in point['Scale'].items():
+                                obj.pose.bones[parameter_name + "-" + point_name].scale[
+                                        0 if axis == 'X' else 
+                                        1 if axis == 'Y' else 
+                                        2 if axis == 'Z' else 
+                                        None] = axis_value
+                                    
+                        else:
+                            obj.pose.bones[parameter_name + "-" + point_name].scale[0] = self.parameters[parameter_name][point_name]['Scale']
+                    # rotation
+                    if 'Rotation' in point.keys():
+                        for axis, axis_value in point['Rotation'].items():
+                            obj.pose.bones[parameter_name + "-" + point_name].rotation_quaternion[
+                                    0 if axis == 'W' else
+                                    1 if axis == 'X' else
+                                    2 if axis == 'Y' else
+                                    3 if axis == 'Z' else
+                                    None] = axis_value
+                    # location
+                    if 'Location' in point.keys():
+                        for axis, axis_value in point['Location'].items():
+                            obj.pose.bones[parameter_name + "-" + point_name].location[
+                                    0 if axis == 'X' else
+                                    1 if axis == 'Y' else
+                                    2 if axis == 'Z' else
+                                    None] = axis_value
 
     def __get_parameters_from_blender(self):
-        pass
+
+        obj = bpy.data.objects["Armature"]
+
+        for parameter_name, parameter in self.parameters.items():
+            # shape keys
+            if 'Shape_key' in parameter.keys():
+                self.parameters[parameter_name]['Shape_key'] = bpy.data.shape_keys['Key.002'].key_blocks[parameter_name].value
+            else:
+                for point_name, point in parameter.items():
+                    # scale
+                    if 'Scale' in point.keys():
+                        if 'Size' in parameter_name:
+                            for axis, axis_value in point['Scale'].items():
+                                self.parameters[parameter_name][point_name]['Scale'][axis] = \
+                                    obj.pose.bones[parameter_name + "-" + point_name].scale[
+                                        0 if axis == 'X' else 
+                                        1 if axis == 'Y' else 
+                                        2 if axis == 'Z' else 
+                                        None]
+                        else:
+                            self.parameters[parameter_name][point_name]['Scale'] = obj.pose.bones[parameter_name + "-" + point_name].scale[0]
+                    # rotation
+                    if 'Rotation' in point.keys():
+                        for axis, axis_value in point['Rotation'].items():
+                            self.parameters[parameter_name][point_name]['Rotation'][axis] = \
+                                obj.pose.bones[parameter_name + "-" + point_name].rotation_quaternion[
+                                    0 if axis == 'W' else
+                                    1 if axis == 'X' else
+                                    2 if axis == 'Y' else
+                                    3 if axis == 'Z' else
+                                    None]
+                    # location
+                    if 'Location' in point.keys():
+                        for axis, axis_value in point['Location'].items():
+                            self.parameters[parameter_name][point_name]['Location'][axis] = \
+                                obj.pose.bones[parameter_name + "-" + point_name].location[
+                                    0 if axis == 'X' else
+                                    1 if axis == 'Y' else
+                                    2 if axis == 'Z' else
+                                    None]
+
 
     def __get_point_cloud_blender(self):
         obj = bpy.data.objects['ARI_PPM_v1']
