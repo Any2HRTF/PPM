@@ -46,10 +46,6 @@ function ppm = ppm_set_values(ppm,varargin)
 %                                provide triplets of X-, Y-, and Z-axis values 
 %                                if N parameter values are to be changed
 %                                simultaneously!
-%     'coordinate_system': Type of coordinate system and related axes to base 
-%                          manipulations of location, rotation, scale on:
-%                          'local': use local coordinate system (default)
-%                          'global': use global coordinate system
 %     'instruction_mode' : Instruction mode [string]
 %                           'rel': val is added to val_orig and subsequently 
 %                                  assigned to the parameter (default)
@@ -143,7 +139,6 @@ function ppm = ppm_set_values(ppm,varargin)
 %             .auto_correct [logical] 
 %             .instruction_mode [string]
 %             .rotation_mode [string]
-%             .coordinate_system [string]
 %             .cam_loc [double]
 %             .cam_rot [double]
 %             .cam_loc_ref [double]
@@ -210,7 +205,6 @@ addOptional(p,'auto_correct',false);
 addOptional(p,'range',1);
 addOptional(p,'instruction_mode','rel');
 addOptional(p,'rotation_mode','quaternion');
-addOptional(p,'coordinate_system','local');
 addOptional(p,'cam_loc',[-10, 200, 5]);
 addOptional(p,'cam_rot',[90, 0, 180]);
 addOptional(p,'cam_loc_ref',[]); 
@@ -398,10 +392,6 @@ if ~ismember(p.Results.instruction_mode,{'rel','abs'})
     error('Input error. Instruction mode must be either ''rel'' or ''abs''.')
 end
 
-if ~ismember(p.Results.coordinate_system,{'local','global'})
-    error('Input error. Coordinate system must be either ''local'' or ''global''.')
-end
-
 if ~ismember(p.Results.rotation_mode,{'quaternion','XYZ','XZY','YXZ','YZX','ZXY','ZYX'})
     error('Input error. Rotation mode must be either ''quaternion'',''XYZ'',''XZY'',''YXZ'',''YZX'',''ZXY'', or ''ZYX''.')
 end
@@ -469,7 +459,6 @@ ppm.modify.sample_start_idx  = p.Results.sample_start_idx;
 ppm.modify.auto_correct      = p.Results.auto_correct;
 ppm.modify.instruction_mode  = p.Results.instruction_mode;
 ppm.modify.rotation_mode     = p.Results.rotation_mode;
-ppm.modify.coordinate_system = p.Results.coordinate_system;
 ppm.modify.cam_loc           = p.Results.cam_loc;
 ppm.modify.cam_rot           = p.Results.cam_rot;
 ppm.modify.cam_loc_ref       = p.Results.cam_loc_ref;
