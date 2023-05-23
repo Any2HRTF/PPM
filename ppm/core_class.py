@@ -6,6 +6,8 @@ from contextlib import redirect_stdout
 
 import bpy
 import bmesh
+import mathutils
+import math
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -339,10 +341,151 @@ class PPM():
             for key, value in export_dict.items():
                 csvfile.write(f'{key},{value}\n')
 
-    def __render_blender(self, file_path):
-        pass
+    def __render_blender(self,
+                         file_path,
+                         filename,
+                         resolution: int=256,
+                         depth: bool=True,
+                         shade_smooth: bool=True,
+                         image_comp: int=0,
+                         image_col_dep='8',
+                         cam_loc:tuple=(-10,200,5),
+                         cam_rot:tuple=(90, 0, 180),
+                         cam_loc_ref:tuple=None,
+                         depth_farthest=0,
+                         depth_nearest='cam_loc',
+                         depth_codec_exr='NONE',
+                         depth_col_dep_exr='16',
+                         depth_comp_exr=8):
 
-    def render(self, file_path):
+        # Scene-render settings
+        bpy.context.scene.render.engine = 'CYCLES' # CYCLES, BLENDER_EEVEE, WORKBENCH
+        bpy.context.view_layer.cycles.denoising_store_passes = True
+
+        cam = bpy.data.objects['Camera']
+        cam.rotation_mode = 'XYZ'
+        bpy.context.scene.camera = cam
+
+        # Optionally smooth mesh faces for more pleasing rendering results
+        if shade_smooth:
+            mesh = bpy.context.object.data
+            for polygon in mesh.polygons:
+                polygon.use_smooth = True
+
+        cam.location = mathutils.Vector((float(cam_loc[0]),
+                                            float(cam_loc[1]),
+                                            float(cam_loc[2])))
+        bpy.context.view_layer.update()
+
+        cam.rotation_euler = mathutils.Euler((
+                                    math.radians(float(cam_rot[0])),
+                                    math.radians(float(cam_rot[1])),
+                                    math.radians(float(cam_rot[2]))),
+                                    cam.rotation_mode
+                                )
+
+        if cam_loc_ref is not None:
+
+            cam_loc_mtx = cam.matrix_world.to_translation()
+            cam_rot = mathutils.Vector((float(cam_loc_ref[0]),
+                                        float(cam_loc_ref[1]),
+                                        float(cam_loc_ref[2]))) - cam_loc_mtx
+
+            cam_rot_quat = cam_rot.to_track_quat('-Z','Y')
+
+            cam.rotation_euler = cam_rot_quat.to_euler()
+
+        bpy.context.view_layer.update()
+
+        # render image and depth information, and store as png and exr files
+
+        bpy.context.scene.render.use_compositing = True
+        bpy.context.scene.render.filepath = file_path + '/' + filename 
+
+        bpy.data.scenes["Scene"].render.resolution_x = resolution
+        bpy.data.scenes["Scene"].render.resolution_y = resolution
+        bpy.data.scenes["Scene"].render.image_settings.color_depth = image_col_dep
+        bpy.data.scenes["Scene"].render.image_settings.compression = image_comp
+        bpy.data.scenes["Scene"].render.image_settings.color_mode = 'BW'
+
+        # Enable nodes
+        bpy.context.scene.use_nodes = True
+
+        tree = bpy.context.scene.node_tree
+        links = tree.links
+
+        # Clear default nodes
+        for node in tree.nodes:
+            tree.nodes.remove(node)
+
+        # Create render-layers node
+        render_layer = tree.nodes.new(type='CompositorNodeRLayers')
+
+        # Create denoising node
+        denoise = tree.nodes.new(type='CompositorNodeDenoise')
+
+        if depth:
+            # Create map-range node
+            tree_map = tree.nodes.new(type='CompositorNodeMapRange')
+
+            # set map minimum in Blender units
+            if depth_farthest=='0': #default
+                tree_map.inputs[1].default_value = 0
+            else:
+                tree_map.inputs[1].default_value = float(depth_farthest)
+            if depth_nearest=='cam_loc': # default
+                # Set map maximum to Euclidian distance of camera to origin
+                cam = bpy.data.objects['Camera']
+                dist_l2 = math.sqrt(cam.location.x**2 + cam.location.y**2 + cam.location.z**2)
+                # map maximum in Blender units
+                tree_map.inputs[2].default_value = dist_l2
+            else:
+                # map maximum in Blender units
+                tree_map.inputs[2].default_value = float(depth_nearest)
+
+            # Map values between 1 (white) and zero (black)
+            # map minimum in normalised units (linear steps when using OPEN_EXR)
+            tree_map.inputs[3].default_value = 1
+            # map minimum in normalised units (linear steps when using OPEN_EXR)
+            tree_map.inputs[4].default_value = 0
+
+            # Link output of render-layers node to input of map node (exr depth)
+            links.new(render_layer.outputs['Depth'], tree_map.inputs['Value'])
+
+            # Create a file-output node, set the path, and file format (exr depth)
+            file_output_exr_depth = tree.nodes.new(type='CompositorNodeOutputFile')
+            file_output_exr_depth.base_path = file_path
+            file_output_exr_depth.format.file_format = "OPEN_EXR"
+            file_output_exr_depth.file_slots[0].path = filename +\
+                file_output_exr_depth.format.file_format # file name with appended frame idx
+            file_output_exr_depth.format.color_depth = depth_col_dep_exr
+            file_output_exr_depth.format.compression = depth_comp_exr
+            file_output_exr_depth.format.exr_codec = depth_codec_exr
+
+            # Link output of map node to input of compositor-output node (exr depth)
+            links.new(tree_map.outputs['Value'], file_output_exr_depth.inputs['Image'])
+
+        links.new(render_layer.outputs['Image'], denoise.inputs['Image'])
+        links.new(render_layer.outputs['Denoising Normal'], denoise.inputs['Normal'])
+        links.new(render_layer.outputs['Denoising Albedo'], denoise.inputs['Albedo'])
+
+        # Create a file-output node, set the path, and file format (png)
+        file_output_png = tree.nodes.new(type='CompositorNodeOutputFile')
+        file_output_png.base_path = file_path
+        file_output_png.format.file_format = "PNG"
+        file_output_png.file_slots[0].path = filename
+        file_output_png.format.color_depth = image_col_dep
+        file_output_png.format.compression = int(image_comp)
+
+        # Link denoise-node output with compositor-output node (png)
+        links.new(denoise.outputs['Image'], file_output_png.inputs['Image'])
+
+        # Render!
+        with redirect_stdout(io.StringIO()):
+            bpy.ops.render.render()
+
+
+    def render(self, file_path, filename):
         """Renders the PPM.
 
         Parameters
@@ -352,6 +495,6 @@ class PPM():
         """
         if self.backend == 'blender':
             self.__set_parameters_in_blender()
-            self.__render_blender(file_path)
+            self.__render_blender(file_path, filename)
         else:
             raise NotImplementedError
