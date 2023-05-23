@@ -48,7 +48,7 @@ type_ppm_input = 'single'; % {'single','multi'}
 
 %% Initialize PPM
 path_blender_file = 'D:\owncloud\SONICOM\WP1\PPM\Experiments\Collaboration with Paris-SOU\PPMs double-checked';
-name_blender_file = 'NH1060.blend';
+name_blender_file = 'NH1059.blend';
 
 ppm = ppm_initialize(...
     'path_blender_file',path_blender_file,...
@@ -67,7 +67,7 @@ sample_start_idx = 1;
     'mesh',true,...
     'sample_start_idx',sample_start_idx);
 
-% Display the selected parameter subset
+% Display the values of the selected parameter subsets
 if ppm.ini.verbose_level>0
     disp(val)
 end
@@ -89,7 +89,7 @@ switch type_ppm_input
             'axis','X',...
             'val',0,...
             'range',4,...
-            'itr',3,...
+            'itr',1,...
             'sample_start_idx',sample_start_idx,...
             'instruction_mode','abs', ...
             'rotation_mode','XYZ',...
@@ -124,9 +124,8 @@ switch type_ppm_input
         type_cell = ppm.parameters(selection_cell,1);
         name_cell = ppm.parameters(selection_cell,2);
         axis_cell = ppm.parameters(selection_cell,3);
-%         val_cell = cellfun(@(x) x-0.07, ppm.parameters(selection_cell,4),'UniformOutput',0);
-%         val_cell = readcell('D:\owncloud\SONICOM\WP1\PPM\Releases\SONICOM_Synthetic_PPM_HRTF_Dataset\extracted_PPM_parameters\converted_PPM_parameters\L\16_PPM_L_v1_0_0_plus.txt');
 
+%         val_cell = cellfun(@(x) x-0.07, ppm.parameters(selection_cell,4),'UniformOutput',0);
         val_cell = readcell('D:\git\PPM\data\test.txt');
         val_cell = val_cell(:,4);
 
