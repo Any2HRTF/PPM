@@ -53,11 +53,11 @@ function ppm = ppm_initialize(varargin)
     %
     % ATTENTION: The Blender file to be modified needs to be saved in "Object Mode"
     %            in Blender with visible armature and object definitions
-    %            in viewport.
+    %            in the viewport.
     %
     % Related functions : ppm_get_values, ppm_set_values, ppm_evaluate
     
-    % #Author: Florian Pausch (2022)
+    % #Author: Florian Pausch (2023)
     
     %% Parse input arguments
     p = inputParser;
