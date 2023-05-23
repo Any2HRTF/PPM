@@ -27,7 +27,7 @@ mesh_target = {
     'NH1060_target.ply',...
     'NH1061_target.ply'};
 
-sel = 4:6; % select meshes to be evaluated
+sel = 4:6; % select PPMs to be evaluated
 
 wb = waitbar(0,sprintf('Evaluating mesh %s/%s...',...
     num2str(1),num2str(numel(sel))));
@@ -46,12 +46,12 @@ for idx=sel
     [ppm,val] = ppm_get_values(ppm);
 
     %% Compare the resulting mesh to the specified target mesh
-    %  and evaluate its fit based on Hausdorff distances, plot result
+    %  and evaluate its fit based on pointwise minimum distances, plot result
     ppm = ppm_evaluate(ppm,...
         'path_pc_target',target_path,...
         'name_pc_target',mesh_target{idx});
 
-    % Plot result mesh with color-coded Hausdorff distance
+    % Plot result mesh with color-coded directed pointwise minimum distance
     if idx==sel(1)
         figure('units','normalized','outerposition',[0.19,0.05,0.62,0.91])
         tiledlayout(numel(sel),2)
