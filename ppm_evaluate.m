@@ -26,36 +26,45 @@ function ppm = ppm_evaluate(ppm,varargin)
 %
 %   ppm : PPM structure array extended by
 %         .evaluate
-%             .val             : If ppm.modify > 1 the parameter value is 
-%                                set to the one resulting in the minimum mean
-%                                minimum Hausdorff distance across iterations
-%             .pc_target       : Target point cloud [double]
-%             .pc_result       : Resulting point cloud after modifications of PPM 
-%                                parameters [double]
+%             .val                   : If ppm.modify > 1 the parameter value is 
+%                                      set to the one resulting in the minimum mean
+%                                      minimum Hausdorff distance across iterations
+%             .pc_target             : Target point cloud [double]
+%             .pc_result             : Resulting point cloud after modifications of PPM 
+%                                      parameters [double]
 %             .sample_start_idx [double]
-%             .hd              : Minimum Hausdorff distance per point 
-%                                of the result point cloud [double]
-%             .hd_mean         : Average minimum Hausdorff distance 
-%                                across the entire result point cloud per 
-%                                iteration (if ppm.modify.itr > 1) [double]
-%             .hd_std          : Standard deviation of minimum Hausdorff distance 
-%                                across the entire result point cloud per 
-%                                iteration (if ppm.modify.itr > 1) [double]
-%             .hd_median       : Median of minimum Hausdorff distance 
-%                                across the entire result point cloud per 
-%                                iteration (if ppm.modify.itr > 1) [double]
-%             .hd_mean_min     : Minimum average minimum Hausdorff distance 
-%                                across all iterations point cloud (if 
-%                                ppm.modify.itr > 1) [double]
-%             .hd_mean_min_itr : Index of iteration that yielded the 
-%                                minimum average minimum Hausdorff distance 
-%                                (only relevant if ppm.modify.itr > 1) [double]
+%             .dist_dir1             : Directed minimum pointwise distances between  
+%                                      two sets of points P and Q [double]
+%             .dist_dir2             : Directed minimum pointwise distances between  
+%                                      two sets of points Q and P [double]
+%             .dist_dir_idx          : Direction containing larger supremum  
+%                                      in minimum pointwise distances [double] 
+%             .hd                    : Hausdorff distance, i.e. larger supremum of 
+%                                      dist_dir1 and dist_dir2 [double]
+%             .dist_dir_mean         : Average directed minimum pointwise distance 
+%                                      for the direction with larger supremum (per 
+%                                      iteration if ppm.modify.itr > 1) [double]
+%             .dist_dir_std          : Standard deviation of the directed minimum 
+%                                      pointwise distance for the direction with 
+%                                      larger supremum (per iteration if 
+%                                      ppm.modify.itr > 1) [double]
+%             .dist_dir_mdn          : Median of the directed minimum pointwise distance 
+%                                      for the direction with larger supremum (per 
+%                                      iteration if ppm.modify.itr > 1) [double]
+%             .dist_dir_mean_min     : Minimum average directed minimum pointwise 
+%                                      distance for the direction with larger supremum  
+%                                      across all iterations point cloud (if 
+%                                      ppm.modify.itr > 1) [double]
+%             .dist_dir_mean_min_itr : Index of iteration that yielded the 
+%                                      minimum directed minimum pointwise distance 
+%                                      for the direction with larger supremum  
+%                                      (only relevant if ppm.modify.itr > 1) [double]
 %
 % Related functions : ppm_initialize, ppm_get_values, ppm_set_values, 
 %                     
 % Dependencies      : Computer Vision Toolbox
 
-% #Author: Florian Pausch (2022)
+% #Author: Florian Pausch (2023)
 
 %% Parse input arguments
 p = inputParser;
@@ -126,11 +135,24 @@ else % itr>1
     ppm.evaluate.pc_result = pc_result_mtx;
 end
 
-%% Calculate Hausdorff distance and visualize result
+%% Calculate distance metrics and visualise result
 if itr==1
     
     % Compare result and target point clouds
-    ppm.evaluate.hd = hausdorff_dist(ppm.evaluate.pc_result,ppm.evaluate.pc_target);
+    [ppm.evaluate.dist_dir1, ppm.evaluate.dist_dir2, ppm.evaluate.hd] = ...
+        hausdorff_dist(ppm.evaluate.pc_result,ppm.evaluate.pc_target);
+
+    [~, ppm.evaluate.dist_dir_idx] = max([max(ppm.evaluate.dist_dir1), ...
+        max(ppm.evaluate.dist_dir2)]);
+    if ppm.evaluate.dist_dir_idx==1
+        ppm.evaluate.dist_dir_mean = mean(ppm.evaluate.dist_dir1);
+        ppm.evaluate.dist_dir_std = std(ppm.evaluate.dist_dir1);
+        ppm.evaluate.dist_dir_mdn = median(ppm.evaluate.dist_dir1);
+    else 
+        ppm.evaluate.dist_dir_mean = mean(ppm.evaluate.dist_dir2);
+        ppm.evaluate.dist_dir_std = std(ppm.evaluate.dist_dir2);
+        ppm.evaluate.dist_dir_mdn = median(ppm.evaluate.dist_dir2);
+    end
 
     if ppm.ini.verbose_level>0
        
@@ -141,30 +163,40 @@ if itr==1
         figure('units','normalized','outerposition',[0 0 1 1])
         tiledlayout(1,2)
 
-        % Plot result point cloud with color-coded Hausdorff distance
-        ppm_plot_hd(ppm,...
+        % Plot result point cloud with color-coded pointwise minimum
+        % distances
+        ppm_plot_distance(ppm,...
             'caxis_min',p.Results.caxis_min,...
             'caxis_max',p.Results.caxis_max);
 
-        disp([mfilename,': Average minimum pointwise distance (mu+/-sigma, Mdn): ', ...
-            [num2str(mean(ppm.evaluate.hd)),'+/-',num2str(std(ppm.evaluate.hd)), ', ', ...
-            num2str(median(ppm.evaluate.hd))]]);
-    
+        fprintf([mfilename,': Average minimum pointwise distance for direction 1:\n\t', ...
+            ['M+/-SD = ', num2str(mean(ppm.evaluate.dist_dir1)),'+/-',num2str(std(ppm.evaluate.dist_dir1)), ', ', ...
+            'Mdn = ', num2str(median(ppm.evaluate.dist_dir1))]]);
+
+        fprintf(['\n', mfilename,': Average minimum pointwise distance for direction 2:\n\t', ...
+            ['M+/-SD = ', num2str(mean(ppm.evaluate.dist_dir2)),'+/-',num2str(std(ppm.evaluate.dist_dir2)), ', ', ...
+            'Mdn = ', num2str(median(ppm.evaluate.dist_dir2))]]);
+
+        fprintf(['\n', mfilename,': Hausdorff distance:\n\t', ...
+            [num2str(ppm.evaluate.hd),'\n']]);
     end
     
 else % itr > 1
     
-    % Create a matrix to store HDs given by different parameter values
+    % Create a matrix to store distance metrics
+    ppm.evaluate.dist_dir1 = zeros(size(ppm.evaluate.pc_result,1),itr);
+    ppm.evaluate.dist_dir2 = zeros(size(ppm.evaluate.pc_target,1),itr);
     ppm.evaluate.hd = zeros(size(ppm.evaluate.pc_result,1),itr);
     
-    % Read all the point clouds and calculate HDs
+    % Read all the point clouds and calculate distance metrics
     if ppm.ini.verbose_level>0
-        wb = waitbar(0,'ppm\_multiple\_hausdorff\_dist: Calculating HD for all iterations...');
+        wb = waitbar(0,'ppm\_evaluate: Calculating distance metrics for all iterations...');
     end
     
     for idx = 1:itr
-        ppm.evaluate.hd(:,idx) = hausdorff_dist(squeeze(ppm.evaluate.pc_result(:,:,idx)), ...
-            ppm.evaluate.pc_target);
+        [ppm.evaluate.dist_dir1(:,idx), ppm.evaluate.dist_dir2(:,idx), ppm.evaluate.hd(:,idx)] = ...
+            hausdorff_dist(squeeze(ppm.evaluate.pc_result(:,:,idx)), ...
+                           ppm.evaluate.pc_target);
         if ppm.ini.verbose_level>0
             waitbar(idx/itr,wb)
         end
@@ -173,12 +205,29 @@ else % itr > 1
     if ppm.ini.verbose_level>0
         close(wb)
     end
-    
-    ppm.evaluate.hd_mean   = mean(ppm.evaluate.hd); % calculate means of minimum HDs
-    ppm.evaluate.hd_std    = std(ppm.evaluate.hd); % calculate standard deviation of minimum HDs
-    ppm.evaluate.hd_median = median(ppm.evaluate.hd); % calculate median of minimum HDs
-    [ppm.evaluate.hd_mean_min,ppm.evaluate.hd_mean_min_itr] = min(ppm.evaluate.hd_mean); % find the smallest mean of minimum HDs
-    ppm.modify.val = ppm.modify.val_vec(ppm.evaluate.hd_mean_min_itr); % assign parameter value with lowest HD to parameter
+
+    % Determine direction with larger supremum per iteration and evaluate
+    % distance metrics
+    ppm.evaluate.dist_dir_idx = zeros(1,numel(itr));
+    for idx = 1:itr
+        [~, ppm.evaluate.dist_dir_idx(idx)] = max([max(ppm.evaluate.dist_dir1(:,idx)), ...
+                                              max(ppm.evaluate.dist_dir2(:,idx))]);
+        if ppm.evaluate.dist_dir_idx(idx)==1
+            ppm.evaluate.dist_dir_mean(idx) = mean(ppm.evaluate.dist_dir1(:,idx)); % calculate means across iterations
+            ppm.evaluate.dist_dir_std(idx) = std(ppm.evaluate.dist_dir1(:,idx)); % calculate standard deviations across iterations
+            ppm.evaluate.dist_dir_mdn(idx) = median(ppm.evaluate.dist_dir1(:,idx)); % calculate medians across iterations
+        else
+            ppm.evaluate.dist_dir_mean(idx) = mean(ppm.evaluate.dist_dir2(:,idx)); % calculate means across iterations
+            ppm.evaluate.dist_dir_std(idx) = std(ppm.evaluate.dist_dir2(:,idx)); % calculate standard deviations across iterations
+            ppm.evaluate.dist_dir_mdn(idx) = median(ppm.evaluate.dist_dir2(:,idx)); % calculate medians across iterations
+        end
+    end
+
+    % Find the smallest mean across iterations
+    [ppm.evaluate.dist_dir_mean_min,ppm.evaluate.dist_dir_mean_min_itr] = min(ppm.evaluate.dist_dir_mean);
+
+    % Assign parameter values of "best" iteration
+    ppm.modify.val = ppm.modify.val_vec(ppm.evaluate.dist_dir_mean_min_itr); 
 
     if ppm.ini.verbose_level>0
         figure('units','normalized','outerposition',[0 0 1 1])
@@ -190,13 +239,13 @@ else % itr > 1
 
             % Plot HD means over the different parameter values tested
             nexttile
-            plot(ppm.modify.val_vec, ppm.evaluate.hd_mean,'o-');
+            plot(ppm.modify.val_vec, ppm.evaluate.dist_dir_mean,'o-');
             hold on
-            plot(ppm.modify.val_vec(ppm.evaluate.hd_mean_min_itr), ...
-                min(ppm.evaluate.hd_mean),'r.','markersize',20);
+            plot(ppm.modify.val_vec(ppm.evaluate.dist_dir_mean_min_itr), ...
+                min(ppm.evaluate.dist_dir_mean),'r.','markersize',20);
             set(gca,'xtick',round(ppm.modify.val_vec*1000)/1000)
             xlabel('Parameter value per iteration')
-            ylabel ('Mean minimum pointwise distance')
+            ylabel ('Mean directed minimum pointwise distance')
             grid minor
             axis square
             axis vis3d
@@ -211,6 +260,7 @@ else % itr > 1
                     ppm.modify.axis))
             end
         end
+        set(gca,'fontsize',14)
 
         % Create a graph showing HDs using the parameter value that gives the smallest mean
         if size(ppm.modify.val_vec,1)==1
@@ -224,13 +274,27 @@ else % itr > 1
             delete(nexttile(2))
         end
 
-        disp([mfilename,': Average minimum pointwise distance (mu+/-sigma, Mdn): ', ...
-            [num2str(mean(ppm.evaluate.hd(:,ppm.evaluate.hd_mean_min_itr))),'+/-', ...
-            num2str(std(ppm.evaluate.hd(:,ppm.evaluate.hd_mean_min_itr))), ', ', ...
-            num2str(median(ppm.evaluate.hd(:,ppm.evaluate.hd_mean_min_itr)))]]);
+        disp([mfilename,': Lowest average minimum pointwise distance (mu+/-sigma, Mdn): ', ...
+            [num2str(mean(ppm.evaluate.hd(:,ppm.evaluate.dist_dir_mean_min_itr))),'+/-', ...
+            num2str(std(ppm.evaluate.hd(:,ppm.evaluate.dist_dir_mean_min_itr))), ', ', ...
+            num2str(median(ppm.evaluate.hd(:,ppm.evaluate.dist_dir_mean_min_itr)))]]);
+
+        fprintf([mfilename,': Lowest average minimum pointwise distance for direction 1:\n\t', ...
+            ['M+/-SD = ', num2str(mean(ppm.evaluate.dist_dir1(:,ppm.evaluate.dist_dir_mean_min_itr))),...
+            '+/-',num2str(std(ppm.evaluate.dist_dir1(:,ppm.evaluate.dist_dir_mean_min_itr))), ', ', ...
+            'Mdn = ', num2str(median(ppm.evaluate.dist_dir1(:,ppm.evaluate.dist_dir_mean_min_itr)))]]);
+
+        fprintf(['\n', mfilename,': Lowest average minimum pointwise distance for direction 2:\n\t', ...
+            ['M+/-SD = ', num2str(mean(ppm.evaluate.dist_dir2(:,ppm.evaluate.dist_dir_mean_min_itr))),...
+            '+/-',num2str(std(ppm.evaluate.dist_dir2(:,ppm.evaluate.dist_dir_mean_min_itr))), ', ', ...
+            'Mdn = ', num2str(median(ppm.evaluate.dist_dir2(:,ppm.evaluate.dist_dir_mean_min_itr)))]]);
+        
+        fprintf(['\n', mfilename,': Lowest Hausdorff distance:\n\t', ...
+            [num2str(ppm.evaluate.hd(ppm.evaluate.dist_dir_mean_min_itr)),'\n']]);
+    
     end
    
-    if isequal(squeeze(ppm.evaluate.pc_result(:,:,ppm.evaluate.hd_mean_min_itr)), ...
+    if isequal(squeeze(ppm.evaluate.pc_result(:,:,ppm.evaluate.dist_dir_mean_min_itr)), ...
             ppm.evaluate.pc_target)
         warning([mfilename,': Result point cloud and target point cloud are identical.'])
     end
