@@ -19,10 +19,10 @@ class PPM():
     """
     def __init__(self, from_blender_file=None, from_csv_file=None, backend='blender'):
 
-        if from_blender_file is not None and from_csv_file is not None:
+        if from_blender_file != None and from_csv_file != None:
             raise Exception('Either load from blender file or from csv file.')
         
-        if backend is not 'blender' and from_blender_file is not None:
+        if backend != 'blender' and from_blender_file != None:
             raise Exception('Blender backend not selected.')
 
         self.backend = backend
@@ -30,8 +30,8 @@ class PPM():
         # load init parameters
         self.__parameters = self.__load_parameters_from_csv()
 
-        if self.backend is 'blender':
-            if from_blender_file is not None:
+        if self.backend == 'blender':
+            if from_blender_file != None:
                 with redirect_stdout(io.StringIO()):
                     bpy.ops.wm.open_mainfile(filepath=from_blender_file)
             else:
@@ -40,7 +40,7 @@ class PPM():
             self.__get_parameters_from_blender()
         
         # rerun fct to load parameters from csv file
-        if from_csv_file is not None:
+        if from_csv_file != None:
             self.__parameters = self.__load_parameters_from_csv(from_csv_file)
 
     @property
@@ -59,7 +59,7 @@ class PPM():
                     self.__parameters[parameter_name][point_name] = point
                 else:
                     for type_name, type in point.items():
-                        if type_name == 'Scale' and parameter_name is not 'Size':
+                        if type_name == 'Scale' and parameter_name != 'Size':
                             self.__parameters[parameter_name][point_name][type_name] = type
                         else:
                             for axis_name, axis in type.items():
@@ -68,7 +68,7 @@ class PPM():
     def set_parameter(self, parameter, point, type, axis, value):
         if point == 'Shape_key':
             self.__parameters[parameter][point] = value
-        elif type == 'Scale' and parameter is not 'Size':
+        elif type == 'Scale' and parameter != 'Size':
             self.__parameters[parameter][point][type] = value
         else:
             self.__parameters[parameter][point][type][axis] = value
@@ -109,17 +109,17 @@ class PPM():
                 
                 if name not in parameters:
                     parameters[name] = {}
-                if point is not None:
+                if point != None:
                     if point not in parameters[name]:
                         parameters[name][point] = {}
-                    if axis is not None:
+                    if axis != None:
                         if type not in parameters[name][point]:
                             parameters[name][point][type] = {}
                         parameters[name][point][type][axis] = value
                     else:
                         parameters[name][point][type] = value
                 else:
-                    if axis is not None:
+                    if axis != None:
                         if type not in parameters[name]:
                             parameters[name][type] = {}
                         parameters[name][type][axis] = value
