@@ -1,11 +1,12 @@
 import os
+import io
 import csv
 import numpy as np
+from contextlib import redirect_stdout
+
 
 import bpy
 import bmesh
-
-# from .math_helpers import euler_to_quaternion
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -26,7 +27,7 @@ class PPM():
         self.backend = backend
 
         # load init parameters
-        self.parameters = self.__load_parameters_from_csv()
+        self.__parameters = self.__load_parameters_from_csv()
 
         if self.backend is 'blender':
             if from_blender_file is not None:
@@ -36,12 +37,10 @@ class PPM():
             else:
                 bpy.ops.wm.open_mainfile(filepath=f'{CURRENT_DIR}/resources/PPM_modified_v1.blend')
             self.__get_parameters_from_blender()
-
-            self.__set_parameters_in_blender()  
         
         # rerun fct to load parameters from csv file
         if from_csv_file is not None:
-            self.parameters = self.__load_parameters_from_csv(from_csv_file)
+            self.__parameters = self.__load_parameters_from_csv(from_csv_file)
 
     def __load_parameters_from_csv(self, csv_file=None) -> dict:
 
@@ -101,15 +100,15 @@ class PPM():
     def reset_parameters(self):
         """Resets the PPM parameters to the default parameters.
         """
-        self.parameters = self.__load_parameters_from_csv()
+        self.__parameters = self.__load_parameters_from_csv()
 
     def __set_parameters_in_blender(self):
         obj = bpy.data.objects["Armature"]
 
-        for parameter_name, parameter in self.parameters.items():
+        for parameter_name, parameter in self.__parameters.items():
             # shape keys
             if 'Shape_key' in parameter.keys():
-                bpy.data.shape_keys['Key.002'].key_blocks[parameter_name].value = self.parameters[parameter_name]['Shape_key']
+                bpy.data.shape_keys['Key.002'].key_blocks[parameter_name].value = self.__parameters[parameter_name]['Shape_key']
             else:
                 for point_name, point in parameter.items():
                     # scale
@@ -123,7 +122,7 @@ class PPM():
                                         None] = axis_value
                                     
                         else:
-                            obj.pose.bones[parameter_name + "-" + point_name].scale[0] = self.parameters[parameter_name][point_name]['Scale']
+                            obj.pose.bones[parameter_name + "-" + point_name].scale[0] = self.__parameters[parameter_name][point_name]['Scale']
                     # rotation
                     if 'Rotation' in point.keys():
                         for axis, axis_value in point['Rotation'].items():
@@ -146,28 +145,28 @@ class PPM():
 
         obj = bpy.data.objects["Armature"]
 
-        for parameter_name, parameter in self.parameters.items():
+        for parameter_name, parameter in self.__parameters.items():
             # shape keys
             if 'Shape_key' in parameter.keys():
-                self.parameters[parameter_name]['Shape_key'] = bpy.data.shape_keys['Key.002'].key_blocks[parameter_name].value
+                self.__parameters[parameter_name]['Shape_key'] = bpy.data.shape_keys['Key.002'].key_blocks[parameter_name].value
             else:
                 for point_name, point in parameter.items():
                     # scale
                     if 'Scale' in point.keys():
                         if 'Size' in parameter_name:
                             for axis, axis_value in point['Scale'].items():
-                                self.parameters[parameter_name][point_name]['Scale'][axis] = \
+                                self.__parameters[parameter_name][point_name]['Scale'][axis] = \
                                     obj.pose.bones[parameter_name + "-" + point_name].scale[
                                         0 if axis == 'X' else 
                                         1 if axis == 'Y' else 
                                         2 if axis == 'Z' else 
                                         None]
                         else:
-                            self.parameters[parameter_name][point_name]['Scale'] = obj.pose.bones[parameter_name + "-" + point_name].scale[0]
+                            self.__parameters[parameter_name][point_name]['Scale'] = obj.pose.bones[parameter_name + "-" + point_name].scale[0]
                     # rotation
                     if 'Rotation' in point.keys():
                         for axis, axis_value in point['Rotation'].items():
-                            self.parameters[parameter_name][point_name]['Rotation'][axis] = \
+                            self.__parameters[parameter_name][point_name]['Rotation'][axis] = \
                                 obj.pose.bones[parameter_name + "-" + point_name].rotation_quaternion[
                                     0 if axis == 'W' else
                                     1 if axis == 'X' else
@@ -177,7 +176,7 @@ class PPM():
                     # location
                     if 'Location' in point.keys():
                         for axis, axis_value in point['Location'].items():
-                            self.parameters[parameter_name][point_name]['Location'][axis] = \
+                            self.__parameters[parameter_name][point_name]['Location'][axis] = \
                                 obj.pose.bones[parameter_name + "-" + point_name].location[
                                     0 if axis == 'X' else
                                     1 if axis == 'Y' else
@@ -186,6 +185,7 @@ class PPM():
 
 
     def __get_point_cloud_blender(self):
+
         obj = bpy.data.objects['ARI_PPM_v1']
         
         if bpy.ops.object.mode_set.poll():
@@ -219,3 +219,53 @@ class PPM():
         else:
             raise NotImplementedError
 
+    def __export_ply_blender(self, file_path):
+
+        bpy.ops.object.select_all(action='DESELECT')
+        bpy.data.objects['ARI_PPM_v1'].select_set(True)
+        # bpy.context.view_layer.objects.active = bpy.data.objects['ARI_PPM_v1']
+
+        with redirect_stdout(io.StringIO()):
+            bpy.ops.export_mesh.ply(
+                filepath=file_path,
+                use_selection=True
+            )
+
+    def export_ply(self, file_path):
+        """Exports the PPM as a PLY file.
+
+        Parameters
+        ----------
+        file_path : str
+            Path to the PLY file.
+        """
+        if self.backend == 'blender':
+            self.__set_parameters_in_blender()
+            self.__export_ply_blender(file_path)
+        else:
+            raise NotImplementedError
+
+    def __export_stl_blender(self, file_path):
+
+        bpy.ops.object.select_all(action='DESELECT')
+        bpy.data.objects['ARI_PPM_v1'].select_set(True)
+
+        with redirect_stdout(io.StringIO()):
+            bpy.ops.export_mesh.stl(
+                filepath=file_path,
+                use_selection=True
+            )
+
+    def export_stl(self, file_path):
+        """Exports the PPM as a STL file.
+
+        Parameters
+        ----------
+        file_path : str
+            Path to the STL file.
+        """
+        if self.backend == 'blender':
+            self.__set_parameters_in_blender()
+            self.__export_stl_blender(file_path)
+        else:
+            raise NotImplementedError
