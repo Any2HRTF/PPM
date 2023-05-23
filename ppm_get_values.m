@@ -35,7 +35,7 @@ function [ppm,val] = ppm_get_values(ppm,varargin)
 %
 % Related functions : ppm_initialize, ppm_set_values, ppm_evaluate
 
-% #Author: Florian Pausch (2022)
+% #Author: Florian Pausch (2023)
 
 %% Parse input arguments
 p = inputParser;
