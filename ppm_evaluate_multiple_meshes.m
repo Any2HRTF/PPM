@@ -8,8 +8,8 @@
 clear; close all; clc
 
 %% Define meshes/files to be compared
-ppm_path = 'D:\owncloud\SONICOM\WP1\PPM\Experiments\Collaboration with Paris-SOU\PPMs double-checked';
-target_path = fullfile(ppm_path, 'ply');
+ppm_path = 'D:\owncloud\SONICOM\WP1\PPM\Experiments\Collaboration with Paris-SOU\PPMs';
+target_path = 'D:\owncloud\SONICOM\WP1\PPM\Experiments\Collaboration with Paris-SOU\PPMs_double-checked\ply';
 
 mesh_ppm = {
     'NH5.blend',...
@@ -27,7 +27,7 @@ mesh_target = {
     'NH1060_target.ply',...
     'NH1061_target.ply'};
 
-sel = 4:6; % select PPMs to be evaluated
+sel = 1:6; % select PPMs to be evaluated
 
 wb = waitbar(0,sprintf('Evaluating mesh %s/%s...',...
     num2str(1),num2str(numel(sel))));
@@ -60,17 +60,16 @@ for idx=sel
         'caxis_min',0,...
         'caxis_max',5);
 
-    fprintf([mfilename,': ', mesh_ppm{idx},'\n'])
-    fprintf([mfilename,': Average minimum pointwise distance for direction 1:\n\t', ...
-        ['M+/-SD = ', num2str(mean(ppm.evaluate.dist_dir1)),'+/-',num2str(std(ppm.evaluate.dist_dir1)), ', ', ...
-        'Mdn = ', num2str(median(ppm.evaluate.dist_dir1))]]);
+    fprintf([mfilename,': ', mesh_ppm{idx},'\nMinimum pointwise distances\n'])
+    Direction = ["1";"2";"Both"];
+    Min = [min(ppm.evaluate.dist_dir1); min(ppm.evaluate.dist_dir2); nan];
+    Max = [max(ppm.evaluate.dist_dir1); max(ppm.evaluate.dist_dir2); nan];
+    Mean = [mean(ppm.evaluate.dist_dir1); mean(ppm.evaluate.dist_dir2); nan];
+    Std = [std(ppm.evaluate.dist_dir1); std(ppm.evaluate.dist_dir2); nan];
+    Median = [median(ppm.evaluate.dist_dir1); median(ppm.evaluate.dist_dir2); nan];
+    Hausdorff = [nan; nan; ppm.evaluate.hd];
 
-    fprintf(['\n', mfilename,': Average minimum pointwise distance for direction 2:\n\t', ...
-        ['M+/-SD = ', num2str(mean(ppm.evaluate.dist_dir2)),'+/-',num2str(std(ppm.evaluate.dist_dir2)), ', ', ...
-        'Mdn = ', num2str(median(ppm.evaluate.dist_dir2))]]);
-
-    fprintf(['\n', mfilename,': Hausdorff distance:\n\t', ...
-        [num2str(ppm.evaluate.hd),'\n\n']]);
+    disp(table(Direction,Min,Max,Mean,Std,Median,Hausdorff))
 
     if idx_wb<numel(sel)
         waitbar(idx_wb/numel(sel),wb,sprintf('Evaluating mesh %s/%s...',...
