@@ -507,6 +507,34 @@ class PPM():
         ----------
         file_path : str
             Path to the rendered image.
+        filename : str
+            Name of the rendered image.
+        resolution : int
+            Resolution of the rendered image.
+        depth : bool
+            Whether to render the depth map.
+        shade_smooth : bool
+            Whether to render the image with smooth shading.
+        image_comp : int
+            Compression of the rendered image.
+        image_col_dep : int
+            Color depth of the rendered image.
+        cam_loc : list
+            Location of the camera.
+        cam_rot : list
+            Rotation of the camera.
+        cam_loc_ref : list
+            Location of the reference camera.
+        depth_farthest : float
+            Farthest depth value.
+        depth_nearest : float
+            Nearest depth value.
+        depth_codec_exr : str
+            Codec of the depth map.
+        depth_col_dep_exr : str
+            Color depth of the depth map.
+        depth_comp_exr : str
+            Compression of the depth map.
         """
         if self.backend == 'blender':
             self.__set_parameters_in_blender()
