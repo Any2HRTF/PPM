@@ -1,13 +1,15 @@
 import os
 import io
+import sys
 import csv
+import math
+import tempfile
 import numpy as np
 from contextlib import redirect_stdout
 
 import bpy
 import bmesh
 import mathutils
-import math
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -481,11 +483,24 @@ class PPM():
         links.new(denoise.outputs['Image'], file_output_png.inputs['Image'])
 
         # Render!
-        with redirect_stdout(io.StringIO()):
-            bpy.ops.render.render()
+        bpy.ops.render.render()
 
 
-    def render(self, file_path, filename):
+        if depth:
+            for file in os.listdir(file_path):
+                if file.startswith(filename) and file.endswith('.exr'):
+                    os.rename(file_path + f'/{file}', \
+                        file_path + f'/{filename}.exr')
+                    break
+        
+        for file in os.listdir(file_path):
+            if file.startswith(filename) and file.endswith('.png'):
+                os.rename(file_path + f'/{file}', \
+                    file_path+ f'/{filename}.png')
+                break
+
+
+    def render(self, *args, **kwargs):
         """Renders the PPM.
 
         Parameters
@@ -495,6 +510,35 @@ class PPM():
         """
         if self.backend == 'blender':
             self.__set_parameters_in_blender()
-            self.__render_blender(file_path, filename)
+            # redirect output to temporary file
+            logfile = tempfile.mktemp()
+            open(logfile, 'a').close()
+            old = os.dup(sys.stdout.fileno())
+            sys.stdout.flush()
+            os.close(sys.stdout.fileno())
+            fd = os.open(logfile, os.O_WRONLY)
+
+            self.__render_blender(
+                file_path=kwargs['file_path'],
+                filename=kwargs['filename'],
+                resolution=kwargs['resolution'] if 'resolution' in kwargs else 256,
+                depth=kwargs['depth'] if 'depth' in kwargs else False,
+                shade_smooth=kwargs['shade_smooth'] if 'shade_smooth' in kwargs else True,
+                image_comp=kwargs['image_comp'] if 'image_comp' in kwargs else 0,
+                image_col_dep=kwargs['image_col_dep'] if 'image_col_dep' in kwargs else '8',
+                cam_loc=kwargs['cam_loc'] if 'cam_loc' in kwargs else (-10,200,5),
+                cam_rot=kwargs['cam_rot'] if 'cam_rot' in kwargs else (90, 0, 180),
+                cam_loc_ref=kwargs['cam_loc_ref'] if 'cam_loc_ref' in kwargs else None,
+                depth_farthest=kwargs['depth_farthest'] if 'depth_farthest' in kwargs else 0,
+                depth_nearest=kwargs['depth_nearest'] if 'depth_nearest' in kwargs else 'cam_loc',
+                depth_codec_exr=kwargs['depth_codec_exr'] if 'depth_codec_exr' in kwargs else 'NONE',
+                depth_col_dep_exr=kwargs['depth_col_dep_exr'] if 'depth_col_dep_exr' in kwargs else '16',
+                depth_comp_exr=kwargs['depth_comp_exr'] if 'depth_comp_exr' in kwargs else 8
+            )
+
+            # disable output redirection
+            os.close(fd)
+            os.dup(old)
+            os.close(old)
         else:
             raise NotImplementedError

@@ -10,6 +10,7 @@ setup(
     author='Felix Perfler',
     author_email='felix.perfler@oeaw.ac.at',
     license='EUPL-1.2',
+    license_files = ('LICENSE.txt',),
     readme='README.md',
     packages=find_packages(),
     package_data={
