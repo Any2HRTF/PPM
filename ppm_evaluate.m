@@ -169,16 +169,20 @@ if itr==1
             'caxis_min',p.Results.caxis_min,...
             'caxis_max',p.Results.caxis_max);
 
-        fprintf([mfilename,': Average minimum pointwise distance for direction 1:\n\t', ...
-            ['M+/-SD = ', num2str(mean(ppm.evaluate.dist_dir1)),'+/-',num2str(std(ppm.evaluate.dist_dir1)), ', ', ...
-            'Mdn = ', num2str(median(ppm.evaluate.dist_dir1))]]);
+        filename = strsplit(ppm.ini.blender_file,'\');
+        title(filename{end}(1:end-1),'Interpreter','none')
 
-        fprintf(['\n', mfilename,': Average minimum pointwise distance for direction 2:\n\t', ...
-            ['M+/-SD = ', num2str(mean(ppm.evaluate.dist_dir2)),'+/-',num2str(std(ppm.evaluate.dist_dir2)), ', ', ...
-            'Mdn = ', num2str(median(ppm.evaluate.dist_dir2))]]);
+        fprintf([mfilename,': ', filename{end}(1:end-1),'\nMinimum pointwise distances\n'])
+        Direction = ["1";"2";"Both"];
+        Min = [min(ppm.evaluate.dist_dir1); min(ppm.evaluate.dist_dir2); nan];
+        Max = [max(ppm.evaluate.dist_dir1); max(ppm.evaluate.dist_dir2); nan];
+        Mean = [mean(ppm.evaluate.dist_dir1); mean(ppm.evaluate.dist_dir2); nan];
+        Std = [std(ppm.evaluate.dist_dir1); std(ppm.evaluate.dist_dir2); nan];
+        Median = [median(ppm.evaluate.dist_dir1); median(ppm.evaluate.dist_dir2); nan];
+        Hausdorff = [nan; nan; ppm.evaluate.hd];
+    
+        disp(table(Direction,Min,Max,Mean,Std,Median,Hausdorff))
 
-        fprintf(['\n', mfilename,': Hausdorff distance:\n\t', ...
-            [num2str(ppm.evaluate.hd),'\n']]);
     end
     
 else % itr > 1
@@ -186,7 +190,7 @@ else % itr > 1
     % Create a matrix to store distance metrics
     ppm.evaluate.dist_dir1 = zeros(size(ppm.evaluate.pc_result,1),itr);
     ppm.evaluate.dist_dir2 = zeros(size(ppm.evaluate.pc_target,1),itr);
-    ppm.evaluate.hd = zeros(size(ppm.evaluate.pc_result,1),itr);
+    ppm.evaluate.hd = zeros(1,itr);
     
     % Read all the point clouds and calculate distance metrics
     if ppm.ini.verbose_level>0
@@ -194,7 +198,7 @@ else % itr > 1
     end
     
     for idx = 1:itr
-        [ppm.evaluate.dist_dir1(:,idx), ppm.evaluate.dist_dir2(:,idx), ppm.evaluate.hd(:,idx)] = ...
+        [ppm.evaluate.dist_dir1(:,idx), ppm.evaluate.dist_dir2(:,idx), ppm.evaluate.hd(idx)] = ...
             hausdorff_dist(squeeze(ppm.evaluate.pc_result(:,:,idx)), ...
                            ppm.evaluate.pc_target);
         if ppm.ini.verbose_level>0
@@ -274,18 +278,24 @@ else % itr > 1
             delete(nexttile(2))
         end
 
-        fprintf([mfilename,': Lowest average minimum pointwise distance for direction 1:\n\t', ...
-            ['M+/-SD = ', num2str(mean(ppm.evaluate.dist_dir1(:,ppm.evaluate.dist_dir_mean_min_itr))),...
-            '+/-',num2str(std(ppm.evaluate.dist_dir1(:,ppm.evaluate.dist_dir_mean_min_itr))), ', ', ...
-            'Mdn = ', num2str(median(ppm.evaluate.dist_dir1(:,ppm.evaluate.dist_dir_mean_min_itr)))]]);
+        filename = strsplit(ppm.ini.blender_file,'\');
+        title(filename{end}(1:end-1),'Interpreter','none')
 
-        fprintf(['\n', mfilename,': Lowest average minimum pointwise distance for direction 2:\n\t', ...
-            ['M+/-SD = ', num2str(mean(ppm.evaluate.dist_dir2(:,ppm.evaluate.dist_dir_mean_min_itr))),...
-            '+/-',num2str(std(ppm.evaluate.dist_dir2(:,ppm.evaluate.dist_dir_mean_min_itr))), ', ', ...
-            'Mdn = ', num2str(median(ppm.evaluate.dist_dir2(:,ppm.evaluate.dist_dir_mean_min_itr)))]]);
-        
-        fprintf(['\n', mfilename,': Lowest Hausdorff distance:\n\t', ...
-            [num2str(ppm.evaluate.hd(ppm.evaluate.dist_dir_mean_min_itr)),'\n']]);
+        fprintf([mfilename,': ', filename{end}(1:end-1),'\nMinimum pointwise distances\n'])
+        Direction = ["1";"2";"Both"];
+        Min = [min(ppm.evaluate.dist_dir1(:,ppm.evaluate.dist_dir_mean_min_itr)); 
+            min(ppm.evaluate.dist_dir2(:,ppm.evaluate.dist_dir_mean_min_itr)); nan];
+        Max = [max(ppm.evaluate.dist_dir1(:,ppm.evaluate.dist_dir_mean_min_itr)); 
+            max(ppm.evaluate.dist_dir2(:,ppm.evaluate.dist_dir_mean_min_itr)); nan];
+        Mean = [mean(ppm.evaluate.dist_dir1(:,ppm.evaluate.dist_dir_mean_min_itr)); 
+            mean(ppm.evaluate.dist_dir2(:,ppm.evaluate.dist_dir_mean_min_itr)); nan];
+        Std = [std(ppm.evaluate.dist_dir1(:,ppm.evaluate.dist_dir_mean_min_itr)); 
+            std(ppm.evaluate.dist_dir2(:,ppm.evaluate.dist_dir_mean_min_itr)); nan];
+        Median = [median(ppm.evaluate.dist_dir1(:,ppm.evaluate.dist_dir_mean_min_itr)); 
+            median(ppm.evaluate.dist_dir2(:,ppm.evaluate.dist_dir_mean_min_itr)); nan];
+        Hausdorff = [nan; nan; ppm.evaluate.hd(:,ppm.evaluate.dist_dir_mean_min_itr)];
+    
+        disp(table(Direction,Min,Max,Mean,Std,Median,Hausdorff))
     
     end
    
