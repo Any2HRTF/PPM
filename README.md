@@ -28,7 +28,7 @@ The following Python scripts are called within `ppm_get_values()`, and `ppm_set_
 - Blender model ARI_PPM_v1 (armature and object definitions)
 
 ## Releases ##
-The latest release version can be downloaded from the [releases page](https://github.com/Any2HRTF/PPM/releases).
+The latest release version can be downloaded from the [releases page](https://github.com/Any2HRTF/PPM/releases). Please note that the development of the MATLAB-Python-Blender interface is stopped after release version 1.6.0 and continued for the Python-only version. Bug fixes for the MATLAB-Python-Blender interface will be on available on branch matlab.
 
 ## References ##
 The PPM was developed at the Acoustics Research Institute (ARI) of the 
