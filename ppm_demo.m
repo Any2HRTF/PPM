@@ -25,13 +25,10 @@
 % [2] Pollack K.; Majdak P.; Brinkmann F.; Kreuzer W. (2021) Von Fotos zu 
 %     personalisierter räumlicher Audiowiedergabe. e & i Elektrotechnik und 
 %     Informationstechnik.
-% [3] Pollack K.; Majdak P.; Furtado H. (2021) Evaluation of Pinna Point 
-%     Cloud Alignment by Means of Non-Rigid registration Algorithms. 150th 
-%     Convention of the Audio Engineering Society.
-% [4] Pollack K.; Majdak P. (2021) Evaluation of a Parametric Pinna Model 
+% [3] Pollack K.; Majdak P. (2021) Evaluation of a Parametric Pinna Model 
 %     for the Calculation of Head-Related Transfer Functions. Immersive and 
 %     3D Audio (I3DA) conference.
-% [5] Pollack K.; Majdak P.; Furtado H. (2020) A Parametric Pinna Model for 
+% [4] Pollack K.; Majdak P.; Furtado H. (2020) A Parametric Pinna Model for 
 %     the Calculations of Head-Related Transfer Functions. Proceedings of 
 %     Forum Acusticum 2020, Lyon. S. 1357-1360.
 
