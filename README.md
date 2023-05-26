@@ -24,6 +24,10 @@ MATLAB-Python-Blender interface for bi-directional communication with the
          build date: 2022-03-31, 23:39:57)
 - Blender model ARI_PPM_v1 (armature and object definitions)
 
+## Releases ##
+The latest release version can be downloaded from the [releases page](https://github.com/Any2HRTF/PPM/releases).
+
+## References ##
 The PPM was developed at the Acoustics Research Institute (ARI) of the 
 Austrian Academy of Sciences, Vienna, Austria [1-4].
 
@@ -43,5 +47,3 @@ Austrian Academy of Sciences, Vienna, Austria [1-4].
  5. Pollack K.; Majdak P.; Furtado H. (2020) A Parametric Pinna Model for 
     the Calculations of Head-Related Transfer Functions. Proceedings of 
     Forum Acusticum 2020, Lyon. S. 1357-1360.
-
-The latest release version can be downloaded from the [releases page](https://github.com/Any2HRTF/PPM/releases).
