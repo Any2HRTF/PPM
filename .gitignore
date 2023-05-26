@@ -15,7 +15,3 @@
 /dist
 *.egg-info
 __pycache__
-
-/docs/_build
-
-/ppm/resources/tmp

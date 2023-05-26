@@ -1,9 +1,9 @@
 from setuptools import setup, find_packages
 
-version = '0.0.3'
+version = '0.1'
 
 setup(
-    name='ppm',
+    name='PyPPM',
     version=version,
     description='Python PPM library.',
     url='https://github.com/Any2HRTF/PPM',
