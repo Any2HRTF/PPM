@@ -1,7 +1,7 @@
 # PPM interface #
 
 MATLAB-Python-Blender interface for bi-directional communication with the 
-    parametric pinna model (PPM) in Matlab via Python scripts (module `bpy`) 
+    parametric pinna model (PPM) via Python scripts (module `bpy`) using Matlab  
 
 ## Main Matlab scripts and functions ##
 - `ppm_demo.m`
