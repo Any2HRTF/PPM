@@ -20,11 +20,11 @@ The following Python scripts are called within `ppm_get_values()`, and `ppm_set_
 ## Dependencies ##
 - MATLAB (tested with version 9.11.0.1769968, R2021b) 
 - MATLAB Computer Vision Toolbox (tested with version 10.1, R2021b; only used in `ppm_evaluate()`)
-- MATLAB class `quaternion` (version 1.8.0.0 by Mark Tincknell, downloaded 
-                           on the fly from [MATLAB File Exchange](https://www.mathworks.com/matlabcentral/fileexchange/33341-quaternion))
+- Custom MATLAB class `quaternion` (version [1.8.0.0](https://www.mathworks.com/matlabcentral/fileexchange/33341-quaternion) by Mark Tincknell, downloaded 
+                           on the fly)
 - Blender (tested with version: [3.1.2](https://www.blender.org/download/releases/3-1/), branch: master, 
          commit date: 2022-03-31 17:40, hash: cc66d1020c3b, type: release
-         build date: 2022-03-31, 23:39:57)
+         build date: 2022-03-31, 23:39:57, containing the Blender Python API)
 - Blender model ARI_PPM_v1 (armature and object definitions)
 
 ## Releases ##
