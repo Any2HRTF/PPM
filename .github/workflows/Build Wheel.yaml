@@ -8,6 +8,7 @@ on:
 
 jobs:
   deploy:
+    if: !startsWith(github.ref, 'refs/tags/Blender Add-on') && !startsWith(github.ref, 'refs/tags/Blender Add-on')
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
