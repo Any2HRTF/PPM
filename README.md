@@ -1,36 +1,12 @@
-# PPM interface #
+# PPM interface
 
-MATLAB-Python-Blender interface for bi-directional communication with the 
-    parametric pinna model (PPM) via Python scripts (module `bpy`) using Matlab  
+Coming soon
 
-## Main Matlab scripts and functions ##
+## Matlab Implementation
 
-Get to know the functionality of the PPM interface by exploring `ppm_demo.m`, which calls the main functions listed below:
-- `ppm_initialize()`
-- `ppm_get_values()`
-- `ppm_set_values()`
-- `ppm_evaluate()`
+For a Matlab implementation please refer to the [Matlab branch](https://github.com/Any2HRTF/PPM/tree/matlab)
 
-## Python scripts ##
-The following Python scripts are called within `ppm_get_values()`, and `ppm_set_values()` -> `ppm_blender_execute()`, respectively: 
-
-- `get_values_and_export_mesh_v1.X.X.py` 
-- `set_values_and_export_mesh_v1.X.X.py` 
-
-## Dependencies ##
-- MATLAB (tested with version 9.11.0.1769968, R2021b) 
-- MATLAB Computer Vision Toolbox (tested with version 10.1, R2021b; only used in `ppm_evaluate()`)
-- Custom MATLAB class `quaternion` (version [1.8.0.0](https://www.mathworks.com/matlabcentral/fileexchange/33341-quaternion) by Mark Tincknell, downloaded 
-                           on the fly)
-- Blender (tested with version: [3.1.2](https://www.blender.org/download/releases/3-1/), branch: master, 
-         commit date: 2022-03-31 17:40, hash: cc66d1020c3b, type: release
-         build date: 2022-03-31, 23:39:57, containing the Blender Python API)
-- Blender model ARI_PPM_v1 (armature and object definitions)
-
-## Releases ##
-The latest release version can be downloaded from the [releases page](https://github.com/Any2HRTF/PPM/releases). Please note that the development of the MATLAB-Python-Blender interface is stopped after release version 1.6.0, and continued only for the Python-Blender PPM interface. Bug fixes for the MATLAB-Python-Blender PPM interface will be available on the branch "matlab".
-
-## References ##
+## References
 The PPM was developed at the Acoustics Research Institute (ARI) of the 
 Austrian Academy of Sciences, Vienna, Austria [1-4].
 
