@@ -17,7 +17,7 @@ setup(
         'ppm': ['resources/*.csv', 'resources/*.blend'],
     },
     include_package_data=True,
-    python_requires='<3.10',
+    python_requires='<3.11',
     zip_safe=False,
     install_requires=[
         "numpy",
