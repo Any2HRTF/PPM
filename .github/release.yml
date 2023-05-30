@@ -1,0 +1,28 @@
+changelog:
+  exclude:
+    labels:
+      - duplicate
+      - question
+      - invalid
+      - wontfix
+      - "help wanted"
+      - "good first issue"
+      - "more info needed"
+
+  categories:
+    - title: Breaking Changes 🛠
+      labels:
+        - Semver-Major
+        - breaking-change
+    - title: New Features 🎉
+      labels:
+        - Semver-Minor
+        - enhancement
+    - title: Bug fixes 🐛
+        - bug
+    - title: Documentation 📚
+      labels:
+        - documentation
+    - title: Other Changes
+      labels:
+        - "*"
