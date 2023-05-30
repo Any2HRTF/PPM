@@ -1,21 +1,21 @@
 # MATLAB-Python-Blender PPM interface #
 
 MATLAB-Python-Blender interface for bi-directional communication with the 
-    parametric pinna model (PPM) via Python scripts (module `bpy`) using Matlab  
+    parametric pinna model (PPM) via Python scripts (module [`bpy`](https://pypi.org/project/bpy/)) using Matlab  
 
 ## Main Matlab scripts and functions ##
 
 Get to know the functionality of the PPM interface by exploring `ppm_demo.m`, which calls the main functions listed below:
-- `ppm_initialize()`
-- `ppm_get_values()`
-- `ppm_set_values()`
-- `ppm_evaluate()`
+- [`ppm_initialize()`](https://github.com/Any2HRTF/PPM/blob/matlab/ppm_initialize.m)
+- [`ppm_get_values()`](https://github.com/Any2HRTF/PPM/blob/matlab/ppm_get_values.m)
+- [`ppm_set_values()`](https://github.com/Any2HRTF/PPM/blob/matlab/ppm_set_values.m)
+- [`ppm_evaluate()`](https://github.com/Any2HRTF/PPM/blob/matlab/ppm_evaluate.m)
 
 ## Python scripts ##
-The following Python scripts are called within `ppm_get_values()`, and `ppm_set_values()` -> `ppm_blender_execute()`, respectively: 
+The following Python scripts are called within [`ppm_get_values()`](https://github.com/Any2HRTF/PPM/blob/matlab/ppm_get_values.m), and [`ppm_set_values()`](https://github.com/Any2HRTF/PPM/blob/matlab/ppm_set_values.m) -> [`ppm_blender_execute()`](https://github.com/Any2HRTF/PPM/blob/matlab/ppm_blender_execute.m), respectively: 
 
-- `get_values_and_export_mesh_v1.X.X.py` 
-- `set_values_and_export_mesh_v1.X.X.py` 
+- [`get_values_and_export_mesh_v1.x.x.py`](https://github.com/Any2HRTF/PPM/blob/matlab/python/get_values_and_export_mesh_v1_6_0.py) 
+- [`set_values_and_export_mesh_v1.x.x.py`](https://github.com/Any2HRTF/PPM/blob/matlab/python/set_values_and_export_mesh_v1_6_0.py) 
 
 ## Dependencies ##
 - MATLAB (tested with version 9.11.0.1769968, R2021b) 
@@ -28,7 +28,7 @@ The following Python scripts are called within `ppm_get_values()`, and `ppm_set_
 - Blender model ARI_PPM_v1 (armature and object definitions)
 
 ## Releases ##
-The latest release version can be downloaded from the [releases page](https://github.com/Any2HRTF/PPM/releases). Please note that the development of the MATLAB-Python-Blender interface is stopped after release version 1.6.0, and continued only for the Python-Blender PPM interface. Bug fixes for the MATLAB-Python-Blender PPM interface will be available on the branch "matlab".
+The latest release version can be downloaded from the [releases page](https://github.com/Any2HRTF/PPM/releases). Please note that the development of the MATLAB-Python-Blender interface is stopped after release version 1.6.0, and continued only for the Python-Blender PPM interface. Bug fixes for the MATLAB-Python-Blender PPM interface will be available on the branch [matlab](https://github.com/Any2HRTF/PPM/tree/matlab).
 
 ## References ##
 The PPM was developed at the Acoustics Research Institute (ARI) of the 
