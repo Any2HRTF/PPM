@@ -9,7 +9,7 @@ clear; close all; clc
 
 %% Define meshes/files to be compared
 ppm_path = 'D:\owncloud\SONICOM\WP1\PPM\Experiments\Collaboration with Paris-SOU\PPMs';
-target_path = 'D:\owncloud\SONICOM\WP1\PPM\Experiments\Collaboration with Paris-SOU\PPMs_double-checked\ply';
+target_path = 'D:\owncloud\SONICOM\WP1\PPM\Experiments\Collaboration with Paris-SOU\PPMs\ply';
 
 mesh_ppm = {
     'NH5.blend',...
@@ -67,9 +67,12 @@ for idx=sel
     Mean = [mean(ppm.evaluate.dist_dir1); mean(ppm.evaluate.dist_dir2); nan];
     Std = [std(ppm.evaluate.dist_dir1); std(ppm.evaluate.dist_dir2); nan];
     Median = [median(ppm.evaluate.dist_dir1); median(ppm.evaluate.dist_dir2); nan];
+    Perc95 = [prctile(ppm.evaluate.dist_dir1,95); prctile(ppm.evaluate.dist_dir2,95); nan];
     Hausdorff = [nan; nan; ppm.evaluate.hd];
 
-    disp(table(Direction,Min,Max,Mean,Std,Median,Hausdorff))
+    tab = table(Direction,Min,Max,Mean,Std,Median,Perc95,Hausdorff);
+    tab = renamevars(tab,"Perc95","95th percentile");
+    disp(tab)
 
     if idx_wb<numel(sel)
         waitbar(idx_wb/numel(sel),wb,sprintf('Evaluating mesh %s/%s...',...

@@ -179,9 +179,12 @@ if itr==1
         Mean = [mean(ppm.evaluate.dist_dir1); mean(ppm.evaluate.dist_dir2); nan];
         Std = [std(ppm.evaluate.dist_dir1); std(ppm.evaluate.dist_dir2); nan];
         Median = [median(ppm.evaluate.dist_dir1); median(ppm.evaluate.dist_dir2); nan];
+        Perc95 = [prctile(ppm.evaluate.dist_dir1,95); prctile(ppm.evaluate.dist_dir2,95); nan];
         Hausdorff = [nan; nan; ppm.evaluate.hd];
     
-        disp(table(Direction,Min,Max,Mean,Std,Median,Hausdorff))
+        tab = table(Direction,Min,Max,Mean,Std,Median,Perc95,Hausdorff);
+        tab = renamevars(tab,"Perc95","95th percentile");
+        disp(tab)
 
     end
     
@@ -293,9 +296,13 @@ else % itr > 1
             std(ppm.evaluate.dist_dir2(:,ppm.evaluate.dist_dir_mean_min_itr)); nan];
         Median = [median(ppm.evaluate.dist_dir1(:,ppm.evaluate.dist_dir_mean_min_itr)); 
             median(ppm.evaluate.dist_dir2(:,ppm.evaluate.dist_dir_mean_min_itr)); nan];
+        Perc95 = [prctile(ppm.evaluate.dist_dir1(:,ppm.evaluate.dist_dir_mean_min_itr),95);...
+            prctile(ppm.evaluate.dist_dir2(:,ppm.evaluate.dist_dir_mean_min_itr),95); nan];
         Hausdorff = [nan; nan; ppm.evaluate.hd(:,ppm.evaluate.dist_dir_mean_min_itr)];
-    
-        disp(table(Direction,Min,Max,Mean,Std,Median,Hausdorff))
+        
+        tab = table(Direction,Min,Max,Mean,Std,Median,Perc95,Hausdorff);
+        tab = renamevars(tab,"Perc95","95th percentile");
+        disp(tab)
     
     end
    
