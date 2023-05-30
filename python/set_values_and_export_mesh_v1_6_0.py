@@ -4,7 +4,7 @@
 # This script is part of the Matlab/Python PPM interface. Please refer to the respective
 # Matlab-function descriptions for further information on its use. 
 #
-# Related Python function:
+# Related Python script:
 # get_values_and_export_mesh_v1_6_0.py
 #
 # Related Matlab functions:
