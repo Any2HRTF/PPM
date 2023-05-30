@@ -1,10 +1,10 @@
-# PPM interface
+# Python-Blender PPM interface
 
-Coming soon
+Coming soon...
 
 ## Matlab Implementation
 
-For a Matlab implementation please refer to the [Matlab branch](https://github.com/Any2HRTF/PPM/tree/matlab)
+For a Matlab implementation please refer to the [Matlab branch](https://github.com/Any2HRTF/PPM/tree/matlab).
 
 ## References
 The PPM was developed at the Acoustics Research Institute (ARI) of the 
