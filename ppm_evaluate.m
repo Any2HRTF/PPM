@@ -1,6 +1,7 @@
 function ppm = ppm_evaluate(ppm,varargin)
 %ppm_evaluate - Evaluate the parametric-pinna-model (PPM) point cloud against a 
-%               target point cloud in terms of the Hausdorff distance
+%               target point cloud in terms of the directed minimum pointwise
+%               distance
 %
 % Usage: 
 %
