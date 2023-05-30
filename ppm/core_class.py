@@ -36,11 +36,29 @@ class PPM():
 
         if self.backend == 'blender':
             if from_blender_file != None:
-                with redirect_stdout(io.StringIO()):
-                    bpy.ops.wm.open_mainfile(filepath=from_blender_file)
+                logfile = tempfile.mktemp()
+                open(logfile, 'a').close()
+                old = os.dup(sys.stdout.fileno())
+                sys.stdout.flush()
+                os.close(sys.stdout.fileno())
+                fd = os.open(logfile, os.O_WRONLY)
+                bpy.ops.wm.open_mainfile(filepath=from_blender_file)
+                # disable output redirection
+                os.close(fd)
+                os.dup(old)
+                os.close(old)
             else:
-                with redirect_stdout(io.StringIO()):
-                    bpy.ops.wm.open_mainfile(filepath=f'{CURRENT_DIR}/resources/PPM_modified_v1.blend')
+                logfile = tempfile.mktemp()
+                open(logfile, 'a').close()
+                old = os.dup(sys.stdout.fileno())
+                sys.stdout.flush()
+                os.close(sys.stdout.fileno())
+                fd = os.open(logfile, os.O_WRONLY)
+                bpy.ops.wm.open_mainfile(filepath=f'{CURRENT_DIR}/resources/PPM_modified_v1.blend')
+                # disable output redirection
+                os.close(fd)
+                os.dup(old)
+                os.close(old)
             self.__get_parameters_from_blender()
         
         # rerun fct to load parameters from csv file
