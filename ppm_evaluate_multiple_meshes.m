@@ -1,5 +1,6 @@
 %% MATLAB script to evaluate multiple PPM template meshes against the
-%  corresponding target meshes in terms of the Hausdorff distance
+%  corresponding target meshes in terms of the directed minimum distance
+%  and the Hausdorff distance
 %
 % Related functions : ppm_initialize, ppm_get_values, ppm_evaluate
 
