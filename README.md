@@ -5,7 +5,7 @@ MATLAB-Python-Blender interface for bi-directional communication with the
 
 ## Main Matlab scripts and functions ##
 
-Get to know the functionality of the PPM interface by exploring `ppm_demo.m`, which calls the main functions listed below:
+Get to know the functionality of the PPM interface by exploring [`ppm_demo.m`](https://github.com/Any2HRTF/PPM/blob/matlab/ppm_demo.m), which calls the main functions listed below:
 - [`ppm_initialize()`](https://github.com/Any2HRTF/PPM/blob/matlab/ppm_initialize.m)
 - [`ppm_get_values()`](https://github.com/Any2HRTF/PPM/blob/matlab/ppm_get_values.m)
 - [`ppm_set_values()`](https://github.com/Any2HRTF/PPM/blob/matlab/ppm_set_values.m)
