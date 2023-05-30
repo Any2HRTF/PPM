@@ -44,13 +44,13 @@ clear; close all; clc
 type_ppm_input = 'single'; % {'single','multi'}
 
 %% Initialize PPM
-path_blender_file = 'D:\owncloud\SONICOM\WP1\PPM\Experiments\Collaboration with Paris-SOU\PPMs double-checked';
-name_blender_file = 'NH1059.blend';
+path_blender_file = '<path to Blender file>';
+name_blender_file = '<name of Blender file including .blend>';
 
 ppm = ppm_initialize(...
     'path_blender_file',path_blender_file,...
     'name_blender_file',name_blender_file,...
-    'verbose_level',2,...
+    'verbose_level',1,...
     'auto_delete',true);
 
 %% Get parameter values from specified Blender file and export mesh
@@ -81,10 +81,10 @@ switch type_ppm_input
 
         % Single-parameter input
         ppm = ppm_set_values(ppm,...
-            'type','Location',...
-            'name','Lobulus-Start',...
+            'type','Scale',...
+            'name','Size-Bendy',...
             'axis','X',...
-            'val',0,...
+            'val',1.3,...
             'range',4,...
             'itr',1,...
             'sample_start_idx',sample_start_idx,...
@@ -114,15 +114,18 @@ switch type_ppm_input
     case 'multi'
 
         % Multiple-parameter input (and further optional parameters in ppm_set_values())
-%         selection_cell = [8:10, 155:157, 164:166];
-%         selection_cell = [1:3,5:10,12:14,33:35,40:42,176:181];
+        % selection_cell = [8:10, 155:157, 164:166];
+        % selection_cell = [1:3,5:10,12:14,33:35,40:42,176:181];
         selection_cell = 1:size(ppm.parameters,1);
 
         type_cell = ppm.parameters(selection_cell,1);
         name_cell = ppm.parameters(selection_cell,2);
         axis_cell = ppm.parameters(selection_cell,3);
 
-%         val_cell = cellfun(@(x) x-0.07, ppm.parameters(selection_cell,4),'UniformOutput',0);
+        % Example for changing multiple parameter values
+        % val_cell = cellfun(@(x) x-0.07, ppm.parameters(selection_cell,4),'UniformOutput',0);
+
+        % Example for reading a *.txt file
         val_cell = readcell('D:\git\PPM\data\test.txt');
         val_cell = val_cell(:,4);
 
@@ -161,8 +164,8 @@ switch type_ppm_input
 end
 
 %% Compare the resulting point cloud to a specified target point cloud
-%  and evaluate its fit based on the Hausdorff distance, plot result
-path_pc_target = 'D:\owncloud\SONICOM\WP1\PPM\Experiments\Collaboration with Paris-SOU\PPMs double-checked\ply';
+%  and evaluate its fit based on the minimum pointwise distance, plot result
+path_pc_target = '<path to target ply file>';
 name_pc_target = [name_blender_file(1:end-6),'_target.ply'];
 
 ppm = ppm_evaluate(ppm,...
