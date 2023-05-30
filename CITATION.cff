@@ -7,7 +7,9 @@ authors:
 - family-names: "Majdak"
   given-names: "Piotr"
   orcid: "https://orcid.org/0000-0003-1511-6164"
+- family-names: "Jones"
+  given-names: "Oscar"
 title: "Matlab-Python-Blender PPM Interface"
-version: 1.5.0
-date-released: 2023-05-26
+version: 1.6.0
+date-released: 2023-05-30
 url: "https://github.com/Any2HRTF/PPM"
