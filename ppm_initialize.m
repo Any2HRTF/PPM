@@ -1,166 +1,168 @@
 function ppm = ppm_initialize(varargin)
-%ppm_initialize - Initialize the parametric-pinna-model (PPM) structure array
-%
-% Usage: 
-%   ppm = ppm_initialize(varargin)
-%
-% Input parameters (key/value pairs):
-%
-%   Required
-%     'path_blender_file'   : Path to Blender file to be modified [string]
-%     'name_blender_file'   : Name of Blender file to be modified [string] 
-%
-%   Optional
-%     'path_default'        : Path to default folder [string]
-%                             (default: fullfile(pwd,'default')) 
-%     'path_data'           : Path to data folder [string]
-%                             (default: fullfile(pwd,'data')) 
-%     'path_python'         : Path to folder containing Python scripts [string]
-%                             (default: fullfile(pwd,'python')) 
-%     'path_result'         : Path to result folder [string]
-%                             (default: fullfile(pwd,'result')) 
-%     'path_external'       : Path to folder containing external
-%                             classes, functions, scripts etc. [string]
-%     'name_parameter_file' : Name of file containing default parameter definitions 
-%                             in default folder [string] 
-%                             (default: 'parameter_defaults_v1')
-%     'name_limit_file'     : Name of file containing shape key parameter limits 
-%                             in default folder [string] 
-%                             (default: 'shape_key_limits_v1')
-%     'auto_delete'         : Automatically delete previous results in result 
-%                             folder [logical], (default: false)
-%     'verbose_level'       : Verbosity level [double] 
-%                             0: quiet (errors only)
-%                             1: info (default) 
-%                             2: debug
-%
-% Output parameters:
-%
-%   ppm : Initialized PPM structure array [struct]
-%         .ini
-%             .blender_file     : fullfile(path_blender_file, ...
-%                                          name_blender_file) [string]
-%             .verbose_level
-%             .path             : Paths to default, data, python, result,
-%                                 and external folders, and blender_exe [string]
-%             .sysarch          : Automatically determined system [string]
-%                                 architecture (e.g. win64)
-%             .shape_key_limits : Limits of PPM parameters of type 
-%                                 'Shape_key' [cell]
-%         .parameters           : Initial parameter values as per 
-%                                 fullfile(ppm.ini.path.default,...
-%                                       'parameter_defaults_v1.mat') [cell]
-%
-% ATTENTION: The Blender file to be modified needs to be saved in "Object Mode"
-%            in Blender with visible armature and object definitions
-%            in viewport.
-%
-% Related functions : ppm_get_values, ppm_set_values, ppm_evaluate
-
-% #Author: Florian Pausch (2022)
-
-%% Parse input arguments
-p = inputParser;
-
-addOptional(p,'path_blender_file',[]);
-addOptional(p,'name_blender_file',[]);
-addOptional(p,'path_default',fullfile(pwd,'default'));
-addOptional(p,'path_data',fullfile(pwd,'data'));
-addOptional(p,'path_python',fullfile(pwd,'python'));
-addOptional(p,'path_result',fullfile(pwd,'result'));
-addOptional(p,'path_external',fullfile(pwd,'external'));
-addOptional(p,'auto_delete',false);
-addOptional(p,'verbose_level',1);
-addOptional(p,'name_limit_file','shape_key_limits_v1');
-addOptional(p,'name_parameter_file','parameter_defaults_v1');
-
-parse(p,varargin{:});
-
-%% Check for input errors
-if (isempty(p.Results.path_blender_file) || isempty(p.Results.name_blender_file))
-    error([mfilename, ': Input error. Please specify ''path_blender_file'' and ''name_blender_file''.'])
-end
-
-if ~((p.Results.verbose_level>=0) && (p.Results.verbose_level<=2))
-    error(mfilename, ': Input error. ''verbose_level'' must be between 0 and 2.')
-end
-
-%% Assign default parameters to ppm and set Blender project to be modified
-ppm.ini.blender_file  = fullfile(p.Results.path_blender_file,...
-                                 p.Results.name_blender_file);
-ppm.ini.verbose_level = p.Results.verbose_level; 
-ppm.ini.path.python   = p.Results.path_python; 
-ppm.ini.path.default  = p.Results.path_default; 
-ppm.ini.path.data     = p.Results.path_data; 
-ppm.ini.path.result   = p.Results.path_result;
-ppm.ini.path.external = p.Results.path_external;
-if ~exist(ppm.ini.path.result,'dir'); mkdir(ppm.ini.path.result); end
-if ~exist(ppm.ini.path.external,'dir'); mkdir(ppm.ini.path.external); end
-addpath(genpath(ppm.ini.path.external))
-
-%% Download quaternion class from MATLAB File Exchange
-if ~exist(fullfile(ppm.ini.path.external,'quaternion'),'dir')
-    mkdir(fullfile(ppm.ini.path.external,'quaternion'))
-    disp([mfilename,': Downloading required class `quaternion` from MATLAB File Exchange...'])
-    websave(fullfile(ppm.ini.path.external,'quaternion','quaternion.zip'),'https://de.mathworks.com/matlabcentral/mlc-downloads/downloads/submissions/33341/versions/9/download/zip');
-    unzip(fullfile(ppm.ini.path.external,'quaternion','quaternion.zip'),fullfile(ppm.ini.path.external,'quaternion'))
-    delete(fullfile(ppm.ini.path.external,'quaternion','quaternion.zip'))
-    disp([mfilename,': Finished downloading required class `quaternion` from MATLAB File Exchange.'])
+    %ppm_initialize - Initialize the parametric-pinna-model (PPM) structure array
+    %
+    % Usage: 
+    %   ppm = ppm_initialize(varargin)
+    %
+    % Input parameters (key/value pairs):
+    %
+    %   Required
+    %     'path_blender_file'   : Path to Blender file to be modified [string]
+    %     'name_blender_file'   : Name of Blender file to be modified [string] 
+    %
+    %   Optional
+    %     'path_default'        : Path to default folder [string]
+    %                             (default: fullfile(pwd,'default')) 
+    %     'path_data'           : Path to data folder [string]
+    %                             (default: fullfile(pwd,'data')) 
+    %     'path_python'         : Path to folder containing Python scripts [string]
+    %                             (default: fullfile(pwd,'python')) 
+    %     'path_result'         : Path to result folder [string]
+    %                             (default: fullfile(pwd,'result')) 
+    %     'path_external'       : Path to folder containing external
+    %                             classes, functions, scripts etc. [string]
+    %     'name_parameter_file' : Name of file containing default parameter definitions 
+    %                             in default folder [string] 
+    %                             (default: 'parameter_defaults_v1')
+    %     'name_limit_file'     : Name of file containing shape key parameter limits 
+    %                             in default folder [string] 
+    %                             (default: 'shape_key_limits_v1')
+    %     'auto_delete'         : Automatically delete previous results in result 
+    %                             folder [logical], (default: false)
+    %     'verbose_level'       : Verbosity level [double] 
+    %                             0: quiet (errors only)
+    %                             1: info (default) 
+    %                             2: debug
+    %
+    % Output parameters:
+    %
+    %   ppm : Initialized PPM structure array [struct]
+    %         .ini
+    %             .blender_file     : fullfile(path_blender_file, ...
+    %                                          name_blender_file) [string]
+    %             .verbose_level
+    %             .path             : Paths to default, data, python, result,
+    %                                 and external folders, and blender_exe [string]
+    %             .sysarch          : Automatically determined system [string]
+    %                                 architecture (e.g. win64)
+    %             .shape_key_limits : Limits of PPM parameters of type 
+    %                                 'Shape_key' [cell]
+    %         .parameters           : Initial parameter values as per 
+    %                                 fullfile(ppm.ini.path.default,...
+    %                                       'parameter_defaults_v1.mat') [cell]
+    %
+    % ATTENTION: The Blender file to be modified needs to be saved in "Object Mode"
+    %            in Blender with visible armature and object definitions
+    %            in the viewport.
+    %
+    % Related functions : ppm_get_values, ppm_set_values, ppm_evaluate
+    
+    % #Author: Florian Pausch (2023)
+    
+    %% Parse input arguments
+    p = inputParser;
+    
+    addOptional(p,'path_blender_file',[]);
+    addOptional(p,'name_blender_file',[]);
+    addOptional(p,'path_default',fullfile(pwd,'default'));
+    addOptional(p,'path_data',fullfile(pwd,'data'));
+    addOptional(p,'path_python',fullfile(pwd,'python'));
+    addOptional(p,'path_result',fullfile(pwd,'result'));
+    addOptional(p,'path_external',fullfile(pwd,'external'));
+    addOptional(p,'auto_delete',false);
+    addOptional(p,'verbose_level',1);
+    addOptional(p,'name_limit_file','shape_key_limits_v1');
+    addOptional(p,'name_parameter_file','parameter_defaults_v1');
+    addOptional(p,'path_blender_exe','');
+    
+    parse(p,varargin{:});
+    %% Check for input errors
+    if (isempty(p.Results.path_blender_file) || isempty(p.Results.name_blender_file))
+        error([mfilename, ': Input error. Please specify ''path_blender_file'' and ''name_blender_file''.'])
+    end
+    
+    if ~((p.Results.verbose_level>=0) && (p.Results.verbose_level<=2))
+        error(mfilename, ': Input error. ''verbose_level'' must be between 0 and 2.')
+    end
+    
+    %% Assign default parameters to ppm and set Blender project to be modified
+    ppm.ini.blender_file  = fullfile(p.Results.path_blender_file,...
+                                     p.Results.name_blender_file);
+    ppm.ini.verbose_level = p.Results.verbose_level; 
+    ppm.ini.path.python   = p.Results.path_python; 
+    ppm.ini.path.default  = p.Results.path_default; 
+    ppm.ini.path.data     = p.Results.path_data; 
+    ppm.ini.path.result   = p.Results.path_result;
+    ppm.ini.path.external = p.Results.path_external;
+    if ~exist(ppm.ini.path.result,'dir'); mkdir(ppm.ini.path.result); end
+    if ~exist(ppm.ini.path.external,'dir'); mkdir(ppm.ini.path.external); end
     addpath(genpath(ppm.ini.path.external))
-end
-
-%% Optionally delete all existing export/render folders in result folder 
-%  (img, img_depth, mesh, parameters, pc) 
-
-filelist = ppm.ini.path.result;
-files_all = dir(filelist);
-files_all_dir = [files_all.isdir];
-dir_results = files_all(files_all_dir); 
-dir_results_names = {dir_results(3:end).name};
-
-if ~isempty(dir_results_names) && p.Results.auto_delete==1
-    if ppm.ini.verbose_level>0
-        warning([mfilename,': Specified result folder contained previous results, which were deleted.'])
+    
+    %% Download quaternion class from MATLAB File Exchange
+    if ~exist(fullfile(ppm.ini.path.external,'quaternion'),'dir')
+        mkdir(fullfile(ppm.ini.path.external,'quaternion'))
+        disp([mfilename,': Downloading required class `quaternion` from MATLAB File Exchange...'])
+        websave(fullfile(ppm.ini.path.external,'quaternion','quaternion.zip'),'https://de.mathworks.com/matlabcentral/mlc-downloads/downloads/submissions/33341/versions/9/download/zip');
+        unzip(fullfile(ppm.ini.path.external,'quaternion','quaternion.zip'),fullfile(ppm.ini.path.external,'quaternion'))
+        delete(fullfile(ppm.ini.path.external,'quaternion','quaternion.zip'))
+        disp([mfilename,': Finished downloading required class `quaternion` from MATLAB File Exchange.'])
+        addpath(genpath(ppm.ini.path.external))
     end
-    for idx=1:numel(dir_results_names)
-        rmdir(fullfile(p.Results.path_result,dir_results_names{idx}),'s')
-    end
-    if exist(fullfile(p.Results.path_result,'blender_render.log'),'file')
-        delete(fullfile(p.Results.path_result,'blender_render.log'))
-    end
-elseif ~isempty(dir_results_names) && p.Results.auto_delete==0
-    answer = questdlg([mfilename,': Specified result folder contained previous results, which will be deleted. Proceed?'],'Yes','No');
-    if strcmp(answer,'Yes')
+    
+    %% Optionally delete all existing export/render folders in result folder 
+    %  (img, img_depth, mesh, parameters, pc) 
+    
+    filelist = ppm.ini.path.result;
+    files_all = dir(filelist);
+    files_all_dir = [files_all.isdir];
+    dir_results = files_all(files_all_dir); 
+    dir_results_names = {dir_results(3:end).name};
+    
+    if ~isempty(dir_results_names) && p.Results.auto_delete==1
+        if ppm.ini.verbose_level>0
+            warning([mfilename,': Specified result folder contained previous results, which were deleted.'])
+        end
         for idx=1:numel(dir_results_names)
             rmdir(fullfile(p.Results.path_result,dir_results_names{idx}),'s')
         end
         if exist(fullfile(p.Results.path_result,'blender_render.log'),'file')
             delete(fullfile(p.Results.path_result,'blender_render.log'))
         end
-    else
-        error('Aborted by user.')
+    elseif ~isempty(dir_results_names) && p.Results.auto_delete==0
+        answer = questdlg([mfilename,': Specified result folder contained previous results, which will be deleted. Proceed?'],'Yes','No');
+        if strcmp(answer,'Yes')
+            for idx=1:numel(dir_results_names)
+                rmdir(fullfile(p.Results.path_result,dir_results_names{idx}),'s')
+            end
+            if exist(fullfile(p.Results.path_result,'blender_render.log'),'file')
+                delete(fullfile(p.Results.path_result,'blender_render.log'))
+            end
+        else
+            error('Aborted by user.')
+        end
     end
-end
-
-%% Determine Blender location depending on system architecture
-ppm.ini.sysarch = computer('arch'); % determines system architecture
-switch ppm.ini.sysarch
-    case 'win64'
-        [~, temp] = system('WHERE /F /R "C:\Program Files\Blender Foundation" blender.exe');
-        temp2 = regexp(temp, '[\f\n\r]', 'split'); % remove unwanted line break added by system command
-        ppm.ini.path.blender_exe = temp2{1};
-    case 'glnxa64'
-        ppm.ini.path.blender = '';
-        error('Please manually set path to Blender.')
-    otherwise % 'MACI64'
-        ppm.ini.path.blender_exe = ''; %'/Users/<user name>/BlenderApp/blender/blender.app/Contents/MacOS/Blender';
-        error('Please manually set path to Blender.')
-end
-
-%% Load default transformation matrix
-load(fullfile(ppm.ini.path.default,[p.Results.name_parameter_file,'.mat']),'parameter_defaults_v1');
-ppm.parameters = parameter_defaults_v1;
-
-%% Load default ppm parameter limits
-load(fullfile(ppm.ini.path.default,[p.Results.name_limit_file,'.mat']),'shape_key_limits_v1');
-ppm.ini.shape_key_limits = shape_key_limits_v1;
+    
+    %% Determine Blender location depending on system architecture
+    ppm.ini.sysarch = computer('arch'); % determines system architecture
+    if strcmp(p.Results.path_blender_exe, '')
+        switch ppm.ini.sysarch
+            case 'win64'
+                [~, temp] = system('WHERE /F /R "C:\Program Files\Blender Foundation" blender.exe');
+                temp2 = regexp(temp, '[\f\n\r]', 'split'); % remove unwanted line break added by system command
+                ppm.ini.path.blender_exe = temp2{1};
+            case 'glnxa64'
+                ppm.ini.path.blender = '';
+                error('Please manually set path to Blender.')
+            otherwise % 'MACI64'
+                ppm.ini.path.blender_exe = '/Applications/Blender.app/Contents/MacOS/Blender'; %'/Users/<user name>/BlenderApp/blender/blender.app/Contents/MacOS/Blender';
+        end
+    else
+        ppm.ini.path.blender_exe = p.Results.path_blender_exe;
+    end
+    %% Load default transformation matrix
+    load(fullfile(ppm.ini.path.default,[p.Results.name_parameter_file,'.mat']),'parameter_defaults_v1');
+    ppm.parameters = parameter_defaults_v1;
+    
+    %% Load default ppm parameter limits
+    load(fullfile(ppm.ini.path.default,[p.Results.name_limit_file,'.mat']),'shape_key_limits_v1');
+    ppm.ini.shape_key_limits = shape_key_limits_v1;

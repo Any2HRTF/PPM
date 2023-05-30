@@ -1,17 +1,17 @@
 # Python script to set the parameters values of the parametric pinna model (PPM)  
-# contained in a Blender file
+# defined in a Blender file
 # 
 # This script is part of the Matlab/Python PPM interface. Please refer to the respective
 # Matlab-function descriptions for further information on its use. 
 #
-# Related Python function:
-# get_values_and_export_mesh_v1_5_0.py
+# Related Python script:
+# get_values_and_export_mesh_v1_6_0.py
 #
 # Related Matlab functions:
 # ppm_demo, ppm_get_values, ppm_set_values
 #
 # Versions and contributors:
-# PPM interface 0.8 and above: Florian Pausch (2022)
+# PPM interface 0.8 and above: Florian Pausch (2023)
 # PPM interface 0.7 and below: Oscar Jones (2021)
 
 print("Blender loaded")
@@ -23,8 +23,10 @@ import io
 from contextlib import redirect_stdout
 import bpy
 import math
-import mathutils
+# import mathutils
+from mathutils import Vector, Matrix, Quaternion, Euler
 import numpy as np
+import warnings
 
 stdout = io.StringIO()
 
@@ -51,6 +53,8 @@ arg_depth_comp_png = argv[argv.index("--") + 15]
 arg_depth_nearest = argv[argv.index("--") + 16]
 arg_depth_farthest = argv[argv.index("--") + 17]
 
+arg_shade_smooth = argv[argv.index("--") + 18]
+
 def select(label, action):
     if action:
         bpy.ops.object.select_all(action='DESELECT')
@@ -64,16 +68,20 @@ def setDir(folder, file, extension):
     target_file = os.path.join(folder, '{}.{}'.format(file, extension))
     return target_file
 
-
 class Bone():
 
     def __init__(self, name, ear):
 
         self.name = name
+        self.rot_flag = False
+        self.scl_flag = False
         ear.bones.append(self)
         ear.bonesLookup[self.name] = self
 
     def rotation(self, point, axis, val):
+
+        obj = bpy.data.objects["Armature"]
+        pose_bone = obj.pose.bones[self.name + "-" + point]
 
         if axis == 'W':
             axis_idx = 0
@@ -86,10 +94,14 @@ class Bone():
         else:
             axis_idx = "error"
 
-        bpy.data.objects["Armature"].pose.bones[self.name + "-" + point].rotation_quaternion[axis_idx] = float(val)
+        pose_bone.rotation_quaternion[axis_idx] = float(val)
+
 
     def location(self, point, axis, val):
 
+        obj = bpy.data.objects["Armature"]
+        pose_bone = bpy.data.objects["Armature"].pose.bones[self.name + "-" + point]
+
         if axis == 'X':
             axis_idx = 0
         elif axis == 'Y':
@@ -99,9 +111,12 @@ class Bone():
         else:
             axis_idx = "error"
 
-        bpy.data.objects["Armature"].pose.bones[self.name + "-" + point].location[axis_idx] = float(val)
+        pose_bone.location[axis_idx] = float(val)
 
     def scaling(self, point, axis, val):
+        
+        obj = bpy.data.objects["Armature"]
+        pose_bone = bpy.data.objects["Armature"].pose.bones[self.name + "-" + point]
 
         if axis == 'X':
             axis_idx = 0
@@ -112,8 +127,7 @@ class Bone():
         else:
             axis_idx = "error"
 
-        bpy.data.objects["Armature"].pose.bones[self.name + "-" + point].scale[axis_idx] = float(val)
-
+        pose_bone.scale[axis_idx] = float(val)       
           
 class Ear():
 
@@ -125,6 +139,7 @@ class Ear():
         self.bonesLookup = {}
 
     def modifiers(self, state):
+        
         if arg_remesh == 'TRUE':
             bpy.data.objects["ARI_PPM_v1"].modifiers["DataTransfer"].show_render = state
             bpy.data.objects["ARI_PPM_v1"].modifiers["DataTransfer"].show_viewport = state
@@ -134,6 +149,7 @@ class Ear():
             bpy.data.objects["ARI_PPM_v1"].modifiers["Decimate"].show_viewport = state
 
     def shapeKey(self, name, val):
+        
         bpy.data.shape_keys["Key.002"].key_blocks[name].value = float(val)
 
     def export_pc(self, name):
@@ -162,8 +178,14 @@ class Ear():
 
         cam = bpy.data.objects['Camera']
         cam.rotation_mode = 'XYZ'
-        bpy.context.scene.camera = cam   
+        bpy.context.scene.camera = cam  
 
+        # Optionally smooth mesh faces for more pleasing rendering results
+        if arg_shade_smooth=='TRUE':
+            mesh = bpy.context.object.data
+            for f in mesh.polygons:
+                f.use_smooth = True
+ 
         if arg_cam=='TRUE' and name.find('_cam')==(-1):
       
             cam_file = setDir(os.path.join(self.path,'cam'), name + '_cam', 'txt')
@@ -180,7 +202,7 @@ class Ear():
             cam_loc[-1] = cam_loc[-1].strip()
             cam_loc = np.asarray(cam_loc)
 
-            cam.location = mathutils.Vector((float(cam_loc[0]),
+            cam.location = Vector((float(cam_loc[0]),
                                              float(cam_loc[1]),
                                              float(cam_loc[2])))
             bpy.context.view_layer.update()
@@ -190,7 +212,7 @@ class Ear():
                 cam_rot[-1] = cam_rot[-1].strip()
                 cam_rot = np.asarray(cam_rot)
 
-                cam.rotation_euler = mathutils.Euler((math.radians(float(cam_rot[0])),
+                cam.rotation_euler = Euler((math.radians(float(cam_rot[0])),
                                                       math.radians(float(cam_rot[1])),
                                                       math.radians(float(cam_rot[2]))), cam.rotation_mode)
             
@@ -200,7 +222,7 @@ class Ear():
                 cam_loc_ref = np.asarray(cam_loc_ref)
 
                 cam_loc_mtx = cam.matrix_world.to_translation()
-                cam_rot = mathutils.Vector((float(cam_loc_ref[0]),
+                cam_rot = Vector((float(cam_loc_ref[0]),
                                             float(cam_loc_ref[1]),
                                             float(cam_loc_ref[2]))) - cam_loc_mtx
 
@@ -209,8 +231,8 @@ class Ear():
                 cam.rotation_euler = cam_rot_quat.to_euler()
             
         else: # set default camera pose
-            cam.location = mathutils.Vector((-10, 200, 5))
-            cam.rotation_euler = mathutils.Euler((math.pi/2, 0, math.pi), cam.rotation_mode)
+            cam.location = Vector((-10, 200, 5))
+            cam.rotation_euler = Euler((math.pi/2, 0, math.pi), cam.rotation_mode)
 
         bpy.context.view_layer.update()
 
@@ -402,11 +424,8 @@ class Ear():
 
     def loadAll(self):
 
-        #print("Locating instructions... ", end="", flush=True)
         os.chdir(os.path.join(self.path,'parameters'))
-        #print("Done")
-        #print("Loaded Instructions from {}".format(self.path))
-        #print("Exporting to {}".format(self.path))
+
         for file in glob.glob("*.txt"):
 
             name = file.split('.')[0]

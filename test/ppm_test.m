@@ -1,11 +1,13 @@
 %% MATLAB script for comprehensive functionality tests of the interface to the
-%  parametric pinna model (PPM), including bi-directional communication with
-%  Blender via Python scripts
+%  parametric pinna model (PPM) in Blender via Python scripts
 
-% #Author: Florian Pausch (2022)
+% #Author: Florian Pausch (2023)
 
 clear; close all;
     
+diary("ppm_test.txt")
+diary on
+
 test_get_values          = true;
 test_set_values_single   = true;
 test_set_values_multiple = true;
@@ -26,8 +28,10 @@ name_limit_file     = 'shape_key_limits_v1';
 auto_delete         = {true,false};
 verbose_level       = {0,1,2};
 
+t0=tic;
 fprintf('ppm_init(): Testing...\n')
 
+t1=tic();
 for idx=1:numel(auto_delete)
     for jdx=1:numel(verbose_level)
         try
@@ -50,9 +54,11 @@ for idx=1:numel(auto_delete)
 end
 
 fprintf('ppm_init(): Sucessfully tested.\n\n')
+toc(t1)
 
 %% ppm_get_values()
 
+t2=tic();
 ppm.ini.verbose_level = 2;
 
 type = unique(ppm.parameters(:,1));
@@ -93,6 +99,7 @@ if test_get_values
     close(wb)
     fprintf('ppm_get_values(): Sucessfully tested.\n\n')
 end
+toc(t2)
 
 %% ppm_set_values()
 
@@ -102,6 +109,7 @@ instruction_mode_cell = {'rel','abs'};
 
 %% Change a single parameter value
 
+t3=tic;
 if test_set_values_single
     fprintf('ppm_set_values(): Testing single input...\n')
     wb = waitbar(0,'ppm_set_values(): Testing single input...');
@@ -147,6 +155,7 @@ if test_set_values_single
     close(wb)
     fprintf('ppm_set_values(): Sucessfully tested single input.\n\n')
 end
+toc(t3)
 
 %% Change multiple parameter values
 
@@ -162,6 +171,7 @@ mesh = [false, true];
 image = [false, true];
 depth = [false, true];
 
+t4=tic();
 if test_set_values_multiple
 
     fprintf('ppm_set_values(): Testing multiple input...\n')
@@ -250,8 +260,8 @@ if test_set_values_multiple
     end
     close(wb)
     fprintf('ppm_set_values(): Sucessfully tested multiple input.\n\n')
-
 end
+toc(t4)
 
 %% ppm_evaluate()
 
@@ -262,6 +272,7 @@ caxis_min = -3;
 caxis_max = 7;
 name_mesh_target = 'PPM_default_v1.ply';
 
+t5=tic();
 if test_evaluate
 
     fprintf('ppm_evaluate(): Testing...\n')
@@ -324,4 +335,6 @@ if test_evaluate
     close(wb)
     fprintf('ppm_evaluate(): Sucessfully tested.\n\n')
 end
+toc(t5)
 
+toc(t0)

@@ -1,17 +1,17 @@
 # Python script to get the parameters values of the parametric pinna model (PPM)  
-# contained in a Blender file
+# defined in a Blender file
 # 
 # This script is part of the Matlab/Python PPM interface. Please refer to the respective
 # Matlab-function descriptions for further information on its use. 
 #
-# Related Python function:
-# set_values_and_export_mesh_v1_5_0.py
+# Related Python script:
+# set_values_and_export_mesh_v1_6_0.py
 #
 # Related Matlab functions:
 # ppm_demo, ppm_get_values, ppm_set_values
 #
 # Versions and contributors:
-# PPM interface 0.8 and above: Florian Pausch (2022)
+# PPM interface 0.8 and above: Florian Pausch (2023)
 # PPM interface 0.7 and below: Oscar Jones (2021)
 
 import bpy

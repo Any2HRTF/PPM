@@ -46,7 +46,6 @@ function ppm = ppm_set_values(ppm,varargin)
 %                                provide triplets of X-, Y-, and Z-axis values 
 %                                if N parameter values are to be changed
 %                                simultaneously!
-%
 %     'instruction_mode' : Instruction mode [string]
 %                           'rel': val is added to val_orig and subsequently 
 %                                  assigned to the parameter (default)
@@ -59,8 +58,15 @@ function ppm = ppm_set_values(ppm,varargin)
 %                          (default: 1)
 %     'sample_start_idx' : File-name index. If itr>1 the exported or
 %                          rendered files start at this index and are
-%                          incremented [double], default: 1
-%     'cam_loc'          : Location vector of the camera [double] 
+%                          incremented [double] (default: 1)
+%     'auto_correct'     : (Only relevant for multi-parameter input) 
+%                          Automatically unify inadmissable anisotropic scaling
+%                          values for bendy bones other than 'Size-Bendy'
+%                          using the first value of the corresponding scaling
+%                          triplet [logical] (default: false); when changing
+%                          a single scale value, the corresponding value
+%                          triplet is unified automatically
+%     'cam_loc'          : Location vector of the camera [double]
 %                          (default: [-10, 200, 5])
 %     'cam_rot'          : Rotation vector of the camera, containing 
 %                          XYZ Euler angles in deg [double] 
@@ -72,47 +78,50 @@ function ppm = ppm_set_values(ppm,varargin)
 %
 %   For ppm_blender_execute():
 %     'pc'                : Export modelled mesh as point cloud (PLY) [logical]
-%                           default: true
-%     'mesh'              : Export modelled mesh as mesh (STL) [logical], default: false 
+%                           (default: true)
+%     'mesh'              : Export modelled mesh as mesh (STL) [logical] 
+%                           (default: false) 
 %     'remesh'            : Disable/enable reduction of vertex/face count of 
-%                           the modelled mesh before exporting [logical], default: false
-%     'image'             : Render modelled mesh as PNG [logical], default: false
+%                           the modelled mesh before exporting [logical]
+%                           (default: false)
+%     'shade_smooth'      : Smooth faces of the modelled mesh for smoother
+%                           rendering results [logical] (default: false)
+%     'image'             : Render modelled mesh as PNG [logical] (default: false)
 %     'image_res'         : Resolution (image_res x image_res) of the
-%                           rendered PNG image [double], default: 1024
+%                           rendered PNG image [double] (default: 1024)
 %     'image_col_dep'     : Set color depth of PNG file in bit [double], 
-%                           {8, 16}, default: 16
+%                           {8, 16} (default: 16)
 %     'image_comp'        : Set amount of compression in rendered PNG file [double], 
-%                           [0, 100] = [none, maximum lossless compression], 
-%                           default: 15
+%                           [0, 100] = [none, maximum lossless compression] 
+%                           (default: 15)
 %     'set_cam'           : Set camera position and rotation as per cam_loc, cam_rot 
-%                           and/or cam_loc_ref [logical], default: false
+%                           and/or cam_loc_ref [logical] (default: false)
 %     'depth'             : (Requires 'image' set to true) Export image-depth 
 %                           data (z buffer) as EXR and PNG files, normalised 
 %                           to values between 1 (black, farthest) and 0 
-%                           (white, closest) [logical], 
-%                           default: false
+%                           (white, closest) [logical] (default: false)
 %     'depth_nearest'     : Nearest distance representing the maximum value
 %                           of the normalised image-depth map (white), 
-%                           provided in Blender units [double], default: 
+%                           provided in Blender units [double] (default: 
 %                           Euclidian distance of the current camera position 
-%                           to the origin of the global coordinate system
+%                           to the origin of the global coordinate system)
 %     'depth_farthest'    : Farthest distance representing the minimum value
 %                           of the normalised image-depth map (black), 
-%                           provided in Blender units [double], default: 0 
+%                           provided in Blender units [double] (default: 0) 
 %                           (origin of the global coordinate system)
 %     'depth_col_dep_exr' : Set color-depth of depth data (z buffer) in OpenEXR file
-%                           [double], {16, 32}, default: 16
+%                           [double], {16, 32} (default: 16)
 %     'depth_comp_exr'    : Set amount of compression in OpenEXR file [double], 
-%                           [0, 100] = [none, maximum lossless compression], 
-%                           default: 15
+%                           [0, 100] = [none, maximum lossless compression] 
+%                           (default: 15)
 %     'depth_codec_exr'   : Set codec of rendered OpenEXR file [string], 
 %                           {'NONE', 'PXR24', 'ZIP', 'PIZ’, 'RLE’, 'ZIPS’, 
-%                           'B44 , 'B44A', 'DWAA', 'DWAB'}, default: 'NONE'
+%                           'B44 , 'B44A', 'DWAA', 'DWAB'} (default: 'NONE')
 %     'depth_col_dep_png' : Set color-depth of depth data (z buffer) in PNG file
-%                           [double], {8, 16}, default: 16
+%                           [double], {8, 16} (default: 16)
 %     'depth_comp_png'    : Set amount of compression in rendered image-depth PNG 
-%                           file [double], [0, 100] = [none, maximum lossless compression], 
-%                           default: 15
+%                           file [double], [0, 100] = [none, maximum lossless 
+%                           compression] (default: 15)
 %
 % Output parameters:
 %
@@ -127,6 +136,7 @@ function ppm = ppm_set_values(ppm,varargin)
 %             .itr [double]
 %             .range [double]
 %             .sample_start_idx [double]
+%             .auto_correct [logical] 
 %             .instruction_mode [string]
 %             .rotation_mode [string]
 %             .cam_loc [double]
@@ -135,6 +145,7 @@ function ppm = ppm_set_values(ppm,varargin)
 %             .set_cam [logical]
 %             .mesh [logical]
 %             .remesh [logical]
+%             .shade_smooth [logical]
 %             .image [logical]
 %             .image_res [logical]
 %             .image_col_dep [double]
@@ -190,6 +201,7 @@ addOptional(p,'axis',[]);
 addOptional(p,'val',[]);
 addOptional(p,'itr',1);
 addOptional(p,'sample_start_idx',1);
+addOptional(p,'auto_correct',false);
 addOptional(p,'range',1);
 addOptional(p,'instruction_mode','rel');
 addOptional(p,'rotation_mode','quaternion');
@@ -201,6 +213,7 @@ addOptional(p,'cam_loc_ref',[]);
 addOptional(p,'pc',true);
 addOptional(p,'mesh',false);
 addOptional(p,'remesh',false);
+addOptional(p,'shade_smooth',false);
 addOptional(p,'image',false);
 addOptional(p,'image_res',1024);
 addOptional(p,'image_col_dep',16);
@@ -288,7 +301,11 @@ if iscell(p.Results.type) || iscell(p.Results.name) || ...
             scale_reshape = cell2mat(reshape(p.Results.val(scale_idx_local),3,numel(p.Results.val(scale_idx_local))/3));
             
             if ~all(~diff(scale_reshape),'all')
-                error('Input error. Only isotropic scaling is possible for bendy bones. Provide identical axis-related values for the corresponding scaling triplets.')
+                if p.Results.auto_correct
+                    warning([mfilename, ': Anisotropic scaling detected for (several) bendy bones other than ''Size-Bendy''. The affected scaling triplets were unified using the first scaling value(s) of the corresponding scaling triplet(s).'])
+                else
+                    error('Input error. Only isotropic scaling is possible for bendy bones other than ''Size-Bendy''. Provide identical axis-related values for the corresponding scaling triplets or enable ''auto_correct''.')
+                end
             end
         end
 
@@ -380,8 +397,9 @@ if ~ismember(p.Results.rotation_mode,{'quaternion','XYZ','XZY','YXZ','YZX','ZXY'
 end
 
 %% Fetch parameter values of Blender file if not done yet
-if ~exist(fullfile(ppm.ini.path.result,'parameters'),'dir')
-    ppm = ppm_get_values(ppm);
+if ~exist(fullfile(strrep(ppm.ini.path.result,'"',''),'parameters'),'dir')
+    ppm = ppm_get_values(ppm,...
+        'sample_start_idx',p.Results.sample_start_idx);
 end
 
 %% Assign input arguments to ppm.modify
@@ -391,6 +409,26 @@ if iscell(p.Results.type) || iscell(p.Results.name) || ...
     ppm.modify.type = p.Results.type;
     ppm.modify.name = p.Results.name;
     ppm.modify.axis = p.Results.axis;
+
+    if ~exist('scale_reshape','var')
+        scale_reshape = 0;
+    end
+
+    % unify impermissible anisotropic scaling for bendy bones other than Size-Bendy
+    if ~all(~diff(scale_reshape),'all') && ~all(ismember(p.Results.name,'Size-Bendy'))...
+            && p.Results.auto_correct
+        % first non-zero element
+        % first_scale_val_row = arrayfun(@(X)  find(scale_reshape(X,:),1,'first'), ...
+        %                                1:size(scale_reshape,2));
+        val_reshaped = scale_reshape;
+        val_reshaped(2:end,:) = repmat(scale_reshape(1,:),2,1);
+        val_unified = val_reshaped(:);
+
+        ppm.modify.val = cell2mat(p.Results.val);
+        ppm.modify.val(scale_idx_local) = val_unified;
+    else
+        ppm.modify.val = cell2mat(p.Results.val);
+    end
 
 else
 
@@ -404,6 +442,7 @@ else
         ppm.modify.type = p.Results.type;
         ppm.modify.name = p.Results.name;
         ppm.modify.axis = p.Results.axis;
+        ppm.modify.val  = p.Results.val;
     end
 
 end
@@ -414,15 +453,10 @@ if ~iscell(p.Results.axis)
     end
 end
 
-if iscell(p.Results.val)
-    ppm.modify.val   = cell2mat(p.Results.val);
-else
-    ppm.modify.val   = p.Results.val;
-end
-
 ppm.modify.itr               = p.Results.itr;
 ppm.modify.range             = p.Results.range;
 ppm.modify.sample_start_idx  = p.Results.sample_start_idx;
+ppm.modify.auto_correct      = p.Results.auto_correct;
 ppm.modify.instruction_mode  = p.Results.instruction_mode;
 ppm.modify.rotation_mode     = p.Results.rotation_mode;
 ppm.modify.cam_loc           = p.Results.cam_loc;
@@ -432,6 +466,7 @@ ppm.modify.set_cam           = p.Results.set_cam;
 ppm.modify.pc                = p.Results.pc;
 ppm.modify.mesh              = p.Results.mesh;
 ppm.modify.remesh            = p.Results.remesh;
+ppm.modify.shade_smooth      = p.Results.shade_smooth;
 ppm.modify.image             = p.Results.image;
 ppm.modify.image_res         = p.Results.image_res;
 ppm.modify.image_col_dep     = p.Results.image_col_dep;
