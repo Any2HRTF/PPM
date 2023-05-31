@@ -362,6 +362,8 @@ class PPM():
                                     
                         else:
                             obj.pose.bones[parameter_name + "-" + point_name].scale[0] = self.__parameters[parameter_name][point_name]['Scale']
+                            obj.pose.bones[parameter_name + "-" + point_name].scale[1] = self.__parameters[parameter_name][point_name]['Scale']
+                            obj.pose.bones[parameter_name + "-" + point_name].scale[2] = self.__parameters[parameter_name][point_name]['Scale']
                     # rotation
                     if 'Rotation' in point.keys():
                         for axis, axis_value in point['Rotation'].items():
