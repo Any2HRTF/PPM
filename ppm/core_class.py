@@ -108,7 +108,7 @@ class PPM():
         from_blender_file (str): Path to a blender file to load the PPM from; if None, the standard PPM is loaded
         from_csv_file (str): Path to a csv file to load the PPM parameters from; if None, the standard PPM is loaded
     """
-    def __init__(self, from_blender_file=None, from_csv_file=None, backend='blender'):
+    def __init__(self, from_blender_file=None, from_csv_file=None, from_dict=None, backend='blender'):
 
         if from_blender_file != None and from_csv_file != None:
             raise Exception('Either load from blender file or from csv file.')
@@ -151,6 +151,9 @@ class PPM():
         # rerun fct to load parameters from csv file
         if from_csv_file != None:
             self.__parameters = self.__load_parameters_from_csv(from_csv_file)
+        
+        if from_dict != None:
+            self.__parameters = self.__load_parameters_from_dict(from_dict)
 
     @property
     def points(self):
@@ -194,7 +197,7 @@ class PPM():
         else:
             if point not in ['Start', 'End'] and parameter != 'Size':
                 raise Exception('point must be one of Start, End')
-            else:
+            elif parameter == 'Size':
                 point = 'Bendy'
             
             if len(value) != len(axis):
@@ -227,6 +230,55 @@ class PPM():
 
                     for i in range(len(value)):
                         self.__parameters[parameter][point][parameter_type][axis[i]] = value[i]
+
+    def __load_parameters_from_dict(self, parameter_dict:dict) -> dict:
+        parameters = {}
+        for key, value in parameter_dict.items():
+            if 'Shape_key' in key:
+                type = 'Shape_key'
+                name = key.replace('Shape_key_', '')
+                point = None
+                axis = None
+            elif 'Scale' in key:
+                type = 'Scale'
+                name = '_'.join(key.split('-')[0].split('_')[1:])
+                point = '_'.join(key.split('-')[1].split('_'))
+                if 'Size' in key:
+                    axis = point.split('_')[-1]
+                    point = point.split('_')[0]
+                else:
+                    axis = None
+            else:
+                type = key.split('_')[0]
+                name = '_'.join(key.split('-')[0].split('_')[1:])
+                point = '_'.join(key.split('-')[1].split('_')[:-1])
+                axis = key.split('_')[-1]
+                
+            value = float(value)
+
+            if type  == 'Scale':
+                pass
+            
+            if name not in parameters:
+                parameters[name] = {}
+            if point != None:
+                if point not in parameters[name]:
+                    parameters[name][point] = {}
+                if axis != None:
+                    if type not in parameters[name][point]:
+                        parameters[name][point][type] = {}
+                    parameters[name][point][type][axis] = value
+                else:
+                    parameters[name][point][type] = value
+            else:
+                if axis != None:
+                    if type not in parameters[name]:
+                        parameters[name][type] = {}
+                    parameters[name][type][axis] = value
+                else:
+                    parameters[name][type] = value            
+
+        return parameters
 
 
     def __load_parameters_from_csv(self, csv_file=None) -> dict:
