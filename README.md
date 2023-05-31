@@ -1,4 +1,6 @@
-# Python-Blender PPM interface
+# PyPPM
+
+Python module to programmatically interface with the PPM (irgenda link solltt da sein). 
 
 Coming soon...
 
