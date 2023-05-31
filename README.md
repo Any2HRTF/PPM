@@ -19,16 +19,16 @@ The following Python scripts are called within [`ppm_get_values()`](https://gith
 
 ## Dependencies ##
 - MATLAB (tested with version 9.11.0.1769968, R2021b) 
-- MATLAB Computer Vision Toolbox (tested with version 10.1, R2021b; only used in `ppm_evaluate()`)
+- MATLAB Computer Vision Toolbox (tested with version 10.1, R2021b; only used in [`ppm_evaluate()`](https://github.com/Any2HRTF/PPM/blob/matlab/ppm_evaluate.m))
 - Custom MATLAB class `quaternion` (version [1.8.0.0](https://www.mathworks.com/matlabcentral/fileexchange/33341-quaternion) by Mark Tincknell, downloaded 
                            on the fly)
 - Blender (tested with version: [3.1.2](https://www.blender.org/download/releases/3-1/), branch: master, 
          commit date: 2022-03-31 17:40, hash: cc66d1020c3b, type: release
          build date: 2022-03-31, 23:39:57, containing the Blender Python API)
-- Blender model ARI_PPM_v1 (armature and object definitions)
+- Blender model ARI_PPM_v1 (armature and object definitions) contained in the file [PPM_default_v1.blend](https://github.com/Any2HRTF/PPM/blob/matlab/default/PPM_default_v1.blend).
 
 ## Releases ##
-The latest release version can be downloaded from the [releases page](https://github.com/Any2HRTF/PPM/releases). Please note that the development of the MATLAB-Python-Blender interface is stopped after release version 1.6.0, and continued only for the Python-Blender PPM interface. Bug fixes for the MATLAB-Python-Blender PPM interface will be available on the branch [matlab](https://github.com/Any2HRTF/PPM/tree/matlab).
+The latest release version can be downloaded from the [releases page](https://github.com/Any2HRTF/PPM/releases). Please note that the development of the MATLAB-Python-Blender interface is stopped after [release version 1.6.0](https://github.com/Any2HRTF/PPM/releases/tag/Matlab_1.6.0), and continued only for the Python-Blender PPM interface. Bug fixes for the MATLAB-Python-Blender PPM interface will be available on the branch [matlab](https://github.com/Any2HRTF/PPM/tree/matlab). Note that it is not planned anymore to merge the [matlab](https://github.com/Any2HRTF/PPM/tree/matlab) branch into the [main](https://github.com/Any2HRTF/PPM) branch.
 
 ## References ##
 The PPM was developed at the Acoustics Research Institute (ARI) of the 
