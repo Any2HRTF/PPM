@@ -320,7 +320,7 @@ They can be set using the 'set_parameter' method.
 
 ```python
 # change the location of the 'Helix_up' 
-ppm.set_parameter('Helix_up', 'Start', 'Location', 'X', 0.0)
+ppm.set_parameter(parameter='Helix_up', point='Start', parameter_type='Location', value=(1,0.6), axis='ZX')
 ```
 
 ### Exporting the PPM
