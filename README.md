@@ -382,12 +382,16 @@ p2 = PPM(from_csv='path/to/file.csv')
 plot_distances(p1, p2)
 ```
 
-**Note**
+**Note**:
 The plotting helper function requires the matplotlib  packages to be installed.
 
 ## Matlab implementation
 
 For a Matlab implementation please refer to the [matlab](https://github.com/Any2HRTF/PPM/tree/matlab) branch.
+
+## License
+
+This software is licensed under the EUPL-1.2 License. See the [LICENSE](LICENSE) file for details.
 
 ## References
 The PPM was developed at the Acoustics Research Institute (ARI) of the 
