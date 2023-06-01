@@ -391,7 +391,7 @@ For a Matlab implementation please refer to the [matlab](https://github.com/Any2
 
 ## License
 
-This software is licensed under the EUPL-1.2 License. See the [LICENSE](LICENSE) file for details.
+This software is licensed under the EUPL-1.2 License. See the [LICENSE](LICENSE.txt) file for details.
 
 ## References
 The PPM was developed at the Acoustics Research Institute (ARI) of the 
