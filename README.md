@@ -28,6 +28,9 @@ Alternatively the PPM can be loaded from a *.blend, *.csv or a Python dictionary
 ### Parameters
 
 The default PPM parameters are as follows:
+```python
+print(ppm)
+```
 ```
 Size:
   ∟Bendy:
