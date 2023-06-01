@@ -1,8 +1,23 @@
 import numpy as np
 from .core_class import PPM
 
-def minimal_distances(P, Q, dtype='PPM') -> np.array:
-    
+def minimal_distances(P, Q) -> np.array:
+    """ Computes the minimal distances between two point clouds P and Q.
+    P and Q can be of type PPM or np.ndarray.
+
+    Parameters
+    ----------
+    P : PPM or np.ndarray
+        Point cloud P.
+    Q : PPM or np.ndarray
+        Point cloud Q.
+
+    Returns
+    -------
+    np.array
+        Minimal distances between P and Q.
+    """
+
     if Q.__class__.__name__ == 'PPM':
         Q_points = Q.get_point_cloud()
     elif Q.__class__.__name__ == 'ndarray':
@@ -24,6 +39,21 @@ def minimal_distances(P, Q, dtype='PPM') -> np.array:
     return np.sqrt(dist)
 
 def hausdorff_distance(P, Q) -> np.float32:
+    """ Computes the Hausdorff distance between two point clouds P and Q.
+    P and Q can be of type PPM or np.ndarray.
+
+    Parameters
+    ----------
+    P : PPM or np.ndarray
+        Point cloud P.
+    Q : PPM or np.ndarray
+        Point cloud Q.
+
+    Returns
+    -------
+    np.float32
+        Hausdorff distance between P and Q.
+    """
 
     minmal_distance = minimal_distances(P, Q)
 

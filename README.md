@@ -2,7 +2,382 @@
 
 Python module to programmatically interface with the PPM[1]. 
 
-Coming soon...
+## Installation
+
+Get the prebuild Python wheel from the [releases](https://github.com/Any2HRTF/PPM/releases) page and install it with pip:
+
+```bash
+pip install /path/to/wheel.whl
+```
+
+Alternatively, you could build the module from source.
+
+## Usage
+
+The module provides a single class 'PPM'.
+Using the default constructor will load the default PPM with the default parameters.
+   
+```python
+from ppm import PPM
+
+ppm = PPM()
+```
+
+Alternatively the PPM can be loaded from a *.blend, *.csv or a Python dictionary containing the PPM parameters in the same format as the *.csv files.
+
+### Parameters
+
+The default PPM parameters are as follows:
+```
+Size:
+  ∟Bendy:
+    ∟Location:
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+    ∟Rotation:
+      ∟W: 1.0
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+    ∟Scale:
+      ∟X: 1.0
+      ∟Y: 1.0
+      ∟Z: 1.0
+Antitragus-Crease:
+  ∟Shape_key:
+    ∟0.0
+Cavum_conchae-Depth:
+  ∟Shape_key:
+    ∟0.0
+Cymba_conchae-Depth:
+  ∟Shape_key:
+    ∟0.0
+Crus_helicis-Prominence:
+  ∟Shape_key:
+    ∟0.0
+Upper_helix-Depth:
+  ∟Shape_key:
+    ∟0.0
+Middle_helix-Depth:
+  ∟Shape_key:
+    ∟0.0
+Lower_helix-Depth:
+  ∟Shape_key:
+    ∟0.0
+Lobulus-Form:
+  ∟Shape_key:
+    ∟0.0
+Scapha-Depth:
+  ∟Shape_key:
+    ∟0.0
+Fossa_triangularis-Depth:
+  ∟Shape_key:
+    ∟0.0
+Crus_inferius_anthelicis-Lower_crease:
+  ∟Shape_key:
+    ∟0.0
+Crus_inferius_anthelicis-Upper_crease:
+  ∟Shape_key:
+    ∟0.0
+Crus_superius_anthelicis-Lower_crease:
+  ∟Shape_key:
+    ∟0.0
+Crus_superius_anthelicis-Upper_crease:
+  ∟Shape_key:
+    ∟0.0
+Tragus-Upper_dent:
+  ∟Shape_key:
+    ∟0.0
+Crus_helicis-Upper_dent:
+  ∟Shape_key:
+    ∟0.0
+Crus_helicis-Lower_dent:
+  ∟Shape_key:
+    ∟0.0
+Ear_canal-Diameter:
+  ∟Shape_key:
+    ∟0.0
+Lobulus:
+  ∟Start:
+    ∟Location:
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+    ∟Rotation:
+      ∟W: 1.0
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+  ∟End:
+    ∟Location:
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+    ∟Rotation:
+      ∟W: 1.0
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+  ∟Bendy:
+    ∟Scale:
+      ∟1.0
+Helix_low:
+  ∟Start:
+    ∟Location:
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+    ∟Rotation:
+      ∟W: 1.0
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+  ∟End:
+    ∟Location:
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+    ∟Rotation:
+      ∟W: 1.0
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+  ∟Bendy:
+    ∟Scale:
+      ∟1.0
+Helix_middle:
+  ∟Start:
+    ∟Location:
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+    ∟Rotation:
+      ∟W: 1.0
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+  ∟End:
+    ∟Location:
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+    ∟Rotation:
+      ∟W: 1.0
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+  ∟Bendy:
+    ∟Scale:
+      ∟1.0
+Helix_up:
+  ∟Start:
+    ∟Location:
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+    ∟Rotation:
+      ∟W: 1.0
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+  ∟End:
+    ∟Location:
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+    ∟Rotation:
+      ∟W: 1.0
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+  ∟Bendy:
+    ∟Scale:
+      ∟1.0
+Tragus:
+  ∟Start:
+    ∟Location:
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+    ∟Rotation:
+      ∟W: 1.0
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+  ∟End:
+    ∟Location:
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+    ∟Rotation:
+      ∟W: 1.0
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+  ∟Bendy:
+    ∟Scale:
+      ∟1.0
+Antitragus:
+  ∟Start:
+    ∟Location:
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+    ∟Rotation:
+      ∟W: 1.0
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+  ∟End:
+    ∟Location:
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+    ∟Rotation:
+      ∟W: 1.0
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+  ∟Bendy:
+    ∟Scale:
+      ∟1.0
+Antihelix:
+  ∟Start:
+    ∟Location:
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+    ∟Rotation:
+      ∟W: 1.0
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+  ∟End:
+    ∟Location:
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+    ∟Rotation:
+      ∟W: 1.0
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+  ∟Bendy:
+    ∟Scale:
+      ∟1.0
+Crus_inferius_anthelicis:
+  ∟Start:
+    ∟Location:
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+    ∟Rotation:
+      ∟W: 1.0
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+  ∟End:
+    ∟Location:
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+    ∟Rotation:
+      ∟W: 1.0
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+  ∟Bendy:
+    ∟Scale:
+      ∟1.0
+Crus_superius_anthelicis:
+  ∟Start:
+    ∟Location:
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+    ∟Rotation:
+      ∟W: 1.0
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+  ∟End:
+    ∟Location:
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+    ∟Rotation:
+      ∟W: 1.0
+      ∟X: 0.0
+      ∟Y: 0.0
+      ∟Z: 0.0
+  ∟Bendy:
+    ∟Scale:
+      ∟1.0
+```
+
+They can be set using the 'set_parameter' method.
+
+```python
+# change the location of the 'Helix_up' 
+ppm.set_parameter('Helix_up', 'Start', 'Location', 'X', 0.0)
+```
+
+### Exporting the PPM
+
+The module offers the possibility to export the PPM mesh in the *.ply and *.stl format using the 'export_plt' and 'export_stl' methods respectively.
+The currently set parameters can be stored to a *.csv file using the 'export_csv' method.
+
+```python
+ppm.export_ply('ppm.ply')
+ppm.export_stl('ppm.stl')
+ppm.export_csv('ppm.csv')
+```
+
+If you want to use the points of the current PPM configuration in your own code, you can use the 'get_point_cloud' method or the 'points' property.
+
+```python
+points = ppm.get_point_cloud()
+points = ppm.points
+```
+
+The 'render' method can be used to render the PPM in Blender.
+
+```python
+ppm.render(filepath='path/to/file', filename='filename', resolution=257)
+```
+
+### Math Helpers
+
+Found in the 'math_helpers' module are two helper functions to calculate the minimal distance between two points and the hausdorff distance between two PPM realisations.
+
+```python
+from ppm import PPM
+from ppm.math_helpers import minimal_distances, hausdorff_distance
+
+p1 = PPM()
+p2 = PPM(from_csv='path/to/file.csv')
+
+# returns an array of the minimal distances between the points of p1 and p2
+distances = minimal_distances(p1, p2)
+
+# returns the hausdorff distance between the points of p1 and p2
+hausdorff = hausdorff_distance(p1, p2)
+```
+
+### Plotting Helpers
+
+Packaged into the model is a helper function to visualise the PPM in a 3D plot and a histogram of the distances between the points of two PPMs.
+
+```python
+from ppm import PPM
+from ppm.plotting_helpers import plot_distances
+
+p1 = PPM()
+p2 = PPM(from_csv='path/to/file.csv')
+
+plot_distances(p1, p2)
+```
 
 ## Matlab implementation
 
