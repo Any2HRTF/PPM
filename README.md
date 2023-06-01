@@ -382,6 +382,9 @@ p2 = PPM(from_csv='path/to/file.csv')
 plot_distances(p1, p2)
 ```
 
+**Note**
+The plotting helper function requires the matplotlib  packages to be installed.
+
 ## Matlab implementation
 
 For a Matlab implementation please refer to the [matlab](https://github.com/Any2HRTF/PPM/tree/matlab) branch.
