@@ -1,6 +1,6 @@
 # PyPPM
 
-Python module to programmatically interface with the PPM (irgenda link solltt da sein). 
+Python module to programmatically interface with the PPM[1]. 
 
 Coming soon...
 
