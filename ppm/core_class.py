@@ -107,6 +107,7 @@ class PPM():
     -----------
         from_blender_file (str): Path to a blender file to load the PPM from; if None, the standard PPM is loaded
         from_csv_file (str): Path to a csv file to load the PPM parameters from; if None, the standard PPM is loaded
+        from_dict (dict): Dictionary containing the PPM parameters; if None, the standard PPM is loaded
     """
     def __init__(self, from_blender_file=None, from_csv_file=None, from_dict=None, backend='blender'):
 
@@ -157,10 +158,12 @@ class PPM():
 
     @property
     def points(self):
+        """The point cloud of the PPM"""
         return self.get_point_cloud()
 
     @property
     def parameters(self):
+        """The parameters of the PPM"""
         return self.__parameters
     
     @parameters.setter
@@ -177,7 +180,41 @@ class PPM():
                             for axis_name, axis in type.items():
                                 self.__parameters[parameter_name][point_name][type_name][axis_name] = axis
 
+
+    def __str__(self):
+
+        string = f'Current PPM parameters:\n'
+        for parameter_name, parameter in self.__parameters.items():
+            string += f'{parameter_name}:\n'
+            for point_name, point in parameter.items():
+                string += f'  ∟{point_name}:\n'
+                if point_name == 'Shape_key':
+                    string += f'    ∟{point}\n'
+                else:
+                    for type_name, type in point.items():
+                        string += f'    ∟{type_name}:\n'
+                        if type_name == 'Scale' and parameter_name != 'Size':
+                            string += f'      ∟{type}\n'
+                        else:
+
+                            for axis_name, axis in type.items():
+                                string += f'      ∟{axis_name}: {axis}\n'
+
+        # remove last \n
+        string = string[:-1]
+        return string
+
     def set_parameter(self, parameter:str, parameter_type:str, value:tuple, point=None, axis=None):
+        """Set a parameter of the PPM
+
+        Parameters:
+        -----------
+            parameter (str): The parameter to set
+            parameter_type (str): The type of the parameter to set (Shape_key, Scale, Rotation, Location)
+            point (str): The point to set the parameter to (Start, End, Shape_key or None)
+            axis (str): The axis to set the parameter to (e.g. X, Y, Z, XY, XYZ, WXYZ, ... or None) 
+            value (tuple): The value to set the parameter to
+        """
 
         parameter_type = parameter_type.lower().capitalize()
         axis = axis.upper() if axis != None else None
@@ -445,7 +482,7 @@ class PPM():
 
         return np.array(verts)
 
-    def get_point_cloud(self):
+    def get_point_cloud(self) -> np.array:
         """Returns the point cloud of the PPM.
 
         Returns
@@ -711,7 +748,7 @@ class PPM():
 
         Parameters
         ----------
-        file_path : str
+        filepath : str
             Path to the rendered image.
         filename : str
             Name of the rendered image.
@@ -753,7 +790,7 @@ class PPM():
             fd = os.open(logfile, os.O_WRONLY)
 
             self.__render_blender(
-                file_path=kwargs['file_path'],
+                file_path=kwargs['filepath'],
                 filename=kwargs['filename'],
                 resolution=kwargs['resolution'] if 'resolution' in kwargs else 256,
                 depth=kwargs['depth'] if 'depth' in kwargs else False,
