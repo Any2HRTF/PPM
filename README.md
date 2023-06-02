@@ -319,11 +319,17 @@ Crus_superius_anthelicis:
       ∟1.0
 ```
 
-The PPM parameters can be set using the `set_parameter` method.
+Set the PPM parameters using the method `set_parameter`.
 
 ```python
 # change the location of the 'Helix_up' 
 ppm.set_parameter(parameter='Helix_up', point='Start', parameter_type='Location', value=(1,0.6), axis='ZX')
+```
+
+Get the current PPM-parameter configuration (or a subset) by accessing the property 'parameters': 
+```python
+print(ppm.parameters)
+print(ppm.parameters['Helix_up']['Start']['Location'])
 ```
 
 ### Exporting the PPM
