@@ -15,7 +15,7 @@ Alternatively, you could build the module from source.
 ## Usage
 
 The module provides a single class `PPM`.
-The constructor will generate a PPM instance with default parameter values.
+The constructor will generate a PPM instance with default PPM-parameter values.
    
 ```python
 from ppm import PPM
@@ -23,7 +23,7 @@ from ppm import PPM
 ppm = PPM()
 ```
 
-Alternatively, the PPM can be instantiated from a *.blend, *.csv, or a Python dictionary containing the PPM parameters in the same format as the *.csv file.
+Alternatively, the PPM can be instantiated from a 'blend' file, 'csv' file, or a Python dictionary containing the PPM parameters in the same format as the 'csv' file.
 
 ### Parameters
 
