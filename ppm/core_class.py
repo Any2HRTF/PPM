@@ -478,8 +478,6 @@ class PPM():
 
         verts = [v.co for v in bm.verts]
 
-        bm.free()
-
         return np.array(verts)
 
     def get_point_cloud(self) -> np.array:
