@@ -155,6 +155,8 @@ class PPM():
         
         if from_dict != None:
             self.__parameters = self.__load_parameters_from_dict(from_dict)
+        
+        bpy.ops.object.mode_set(mode='OBJECT')
 
     @property
     def points(self):
@@ -495,7 +497,7 @@ class PPM():
             raise NotImplementedError
 
     def __export_ply_blender(self, file_path):
-
+        
         bpy.ops.object.select_all(action='DESELECT')
         bpy.data.objects['ARI_PPM_v1'].select_set(True)
         # bpy.context.view_layer.objects.active = bpy.data.objects['ARI_PPM_v1']
@@ -514,6 +516,8 @@ class PPM():
         file_path : str
             Path to the PLY file.
         """
+        if file_path[-4:] != '.ply':
+            file_path += '.ply'
         if self.backend == 'blender':
             self.__set_parameters_in_blender()
             self.__export_ply_blender(file_path)
@@ -539,6 +543,8 @@ class PPM():
         file_path : str
             Path to the STL file.
         """
+        if file_path[-4:] != '.stl':
+            file_path += '.stl'
         if self.backend == 'blender':
             self.__set_parameters_in_blender()
             self.__export_stl_blender(file_path)
