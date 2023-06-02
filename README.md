@@ -4,7 +4,7 @@ Python module to programmatically interface with the parametric pinna model (PPM
 
 ## Installation
 
-Get the prebuilt Python wheel from the [releases](https://github.com/Any2HRTF/PPM/releases) page and install it using pip:
+Get the pre-built Python wheel from the [releases](https://github.com/Any2HRTF/PPM/releases) page (vX.x.x) and install it using pip:
 
 ```bash
 pip install /path/to/wheel.whl
@@ -332,7 +332,7 @@ print(ppm.parameters)
 print(ppm.parameters['Helix_up']['Start']['Location'])
 ```
 
-### Exporting the PPM
+### Export options
 
 The module offers the possibility to export the PPM mesh in 'ply' and 'stl' format using the methods `export_ply` and `export_stl`, respectively.
 The currently set PPM parameters can be exported to a 'csv' file using the method `export_csv`.
