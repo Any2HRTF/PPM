@@ -1,10 +1,10 @@
 # PyPPM
 
-Python module to programmatically interface with the PPM[1]. 
+Python module to programmatically interface with the parametric pinna model (PPM) [1]. 
 
 ## Installation
 
-Get the prebuild Python wheel from the [releases](https://github.com/Any2HRTF/PPM/releases) page and install it with pip:
+Get the prebuilt Python wheel from the [releases](https://github.com/Any2HRTF/PPM/releases) page and install it using pip:
 
 ```bash
 pip install /path/to/wheel.whl
@@ -14,8 +14,8 @@ Alternatively, you could build the module from source.
 
 ## Usage
 
-The module provides a single class 'PPM'.
-Using the default constructor will load the default PPM with the default parameters.
+The module provides a single class `PPM`.
+The constructor will generate a PPM instance with default parameter values.
    
 ```python
 from ppm import PPM
@@ -23,11 +23,11 @@ from ppm import PPM
 ppm = PPM()
 ```
 
-Alternatively the PPM can be loaded from a *.blend, *.csv or a Python dictionary containing the PPM parameters in the same format as the *.csv files.
+Alternatively, the PPM can be instantiated from a *.blend, *.csv, or a Python dictionary containing the PPM parameters in the same format as the *.csv file.
 
 ### Parameters
 
-The default PPM parameters are as follows:
+The PPM parameters and their default values are listed below:
 ```python
 print(ppm)
 ```
@@ -319,7 +319,7 @@ Crus_superius_anthelicis:
       ∟1.0
 ```
 
-They can be set using the 'set_parameter' method.
+The PPM parameters can be set using the `set_parameter` method.
 
 ```python
 # change the location of the 'Helix_up' 
@@ -328,8 +328,8 @@ ppm.set_parameter(parameter='Helix_up', point='Start', parameter_type='Location'
 
 ### Exporting the PPM
 
-The module offers the possibility to export the PPM mesh in the *.ply and *.stl format using the 'export_plt' and 'export_stl' methods respectively.
-The currently set parameters can be stored to a *.csv file using the 'export_csv' method.
+The module offers the possibility to export the PPM mesh in 'ply' and 'stl' format using the methods `export_ply` and `export_stl`, respectively.
+The currently set PPM parameters can be exported to a 'csv' file using the method `export_csv`.
 
 ```python
 ppm.export_ply('ppm.ply')
@@ -337,14 +337,14 @@ ppm.export_stl('ppm.stl')
 ppm.export_csv('ppm.csv')
 ```
 
-If you want to use the points of the current PPM configuration in your own code, you can use the 'get_point_cloud' method or the 'points' property.
+To get the points of the current PPM instance, use the method `get_point_cloud` or access the property 'points'.
 
 ```python
 points = ppm.get_point_cloud()
 points = ppm.points
 ```
 
-The 'render' method can be used to render the PPM in Blender.
+The method `render` can be used to render the PPM instance as 'png' or 'exr' (OpenEXR) file in Blender.
 
 ```python
 ppm.render(filepath='path/to/file', filename='filename', resolution=257)
@@ -352,7 +352,7 @@ ppm.render(filepath='path/to/file', filename='filename', resolution=257)
 
 ### Math Helpers
 
-Found in the 'math_helpers' module are two helper functions to calculate the minimal distance between two points and the hausdorff distance between two PPM realisations.
+The module `math_helpers` provides two helper functions to calculate the minimum pointwise distance and the Hausdorff distance between two PPM instances.
 
 ```python
 from ppm import PPM
@@ -370,7 +370,7 @@ hausdorff = hausdorff_distance(p1, p2)
 
 ### Plotting Helpers
 
-Packaged into the model is a helper function to visualise the PPM in a 3D plot and a histogram of the distances between the points of two PPMs.
+Packaged into the module, a helper function is available to visualise the PPM and the minimum pointwise distances between two PPM instances as a 3D plot and a histogram, respectively.
 
 ```python
 from ppm import PPM
@@ -383,7 +383,7 @@ plot_distances(p1, p2)
 ```
 
 **Note**:
-The plotting helper function requires the matplotlib  packages to be installed.
+The plotting helper function requires the matplotlib package to be installed.
 
 ## Matlab implementation
 
