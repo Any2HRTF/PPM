@@ -376,7 +376,7 @@ hausdorff = hausdorff_distance(p1, p2)
 
 ### Plotting Helpers
 
-Packaged into the module, a helper function is available to visualise the PPM and the minimum pointwise distances between two PPM instances as a 3D plot and a histogram, respectively.
+Packaged in the module, a helper function is available to visualize the PPM and the minimum pointwise distances between two PPM instances as a 3D plot and a histogram, respectively. `plot_distances` either accepts PPM instances or point clouds.
 
 ```python
 from ppm import PPM
