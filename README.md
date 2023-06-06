@@ -35,7 +35,7 @@ Default Parmaeters
 </summary>
    
 ```python
-   print(ppm)
+print(ppm)
 ```
 
 ```
