@@ -31,12 +31,12 @@ The PPM parameters and their default values are listed below:
 
 <details>
 <summary>
-
+Default Parmaeters
+</summary>
+   
 ```python
    print(ppm)
 ```
-
-</summary>
 
 ```
 Size:
