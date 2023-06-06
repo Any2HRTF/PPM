@@ -496,7 +496,7 @@ class PPM():
         else:
             raise NotImplementedError
 
-    def __export_ply_blender(self, file_path):
+    def __export_ply_blender(self, filepath):
         
         bpy.ops.object.select_all(action='DESELECT')
         bpy.data.objects['ARI_PPM_v1'].select_set(True)
@@ -504,59 +504,79 @@ class PPM():
 
         with redirect_stdout(io.StringIO()):
             bpy.ops.export_mesh.ply(
-                filepath=file_path,
+                filepath=filepath,
                 use_selection=True
             )
 
-    def export_ply(self, file_path):
+    def export_ply(self, filepath):
         """Exports the PPM as a PLY file.
 
         Parameters
         ----------
-        file_path : str
+        filepath : str
             Path to the PLY file.
         """
-        if file_path[-4:] != '.ply':
-            file_path += '.ply'
+        if filepath[-4:] != '.ply':
+            filepath += '.ply'
         if self.backend == 'blender':
             self.__set_parameters_in_blender()
-            self.__export_ply_blender(file_path)
+            self.__export_ply_blender(filepath)
         else:
             raise NotImplementedError
 
-    def __export_stl_blender(self, file_path):
+    def __export_stl_blender(self, filepath):
 
         bpy.ops.object.select_all(action='DESELECT')
         bpy.data.objects['ARI_PPM_v1'].select_set(True)
 
         with redirect_stdout(io.StringIO()):
             bpy.ops.export_mesh.stl(
-                filepath=file_path,
+                filepath=filepath,
                 use_selection=True
             )
 
-    def export_stl(self, file_path):
+    def export_stl(self, filepath):
         """Exports the PPM as a STL file.
 
         Parameters
         ----------
-        file_path : str
+        filepath : str
             Path to the STL file.
         """
-        if file_path[-4:] != '.stl':
-            file_path += '.stl'
+        if filepath[-4:] != '.stl':
+            filepath += '.stl'
         if self.backend == 'blender':
             self.__set_parameters_in_blender()
-            self.__export_stl_blender(file_path)
+            self.__export_stl_blender(filepath)
         else:
             raise NotImplementedError
-        
-    def export_csv(self, file_path):
+       
+    def __export_blend_blender(self, filepath):
+
+        bpy.ops.wm.save_as_mainfile(filepath=filepath)
+
+    def export_blend(self, filepath:str):
+        """Exports the PPM as a blend file.
+
+        Parameters
+        ----------
+        filepath : str
+            Path to the blend file.(NOTE: has to be an absolute path)
+        """
+
+        if self.backend != 'blender':
+            raise NotImplementedError
+
+        self.__set_parameters_in_blender()
+        self.__export_blend_blender(filepath=filepath)
+
+     
+    def export_csv(self, filepath):
         """Exports the PPM as a CSV file.
 
         Parameters
         ----------
-        file_path : str
+        filepath : str
             Path to the CSV file.
         """
 
@@ -586,7 +606,7 @@ class PPM():
                         for axis, axis_value in point['Location'].items():
                             export_dict[f'Location_{parameter_name}-{point_name}_{axis}'] = self.__parameters[parameter_name][point_name]['Location'][axis]
         
-        with open(file_path, 'w', newline='') as csvfile:
+        with open(filepath, 'w', newline='') as csvfile:
             for key, value in export_dict.items():
                 csvfile.write(f'{key},{value}\n')
 
