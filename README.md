@@ -29,9 +29,12 @@ Alternatively, the PPM can be instantiated from a 'blend' file, 'csv' file, or a
 
 The PPM parameters and their default values are listed below:
 
-<details open></summary>```python
+<details>
+<summary>
+```python
 print(ppm)
-```</summary>
+```
+</summary>
 ```
 Size:
   ∟Bendy:
