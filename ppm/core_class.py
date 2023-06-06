@@ -109,7 +109,12 @@ class PPM():
         from_csv_file (str): Path to a csv file to load the PPM parameters from; if None, the standard PPM is loaded
         from_dict (dict): Dictionary containing the PPM parameters; if None, the standard PPM is loaded
     """
-    def __init__(self, from_blender_file=None, from_csv_file=None, from_dict=None, backend='blender'):
+    def __init__(self, 
+                 from_blender_file=None,
+                 from_csv_file=None,
+                 from_dict=None,
+                 ear_canal_closed=False,
+                 backend='blender'):
 
         if from_blender_file != None and from_csv_file != None:
             raise Exception('Either load from blender file or from csv file.')
@@ -124,29 +129,9 @@ class PPM():
 
         if self.backend == 'blender':
             if from_blender_file != None:
-                logfile = tempfile.mktemp()
-                open(logfile, 'a').close()
-                old = os.dup(sys.stdout.fileno())
-                sys.stdout.flush()
-                os.close(sys.stdout.fileno())
-                fd = os.open(logfile, os.O_WRONLY)
-                bpy.ops.wm.open_mainfile(filepath=from_blender_file)
-                # disable output redirection
-                os.close(fd)
-                os.dup(old)
-                os.close(old)
+                self.__load_blender_file(from_blender_file)
             else:
-                logfile = tempfile.mktemp()
-                open(logfile, 'a').close()
-                old = os.dup(sys.stdout.fileno())
-                sys.stdout.flush()
-                os.close(sys.stdout.fileno())
-                fd = os.open(logfile, os.O_WRONLY)
-                bpy.ops.wm.open_mainfile(filepath=f'{CURRENT_DIR}/resources/PPM_modified_v1.blend')
-                # disable output redirection
-                os.close(fd)
-                os.dup(old)
-                os.close(old)
+                self.__load_blender_file(f'{CURRENT_DIR}/resources/PPM_modified_v1.blend')
             self.__get_parameters_from_blender()
         
         # rerun fct to load parameters from csv file
@@ -155,8 +140,40 @@ class PPM():
         
         if from_dict != None:
             self.__parameters = self.__load_parameters_from_dict(from_dict)
+
+        self.ear_canal_closed = ear_canal_closed
+        if self.ear_canal_closed:
+            self.__load_blender_file(f'{CURRENT_DIR}/resources/PPM_modified_v1_closed.blend')
         
         bpy.ops.object.mode_set(mode='OBJECT')
+
+    def __load_blender_file(self, filepath):
+        logfile = tempfile.mktemp()
+        open(logfile, 'a').close()
+        old = os.dup(sys.stdout.fileno())
+        sys.stdout.flush()
+        os.close(sys.stdout.fileno())
+        fd = os.open(logfile, os.O_WRONLY)
+        bpy.ops.wm.open_mainfile(filepath=filepath)
+        # disable output redirection
+        os.close(fd)
+        os.dup(old)
+        os.close(old)
+        bpy.ops.object.mode_set(mode='OBJECT')
+
+    @property
+    def ear_canal_closed(self):
+        return self.__ear_canal_closed
+    
+    @ear_canal_closed.setter
+    def ear_canal_closed(self, ear_canal_closed):
+        self.__ear_canal_closed = ear_canal_closed
+
+        if self.__ear_canal_closed:
+            self.__load_blender_file(f'{CURRENT_DIR}/resources/PPM_modified_v1_closed.blend')
+        else:
+            self.__load_blender_file(f'{CURRENT_DIR}/resources/PPM_modified_v1.blend')
+
 
     @property
     def points(self):
