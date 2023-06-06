@@ -31,10 +31,13 @@ The PPM parameters and their default values are listed below:
 
 <details>
 <summary>
+
 ```python
-print(ppm)
+   print(ppm)
 ```
+
 </summary>
+
 ```
 Size:
   ∟Bendy:
@@ -322,6 +325,7 @@ Crus_superius_anthelicis:
     ∟Scale:
       ∟1.0
 ```
+
 </details>
 
 Set the PPM parameters using the method `set_parameter`.
