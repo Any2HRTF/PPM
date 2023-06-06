@@ -31,13 +31,14 @@ The PPM parameters and their default values are listed below:
 
 <details>
 <summary>
-Default Parmaeters
+Default Parameters
 </summary>
-   
+
+At any time it is possible to see the currently set parameters by calling the `print` function.
 ```python
 print(ppm)
 ```
-
+The default parameters of the model are:
 ```
 Size:
   ∟Bendy:
