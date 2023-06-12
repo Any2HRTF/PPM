@@ -401,13 +401,13 @@ plot_distances(p1, p2)
 **Note**:
 The plotting helper function requires the matplotlib package to be installed.
 
+## Matlab Implementation
+
+For a Matlab implementation please refer to the [matlab](https://github.com/Any2HRTF/PPM/tree/matlab) branch.
+
 ## Blender Add-on
 
 A Blender Add-on to visualize directional pointwise minimum distances for a guided manual PPM registration, including calculations of the corresponding descriptive statistics and the Hausdorff distance, is available in the folder [Blender Add-on](https://github.com/Any2HRTF/PPM/tree/main/Blender%20Add-on).
-
-## Matlab implementation
-
-For a Matlab implementation please refer to the [matlab](https://github.com/Any2HRTF/PPM/tree/matlab) branch.
 
 ## License
 
