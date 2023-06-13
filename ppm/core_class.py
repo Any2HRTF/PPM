@@ -871,22 +871,11 @@ class PPM():
             reference_point = self.__get_center_of_mass_blender()
         else:
             raise ValueError("reference_point must be either 'ear_canal_entrance' or 'center_of_mass'.")
-    
-        # get apporoximate pivot location
-        # TODO: get exact pivot location
-        pivot_location = self.parameters['Lobulus']['Start']['Location']
-        pivot_location = [pivot_location['X'], pivot_location['Y'], pivot_location['Z']]
-
-        # convert pivot_location to world coordinates
-        obj = bpy.data.objects['ARI_PPM_v1']
-        pivot_location_world = obj.matrix_world @ mathutils.Matrix.Translation(pivot_location)
-        pivot_location_world = pivot_location_world.to_translation()
-
-        # TODO: relative translation is not correct
-        relative_translation = pivot_location_world - reference_point
-
-        self.set_parameter(parameter='Size', point='Bendy', parameter_type='Location', value=relative_translation, axis='XZY')
-
+        
+        # move object so that the reference point coincides with the center of the global coordinate system
+        obj = bpy.data.objects['Armature']
+        obj.matrix_world = mathutils.Matrix.Translation(-reference_point) @ obj.matrix_world
+        
     def __get_ear_canal_entrance_blender(self):
         """Returns the location of the ear canal entrance in global coordinates.
 
@@ -911,11 +900,12 @@ class PPM():
         # get center of mass of PPM template mesh bounding box
         obj = bpy.data.objects['ARI_PPM_v1']
         local_bbox_center = 1/8 * sum((mathutils.Vector(b) for b in obj.bound_box), mathutils.Vector())
-        local_bbox_center = mathutils.Matrix.Translation(local_bbox_center)
+        # local_bbox_center = mathutils.Matrix.Translation(local_bbox_center)
+        local_bbox_center = local_bbox_center
 
         # convert to world coordinates
         center_of_mass = obj.matrix_world @ local_bbox_center
-        center_of_mass = center_of_mass.to_translation()
+        # center_of_mass = center_of_mass.to_translation()
 
         return center_of_mass
 
