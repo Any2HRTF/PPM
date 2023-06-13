@@ -12,8 +12,8 @@ import bmesh
 import mathutils
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
-PPM_FILE = f'{CURRENT_DIR}/resources/PPM_modified_v1.blend'
-PPM_FILE_EAR_CANAL_CLOSED = f'{CURRENT_DIR}/resources/PPM_modified_v1_closed.blend'
+PPM_FILE = f'{CURRENT_DIR}/resources/PPM.blend'
+PPM_FILE_EAR_CANAL_CLOSED = f'{CURRENT_DIR}/resources/PPM_closed_ear_canal.blend'
 
 def euler_to_quaternion(euler_matrix:np.array, sequence:str='ZYX') -> np.array:
     """Transforms a rotation matrix into a quaternion.
