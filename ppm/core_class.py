@@ -11,6 +11,9 @@ import bpy
 import bmesh
 import mathutils
 
+CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
+PPM_FILE = f'{CURRENT_DIR}/resources/PPM_modified_v1.blend'
+PPM_FILE_EAR_CANAL_CLOSED = f'{CURRENT_DIR}/resources/PPM_modified_v1_closed.blend'
 
 def euler_to_quaternion(euler_matrix:np.array, sequence:str='ZYX') -> np.array:
     """Transforms a rotation matrix into a quaternion.
@@ -98,8 +101,6 @@ def euler_to_quaternion(euler_matrix:np.array, sequence:str='ZYX') -> np.array:
 
     return quaternion
 
-CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
-
 class PPM():
     """PPM class
 
@@ -114,6 +115,7 @@ class PPM():
                  from_csv_file=None,
                  from_dict=None,
                  ear_canal_closed=False,
+                 reference_point=None,
                  backend='blender'):
 
         if from_blender_file != None and from_csv_file != None:
@@ -127,14 +129,11 @@ class PPM():
         # load init parameters
         self.__parameters = self.__load_parameters_from_csv()
 
-        if self.backend == 'blender':
-            if from_blender_file != None:
-                self.__load_blender_file(from_blender_file)
-            else:
-                self.__load_blender_file(f'{CURRENT_DIR}/resources/PPM_modified_v1.blend')
+
+        if from_blender_file != None and self.backend == 'blender':
+            self.__load_blender_file(from_blender_file)
             self.__get_parameters_from_blender()
         
-        # rerun fct to load parameters from csv file
         if from_csv_file != None:
             self.__parameters = self.__load_parameters_from_csv(from_csv_file)
         
@@ -142,10 +141,7 @@ class PPM():
             self.__parameters = self.__load_parameters_from_dict(from_dict)
 
         self.ear_canal_closed = ear_canal_closed
-        if self.ear_canal_closed:
-            self.__load_blender_file(f'{CURRENT_DIR}/resources/PPM_modified_v1_closed.blend')
-        
-        bpy.ops.object.mode_set(mode='OBJECT')
+        self.__reference_point = reference_point
 
     def __load_blender_file(self, filepath):
         logfile = tempfile.mktemp()
@@ -169,11 +165,26 @@ class PPM():
     def ear_canal_closed(self, ear_canal_closed):
         self.__ear_canal_closed = ear_canal_closed
 
-        if self.__ear_canal_closed:
-            self.__load_blender_file(f'{CURRENT_DIR}/resources/PPM_modified_v1_closed.blend')
-        else:
-            self.__load_blender_file(f'{CURRENT_DIR}/resources/PPM_modified_v1.blend')
+    @property
+    def mesh_reference_point(self):
+        return self.__reference_point
 
+    @mesh_reference_point.setter
+    def mesh_reference_point(self, reference_point):
+        self.__reference_point = reference_point
+
+    def __prepare_blend_file(self):
+        if self.ear_canal_closed:
+            self.__load_blender_file(PPM_FILE_EAR_CANAL_CLOSED)
+        else:
+            self.__load_blender_file(PPM_FILE)
+
+        self.__set_parameters_in_blender()
+
+        if self.__reference_point != None:
+            self.__center_mesh_blender(
+                    reference_point=self.__reference_point,
+                )
 
     @property
     def points(self):
@@ -335,7 +346,6 @@ class PPM():
                     parameters[name][type] = value            
 
         return parameters
-
 
     def __load_parameters_from_csv(self, csv_file=None) -> dict:
 
@@ -508,7 +518,7 @@ class PPM():
             Point cloud of the PPM.
         """
         if self.backend == 'blender':
-            self.__set_parameters_in_blender()
+            self.__prepare_blend_file()
             return self.__get_point_cloud_blender()
         else:
             raise NotImplementedError
@@ -536,7 +546,7 @@ class PPM():
         if filepath[-4:] != '.ply':
             filepath += '.ply'
         if self.backend == 'blender':
-            self.__set_parameters_in_blender()
+            self.__prepare_blend_file()
             self.__export_ply_blender(filepath)
         else:
             raise NotImplementedError
@@ -563,7 +573,7 @@ class PPM():
         if filepath[-4:] != '.stl':
             filepath += '.stl'
         if self.backend == 'blender':
-            self.__set_parameters_in_blender()
+            self.__prepare_blend_file()
             self.__export_stl_blender(filepath)
         else:
             raise NotImplementedError
@@ -584,10 +594,10 @@ class PPM():
         if self.backend != 'blender':
             raise NotImplementedError
 
-        self.__set_parameters_in_blender()
+        self.__prepare_blend_file()
         self.__export_blend_blender(filepath=filepath)
+        self.__wind_down_blend_file()
 
-     
     def export_csv(self, filepath):
         """Exports the PPM as a CSV file.
 
@@ -597,7 +607,13 @@ class PPM():
             Path to the CSV file.
         """
 
-        self.__set_parameters_in_blender()
+        if filepath[-4:] != '.csv':
+            filepath += '.csv'
+
+        if self.backend == 'blender':
+            self.__prepare_blend_file()
+        else:
+            raise NotImplementedError
 
         export_dict = {}
 
@@ -783,7 +799,6 @@ class PPM():
                     file_path+ f'/{filename}.png')
                 break
 
-
     def render(self, *args, **kwargs):
         """Renders the PPM.
 
@@ -821,7 +836,7 @@ class PPM():
             Compression of the depth map.
         """
         if self.backend == 'blender':
-            self.__set_parameters_in_blender()
+            self.__prepare_blend_file()
             # redirect output to temporary file
             logfile = tempfile.mktemp()
             open(logfile, 'a').close()
@@ -852,6 +867,7 @@ class PPM():
             os.close(fd)
             os.dup(old)
             os.close(old)
+            self.__wind_down_blend_file()
         else:
             raise NotImplementedError
     
@@ -910,20 +926,3 @@ class PPM():
         center_of_mass = obj.matrix_world @ local_bbox_center
 
         return center_of_mass
-
-    def center_mesh(self, *args, **kwargs):
-        """Centers a reference point of the PPM in the origin of the global coordinate system.
-
-        Parameters
-        ----------
-        reference_point : str
-            Reference point to be centered. Can be either 'ear_canal_entrance' or 'center_of_mass'.
-        """
-
-        if self.backend == 'blender':
-            self.__set_parameters_in_blender()
-            self.__center_mesh_blender(
-                reference_point=kwargs['reference_point'] if 'reference_point' in kwargs else 'center_of_mass'
-            )
-        else:
-            raise NotImplementedError
