@@ -900,12 +900,9 @@ class PPM():
         # get center of mass of PPM template mesh bounding box
         obj = bpy.data.objects['ARI_PPM_v1']
         local_bbox_center = 1/8 * sum((mathutils.Vector(b) for b in obj.bound_box), mathutils.Vector())
-        # local_bbox_center = mathutils.Matrix.Translation(local_bbox_center)
-        local_bbox_center = local_bbox_center
 
         # convert to world coordinates
         center_of_mass = obj.matrix_world @ local_bbox_center
-        # center_of_mass = center_of_mass.to_translation()
 
         return center_of_mass
 
