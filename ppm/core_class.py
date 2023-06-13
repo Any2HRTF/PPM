@@ -140,7 +140,7 @@ class PPM():
         if from_dict != None:
             self.__parameters = self.__load_parameters_from_dict(from_dict)
 
-        self.ear_canal_closed = ear_canal_closed
+        self.__ear_canal_closed = ear_canal_closed
         self.__reference_point = reference_point
 
     def __load_blender_file(self, filepath):
@@ -176,7 +176,7 @@ class PPM():
 
     def __prepare_blend_file(self):
         '''Here all the preparation steps for the blend file should be done.'''
-        if self.ear_canal_closed:
+        if self.__ear_canal_closed:
             self.__load_blender_file(PPM_FILE_EAR_CANAL_CLOSED)
         else:
             self.__load_blender_file(PPM_FILE)
