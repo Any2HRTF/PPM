@@ -163,7 +163,7 @@ class PPM():
     
     @ear_canal_closed.setter
     def ear_canal_closed(self, ear_canal_closed):
-        self.__ear_canal_closed = ear_canal_closed
+        self.close_ear_canal(ear_canal_closed)
 
     @property
     def mesh_reference_point(self):
@@ -171,9 +171,11 @@ class PPM():
 
     @mesh_reference_point.setter
     def mesh_reference_point(self, reference_point):
-        self.__reference_point = reference_point
+
+        self.center_mesh(reference_point=reference_point)
 
     def __prepare_blend_file(self):
+        '''Here all the preparation steps for the blend file should be done.'''
         if self.ear_canal_closed:
             self.__load_blender_file(PPM_FILE_EAR_CANAL_CLOSED)
         else:
@@ -926,3 +928,26 @@ class PPM():
         center_of_mass = obj.matrix_world @ local_bbox_center
 
         return center_of_mass
+
+    def center_mesh(self, *args, **kwargs):
+        """Centers a reference point of the PPM in the origin of the global coordinate system.
+
+        Parameters
+        ----------
+        reference_point : str
+            Reference point to be centered. Can be either 'ear_canal_entrance' or 'center_of_mass'.
+        """
+
+        self.__reference_point = kwargs['reference_point'] if 'reference_point' in kwargs else 'center_of_mass'
+
+    
+    def close_ear_canal(self, closeed=True):
+        """Closes the ear canal of the PPM.
+
+        Parameters
+        ----------
+        closeed : bool
+            Whether to close the ear canal.
+        """
+        
+        self.__ear_canal_closed = closeed
