@@ -854,3 +854,84 @@ class PPM():
             os.close(old)
         else:
             raise NotImplementedError
+    
+    def __center_mesh_blender(self, reference_point='ear_canal_entrance'):
+        """Centers a reference point of the PPM in the origin of the global coordinate system.
+
+        Parameters
+        ----------
+        reference_point : str
+            Reference point to be centered. Can be either 'ear_canal_entrance' or 'center_of_mass'.
+        """
+
+        # get reference point
+        if reference_point == 'ear_canal_entrance':
+            reference_point = self.__get_ear_canal_entrance_blender()
+        elif reference_point == 'center_of_mass':
+            reference_point = self.__get_center_of_mass_blender()
+        else:
+            raise ValueError("reference_point must be either 'ear_canal_entrance' or 'center_of_mass'.")
+    
+        # get apporoximate pivot location
+        # TODO: get exact pivot location
+        pivot_location = self.parameters['Lobulus']['Start']['Location']
+        pivot_location = [pivot_location['X'], pivot_location['Y'], pivot_location['Z']]
+
+        # convert pivot_location to world coordinates
+        obj = bpy.data.objects['ARI_PPM_v1']
+        pivot_location_world = obj.matrix_world @ mathutils.Matrix.Translation(pivot_location)
+        pivot_location_world = pivot_location_world.to_translation()
+
+        # TODO: relative translation is not correct
+        relative_translation = pivot_location_world - reference_point
+
+        self.set_parameter(parameter='Size', point='Bendy', parameter_type='Location', value=relative_translation, axis='XZY')
+
+    def __get_ear_canal_entrance_blender(self):
+        """Returns the location of the ear canal entrance in global coordinates.
+
+        Returns
+        -------
+        ear_canal_entrance : list
+            Location of the ear canal entrance in global coordinates.
+        """
+
+        # get ear canal entrance
+        raise NotImplementedError("Reference object not yet available in Blender model.")
+    
+    def __get_center_of_mass_blender(self):
+        """Returns the location of the center of mass of the PPM in global coordinates.
+
+        Returns
+        -------
+        center_of_mass : list
+            Location of the center of mass in global coordinates.
+        """
+
+        # get center of mass of PPM template mesh bounding box
+        obj = bpy.data.objects['ARI_PPM_v1']
+        local_bbox_center = 1/8 * sum((mathutils.Vector(b) for b in obj.bound_box), mathutils.Vector())
+        local_bbox_center = mathutils.Matrix.Translation(local_bbox_center)
+
+        # convert to world coordinates
+        center_of_mass = obj.matrix_world @ local_bbox_center
+        center_of_mass = center_of_mass.to_translation()
+
+        return center_of_mass
+
+    def center_mesh(self, *args, **kwargs):
+        """Centers a reference point of the PPM in the origin of the global coordinate system.
+
+        Parameters
+        ----------
+        reference_point : str
+            Reference point to be centered. Can be either 'ear_canal_entrance' or 'center_of_mass'.
+        """
+
+        if self.backend == 'blender':
+            self.__set_parameters_in_blender()
+            self.__center_mesh_blender(
+                reference_point=kwargs['reference_point'] if 'reference_point' in kwargs else 'center_of_mass'
+            )
+        else:
+            raise NotImplementedError
