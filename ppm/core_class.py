@@ -881,19 +881,24 @@ class PPM():
 
         Returns
         -------
-        ear_canal_entrance : list
+        ear_canal_entrance : Vector
             Location of the ear canal entrance in global coordinates.
         """
+        
+        vs = [vert for vert in bpy.context.object.data.vertices if bpy.context.object.vertex_groups['Ear_canal_entrance_center'].index in [i.group for i in vert.groups]]
+        local_ear_canal_entrance = vs[0].co
 
-        # get ear canal entrance
-        raise NotImplementedError("Reference object not yet available in Blender model.")
-    
+        obj = bpy.data.objects['ARI_PPM_v1']
+        ear_canal_entrance = obj.matrix_world @ local_ear_canal_entrance
+
+        return ear_canal_entrance
+
     def __get_center_of_mass_blender(self):
         """Returns the location of the center of mass of the PPM in global coordinates.
 
         Returns
         -------
-        center_of_mass : list
+        center_of_mass : Vector
             Location of the center of mass in global coordinates.
         """
 
