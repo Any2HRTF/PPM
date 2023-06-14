@@ -940,7 +940,6 @@ class PPM():
         """
 
         self.__reference_point = kwargs['reference_point'] if 'reference_point' in kwargs else 'center_of_mass'
-
     
     def close_ear_canal(self, closeed=True):
         """Closes the ear canal of the PPM.
