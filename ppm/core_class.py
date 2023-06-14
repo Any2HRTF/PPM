@@ -702,7 +702,6 @@ class PPM():
         bpy.context.view_layer.update()
 
         # render image and depth information, and store as png and exr files
-
         bpy.context.scene.render.use_compositing = True
         bpy.context.scene.render.filepath = file_path + '/' + filename 
 
@@ -929,7 +928,7 @@ class PPM():
 
         return center_of_mass
 
-    def center_mesh(self, *args, **kwargs):
+    def center_mesh(self, reference_point='ear_canal_entrance'):
         """Centers a reference point of the PPM in the origin of the global coordinate system.
 
         Parameters
@@ -938,8 +937,8 @@ class PPM():
             Reference point to be centered. Can be either 'ear_canal_entrance' or 'center_of_mass'.
         """
 
-        self.__reference_point = kwargs['reference_point'] if 'reference_point' in kwargs else 'center_of_mass'
-    
+        self.__reference_point = reference_point
+        
     def close_ear_canal(self, closed=True):
         """Closes the ear canal of the PPM.
 
