@@ -25,6 +25,23 @@ ppm = PPM()
 
 Alternatively, the PPM can be instantiated from a 'blend' file, 'csv' file, or a Python dictionary containing the PPM parameters in the same format as the 'csv' file.
 
+### Template mesh
+
+Set the Boolean property 'ear_canal_closed' to load the PPM template mesh with open (False) or closed (True) ear canal.
+
+```python
+ppm.ear_canal_closed = True
+```
+
+### Centering
+
+Use the method 'center_mesh' to either move the PPM's center of mass, i.e. the center of the bounding box surrounding the PPM, or the center of the ear-canal entrance to the origin of the global coordinate system. 
+
+```python
+ppm.center_mesh(reference_point='center_of_mass')
+ppm.center_mesh(reference_point='ear_canal_entrance')
+```
+
 ### Parameters
 
 The PPM parameters and their default values are listed below:
