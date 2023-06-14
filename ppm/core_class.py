@@ -14,6 +14,7 @@ import mathutils
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 PPM_FILE = f'{CURRENT_DIR}/resources/PPM.blend'
 PPM_FILE_EAR_CANAL_CLOSED = f'{CURRENT_DIR}/resources/PPM_closed_ear_canal.blend'
+PPM_PARAMETERS_FILE = f'{CURRENT_DIR}/resources/PPM_params.csv'
 
 def euler_to_quaternion(euler_matrix:np.array, sequence:str='ZYX') -> np.array:
     """Transforms a rotation matrix into a quaternion.
@@ -352,7 +353,7 @@ class PPM():
     def __load_parameters_from_csv(self, csv_file=None) -> dict:
 
         if csv_file is None:
-            csv_file = f'{CURRENT_DIR}/resources/PPM_params_default_v1.csv'
+            csv_file = PPM_PARAMETERS_FILE
 
         with open(csv_file, newline='', encoding='utf-8') as csvfile:
             reader = csv.reader(csvfile)
