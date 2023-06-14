@@ -35,11 +35,11 @@ ppm.ear_canal_closed = True
 
 ### Centering
 
-Use the method 'center_mesh' to either move the PPM's center of mass, i.e. the center of the bounding box surrounding the PPM, or the center of the ear-canal entrance to the origin of the global coordinate system. 
+Use the method `center_mesh` to either move the PPM's center of mass, i.e. the center of the bounding box surrounding the PPM, or the center of the ear-canal entrance to the origin of the global coordinate system. 
 
 ```python
+ppm.center_mesh(reference_point='ear_canal_entrance') # default
 ppm.center_mesh(reference_point='center_of_mass')
-ppm.center_mesh(reference_point='ear_canal_entrance')
 ```
 
 ### Parameters
