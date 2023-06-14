@@ -50,12 +50,7 @@ The PPM parameters and their default values are listed below:
 <summary>
 Default Parameters
 </summary>
-
-At any time it is possible to see the currently set parameters by calling the `print` function.
-```python
-print(ppm)
-```
-The default parameters of the model are:
+  
 ```
 Size:
   ∟Bendy:
@@ -346,17 +341,19 @@ Crus_superius_anthelicis:
 
 </details>
 
+To get the currently set parameters, use the `print` function.
+```python
+print(ppm)
+print(ppm.parameters['Helix_up']['Start']['Location'])
+```
+
 Set the PPM parameters using the method `set_parameter`.
+
+
 
 ```python
 # change the location of the 'Helix_up' 
 ppm.set_parameter(parameter='Helix_up', point='Start', parameter_type='Location', value=(1,0.6), axis='ZX')
-```
-
-Get the current PPM-parameter configuration (or a subset) by accessing the property 'parameters': 
-```python
-print(ppm.parameters)
-print(ppm.parameters['Helix_up']['Start']['Location'])
 ```
 
 ### Export options
