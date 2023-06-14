@@ -207,7 +207,7 @@ class PPM():
                     self.__parameters[parameter_name][point_name] = point
                 else:
                     for type_name, type in point.items():
-                        if type_name == 'Scale' and parameter_name != 'Size':
+                        if type_name == 'Scale' and parameter_name != 'Parent':
                             self.__parameters[parameter_name][point_name][type_name] = type
                         else:
                             for axis_name, axis in type.items():
@@ -226,7 +226,7 @@ class PPM():
                 else:
                     for type_name, type in point.items():
                         string += f'    ∟{type_name}:\n'
-                        if type_name == 'Scale' and parameter_name != 'Size':
+                        if type_name == 'Scale' and parameter_name != 'Parent':
                             string += f'      ∟{type}\n'
                         else:
 
@@ -260,14 +260,14 @@ class PPM():
             if len(value) > 1:
                 raise Exception('value must be a single float value')
             self.__parameters[parameter][parameter_type] = value
-        elif parameter_type == 'Scale' and parameter != 'Size':
+        elif parameter_type == 'Scale' and parameter != 'Parent':
             if len(value) > 1:
                 raise Exception('value must be a single float value')
             self.__parameters[parameter]['Bendy'][parameter_type] = value
         else:
-            if point not in ['Start', 'End'] and parameter != 'Size':
+            if point not in ['Start', 'End'] and parameter != 'Parent':
                 raise Exception('point must be one of Start, End')
-            elif parameter == 'Size':
+            elif parameter == 'Parent':
                 point = 'Bendy'
             
             if len(value) != len(axis):
@@ -313,7 +313,7 @@ class PPM():
                 type = 'Scale'
                 name = '_'.join(key.split('-')[0].split('_')[1:])
                 point = '_'.join(key.split('-')[1].split('_'))
-                if 'Size' in key:
+                if 'Parent' in key:
                     axis = point.split('_')[-1]
                     point = point.split('_')[0]
                 else:
@@ -368,7 +368,7 @@ class PPM():
                     type = 'Scale'
                     name = '_'.join(row[0].split('-')[0].split('_')[1:])
                     point = '_'.join(row[0].split('-')[1].split('_'))
-                    if 'Size' in row[0]:
+                    if 'Parent' in row[0]:
                         axis = point.split('_')[-1]
                         point = point.split('_')[0]
                     else:
@@ -416,12 +416,12 @@ class PPM():
         for parameter_name, parameter in self.__parameters.items():
             # shape keys
             if 'Shape_key' in parameter.keys():
-                bpy.data.shape_keys['Key.002'].key_blocks[parameter_name].value = self.__parameters[parameter_name]['Shape_key']
+                bpy.data.shape_keys['Key'].key_blocks[parameter_name].value = self.__parameters[parameter_name]['Shape_key']
             else:
                 for point_name, point in parameter.items():
                     # scale
                     if 'Scale' in point.keys():
-                        if 'Size' in parameter_name:
+                        if 'Parent' in parameter_name:
                             for axis, axis_value in point['Scale'].items():
                                 obj.pose.bones[parameter_name + "-" + point_name].scale[
                                         0 if axis == 'X' else 
@@ -458,12 +458,12 @@ class PPM():
         for parameter_name, parameter in self.__parameters.items():
             # shape keys
             if 'Shape_key' in parameter.keys():
-                self.__parameters[parameter_name]['Shape_key'] = bpy.data.shape_keys['Key.002'].key_blocks[parameter_name].value
+                self.__parameters[parameter_name]['Shape_key'] = bpy.data.shape_keys['Key'].key_blocks[parameter_name].value
             else:
                 for point_name, point in parameter.items():
                     # scale
                     if 'Scale' in point.keys():
-                        if 'Size' in parameter_name:
+                        if 'Parent' in parameter_name:
                             for axis, axis_value in point['Scale'].items():
                                 self.__parameters[parameter_name][point_name]['Scale'][axis] = \
                                     obj.pose.bones[parameter_name + "-" + point_name].scale[
@@ -495,7 +495,7 @@ class PPM():
 
     def __get_point_cloud_blender(self):
 
-        obj = bpy.data.objects['ARI_PPM_v1']
+        obj = bpy.data.objects['Mesh']
         
         if bpy.ops.object.mode_set.poll():
             bpy.ops.object.mode_set(mode='OBJECT')
@@ -529,8 +529,8 @@ class PPM():
     def __export_ply_blender(self, filepath):
         
         bpy.ops.object.select_all(action='DESELECT')
-        bpy.data.objects['ARI_PPM_v1'].select_set(True)
-        # bpy.context.view_layer.objects.active = bpy.data.objects['ARI_PPM_v1']
+        bpy.data.objects['Mesh'].select_set(True)
+        # bpy.context.view_layer.objects.active = bpy.data.objects['Mesh']
 
         with redirect_stdout(io.StringIO()):
             bpy.ops.export_mesh.ply(
@@ -557,7 +557,7 @@ class PPM():
     def __export_stl_blender(self, filepath):
 
         bpy.ops.object.select_all(action='DESELECT')
-        bpy.data.objects['ARI_PPM_v1'].select_set(True)
+        bpy.data.objects['Mesh'].select_set(True)
 
         with redirect_stdout(io.StringIO()):
             bpy.ops.export_mesh.stl(
@@ -628,7 +628,7 @@ class PPM():
                 for point_name, point in parameter.items():
                     # scale
                     if 'Scale' in point.keys():
-                        if 'Size' in parameter_name:
+                        if 'Parent' in parameter_name:
                             for axis, axis_value in point['Scale'].items():
                                 export_dict[f'Scale_{parameter_name}-{point_name}_{axis}'] = self.__parameters[parameter_name][point_name]['Scale'][axis]
                         else:
@@ -907,7 +907,7 @@ class PPM():
         vs = [vert for vert in bpy.context.object.data.vertices if bpy.context.object.vertex_groups['Ear_canal_entrance_center'].index in [i.group for i in vert.groups]]
         local_ear_canal_entrance = vs[0].co
 
-        obj = bpy.data.objects['ARI_PPM_v1']
+        obj = bpy.data.objects['Mesh']
         ear_canal_entrance = obj.matrix_world @ local_ear_canal_entrance
 
         return ear_canal_entrance
@@ -922,7 +922,7 @@ class PPM():
         """
 
         # get center of mass of PPM template mesh bounding box
-        obj = bpy.data.objects['ARI_PPM_v1']
+        obj = bpy.data.objects['Mesh']
         local_bbox_center = 1/8 * sum((mathutils.Vector(b) for b in obj.bound_box), mathutils.Vector())
 
         # convert to world coordinates
