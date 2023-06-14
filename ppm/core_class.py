@@ -599,7 +599,6 @@ class PPM():
 
         self.__prepare_blend_file()
         self.__export_blend_blender(filepath=filepath)
-        self.__wind_down_blend_file()
 
     def export_csv(self, filepath):
         """Exports the PPM as a CSV file.
