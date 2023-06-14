@@ -10,7 +10,7 @@ Get the pre-built Python wheel from the [releases](https://github.com/Any2HRTF/P
 pip install /path/to/wheel.whl
 ```
 
-Alternatively, you could build the module from source.
+Alternatively, build the module from source.
 
 ## Usage
 
@@ -407,15 +407,15 @@ For a Matlab implementation please refer to the [matlab](https://github.com/Any2
 
 ## Blender Add-on
 
-A Blender Add-on to visualize directional pointwise minimum distances for a guided manual PPM registration, including calculations of the corresponding descriptive statistics and the Hausdorff distance, is available in the folder [Blender Add-on](https://github.com/Any2HRTF/PPM/tree/main/Blender%20Add-on).
+A Blender Add-on to visualize directional pointwise minimum distances for a guided manual PPM registration is available in the folder [Blender Add-on](https://github.com/Any2HRTF/PPM/tree/main/Blender%20Add-on). The Add-on additionally calculates the corresponding descriptive statistics and the Hausdorff distance.
 
 ## License
 
-This software is licensed under the EUPL-1.2 License. See the [LICENSE](LICENSE.txt) file for details.
+This software is licensed under [EUPL-1.2 License](https://github.com/Any2HRTF/PPM/blob/main/LICENSE.txt).
 
 ## References
-The PPM was developed at the Acoustics Research Institute (ARI) of the 
-Austrian Academy of Sciences, Vienna, Austria [1-4].
+The PPM was developed at the [Acoustics Research Institute (ARI)](https://www.oeaw.ac.at/en/ari) of the 
+[Austrian Academy of Sciences](https://www.oeaw.ac.at/en/oeaw-home/austrian-academy-of-sciences), Vienna, Austria [1-4].
 
 1.  Pollack K.; Pausch F.; Majdak P. (2022) [Parametric pinna model for a 
     realistic representation of listener-specific pinna geometry](https://www.researchgate.net/profile/Florian-Pausch/publication/366977010_Parametric_pinna_model_for_a_realistic_representation_of_listener-specific_pinna_geometry/links/63bc77a1097c7832caa1ffd2/Parametric-pinna-model-for-a-realistic-representation-of-listener-specific-pinna-geometry.pdf?origin=publicationDetail&_sg%5B0%5D=CFr20BsHvQ3k0OmR_gN-XEXvU_IUp2yohXbvrqEzLIKyydtYST3pOQd_ec4Hj_7Dla8Ma5PNwHlp8t0OFyNlXw.vRk-HUSZsPec5Y3v5TJ0n8X0UTQrsWDRO85zyvQJrrni5DtuPXpOFj5yNTsWR3OUDbtwXTIp2qGWwbMbu2O6-w&_sg%5B1%5D=FAr7AoGW3im4MzlZvfT29nywMswK_uXAxcn-6CSJoTZF5IvSbVCKGgdSYxp7jwb1phk1ZGDndKDpqXh0qo_V0F-m2QqukrE0L_4AwshB1m5k.vRk-HUSZsPec5Y3v5TJ0n8X0UTQrsWDRO85zyvQJrrni5DtuPXpOFj5yNTsWR3OUDbtwXTIp2qGWwbMbu2O6-w&_iepl=&_rtd=eyJjb250ZW50SW50ZW50IjoibWFpbkl0ZW0ifQ%3D%3D), 
