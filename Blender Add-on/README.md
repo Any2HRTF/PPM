@@ -1,6 +1,6 @@
 # Installation instructions
 
-1)Paste the three files to: 
+1) Paste the three files to: 
 
 BlenderDir\Blender Foundation\Blender\3.4\scripts\addons
 
