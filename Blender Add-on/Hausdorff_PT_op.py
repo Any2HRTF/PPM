@@ -1,68 +1,7 @@
 import bpy
-
 import numpy as np
 
-import open3d as o3d
-
-import os
-
-import tempfile
-
 import time
-
-#from scipy.spatial.distance import cdist
-# import bmesh
-
-# from bpy_extras.io_utils import axis_conversion
-
-# from mathutils import Matrix
-
-
-
-# def get_points_from_obj(obj: bpy.types.Object) -> np.array:
-
-
-
-#     bm = bmesh.new()
-
-#     me = obj.to_mesh()
-
-#     me.transform(obj.matrix_world)
-
-#     bm.from_mesh(me)
-
-#     obj.to_mesh_clear()
-
-
-
-#     mesh = bpy.data.meshes.new("TMP PLY EXPORT")
-
-#     bm.to_mesh(mesh)
-
-#     bm.free()
-
-
-
-#     global_matrix = axis_conversion(
-
-#         to_forward='Y',
-
-#         to_up='Z',
-
-#     # global_scale ?
-
-#     # ).to_4x4() @ Matrix.Scale(global_scale, 4)
-
-#     ).to_4x4() @ Matrix.Scale(1, 4)
-
-
-
-#     mesh.transform(global_matrix)
-
-
-
-#     return np.array([v.co for v in mesh.vertices])
-
 
 
 class VisualizeHausdorff(bpy.types.Operator):
