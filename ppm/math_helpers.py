@@ -72,8 +72,8 @@ def jaccard_similarity(P, Q) -> np.float32:
     for z_idx in range(len(zz)):
         for y_idx in range(len(yy)):
             for x_idx in range(len(xx)):
-                grid_points[z_idx+offset,...] = np.array([xx[x_idx], yy[y_idx], zz[z_idx],  0, 1, 0, 0, 0, 1, 0, 0])
-            offset += len(xx) - 1
+                grid_points[x_idx+offset,...] = np.array([xx[x_idx], yy[y_idx], zz[z_idx],  0, 1, 0, 0, 0, 1, 0, 0])
+            offset += len(xx)
 
     for i in range(len(grid_points)):
         dist_to_nearest_p = np.sqrt(np.min(np.sum( (grid_points[i,:3] - P_points)**2, axis=1)))
@@ -85,7 +85,7 @@ def jaccard_similarity(P, Q) -> np.float32:
         if dist_to_nearest_q <= 0.6:
             grid_points[i, 7:] = np.array([1, 0, 1, 0])
 
-    return np.sum(grid_points[:, 3] * grid_points[:, 7]) / np.sum(grid_points[:, 4] + grid_points[:, 8])
+    return np.sum(np.logical_and(grid_points[:, 3], grid_points[:, 7])) / (np.sum(np.logical_or(grid_points[:, 3], grid_points[:, 7])) + np.finfo(np.float32).eps)
 
 
 
