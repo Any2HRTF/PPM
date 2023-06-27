@@ -15,7 +15,7 @@ authors:
 - family-names: "Majdak"
   given-names: "Piotr"
   orcid: "https://orcid.org/0000-0003-1511-6164"
-title: "Python-Blender PPM Interface"
+title: "PyPPM"
 version: 1.0.0
 date-released: 2023
 url: "https://github.com/Any2HRTF/PPM"

@@ -411,7 +411,7 @@ A Blender Add-on to visualize directional pointwise minimum distances for a guid
 
 ## License
 
-This software is licensed under [EUPL-1.2 License](https://github.com/Any2HRTF/PPM/blob/main/LICENSE.txt).
+This software is licensed under [EUPL-1.2 License](https://github.com/Any2HRTF/PPM/blob/main/LICENSE).
 
 ## References
 The PPM was developed at the [Acoustics Research Institute (ARI)](https://www.oeaw.ac.at/en/ari) of the 
