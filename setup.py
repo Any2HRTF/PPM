@@ -10,13 +10,12 @@ setup(
     author='The PPM authors',
     license='EUPL-1.2',
     license_files = ('LICENSE',),
-    readme='README.md',
     packages=find_packages(),
     package_data={
         'ppm': ['resources/*.csv', 'resources/*.blend'],
     },
     include_package_data=True,
-    python_requires='3.10',
+    python_requires='==3.10.*',
     zip_safe=False,
     install_requires=[
         "numpy",
