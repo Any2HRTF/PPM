@@ -21,7 +21,7 @@ def _get_point_cloud(P) -> np.ndarray:
     else:
         raise TypeError('P must be of type PPM or np.ndarray')
 
-def dice_coefficient(P, Q) -> np.float32:
+def dice_coefficient(P, Q, resolution_x=None, resolution_y=None, resolution_z=None) -> np.float32:
     """ Computes the Dice coefficient between two point clouds P and Q.
     
     Parameters
@@ -35,10 +35,10 @@ def dice_coefficient(P, Q) -> np.float32:
         Dice coefficient between P and Q. (0 <= D <= 1)
     """
 
-    jaccard = jaccard_similarity(P, Q)
+    jaccard = jaccard_similarity(P, Q, resolution_x, resolution_y, resolution_z)
     return 2 * jaccard / (1 + jaccard)
 
-def jaccard_similarity(P, Q) -> np.float32:
+def jaccard_similarity(P, Q, resolution_x=None, resolution_y=None, resolution_z=None) -> np.float32:
     """ Computes the Jaccard similarity between two point clouds P and Q.
     
     Parameters
@@ -58,11 +58,11 @@ def jaccard_similarity(P, Q) -> np.float32:
     y_min = min(min(P_points[:, 1]), min(Q_points[:, 1])); y_max = max(max(P_points[:, 1]), max(Q_points[:, 1]))
     z_min = min(min(P_points[:, 2]), min(Q_points[:, 2])); z_max = max(max(P_points[:, 2]), max(Q_points[:, 2]))
 
-    resolution_xx = int(np.round(2 * (x_max - x_min)))
-    resolution_yy = int(np.round(2 * (y_max - y_min)))
-    resolution_zz = int(np.round(2 * (z_max - z_min)))
+    resolution_xx = int(x_max - x_min) if resolution_x is None else resolution_x
+    resolution_yy = int(y_max - y_min) if resolution_y is None else resolution_y
+    resolution_zz = int(z_max - z_min)//2 if resolution_z is None else resolution_z
 
-    xx = np.linspace(x_min+.25, x_max-.25, resolution_xx)
+    xx = np.linspace(x_min+.25, x_max-.25, resolution_xx) 
     yy = np.linspace(y_min+.25, y_max-.25, resolution_yy)
     zz = np.linspace(z_min+.25, z_max-.25, resolution_zz)
 
