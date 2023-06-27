@@ -60,7 +60,7 @@ def jaccard_similarity(P, Q, resolution_x=None, resolution_y=None, resolution_z=
 
     resolution_xx = int(x_max - x_min) if resolution_x is None else resolution_x
     resolution_yy = int(y_max - y_min) if resolution_y is None else resolution_y
-    resolution_zz = int(z_max - z_min)//2 if resolution_z is None else resolution_z
+    resolution_zz = int(z_max - z_min) if resolution_z is None else resolution_z
 
     xx = np.linspace(x_min+.25, x_max-.25, resolution_xx) 
     yy = np.linspace(y_min+.25, y_max-.25, resolution_yy)
