@@ -1,5 +1,4 @@
 import numpy as np
-from .core_class import PPM
 
 def _get_point_cloud(P) -> np.ndarray:
     """ Returns the point cloud of P.
