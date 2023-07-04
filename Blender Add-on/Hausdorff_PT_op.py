@@ -31,23 +31,23 @@ class VisualizeHausdorff(bpy.types.Operator):
     
 
     def execute(self, context):
-
+        
         start_time=time.time()
-
+        
         obj1 = context.view_layer.objects.active
-
+        
         obj1_copy = create_mesh_copy(obj1)
-
+        
         check_if_nomats(obj1_copy)
-
+        
         set_use_nodes_False(obj1_copy)
-
+        
         check_if_nocols(obj1_copy)
 
         obj2= context.scene.objects[context.scene.theReferenceObject]         #setting up reference object
 
         obj2_copy = create_mesh_copy(obj2)
-
+        
         #creating and applying decimation modifier
         if len(obj1_copy.data.vertices)>=30000:
             modifier = obj1_copy.modifiers.new(name="Decimate", type='DECIMATE')
@@ -55,7 +55,7 @@ class VisualizeHausdorff(bpy.types.Operator):
             
             bpy.context.view_layer.objects.active = obj1_copy
             bpy.ops.object.modifier_apply(modifier=modifier.name)
-
+        
         if len(obj2_copy.data.vertices)>=30000:
             modifier = obj2_copy.modifiers.new(name="Decimate", type='DECIMATE')
             modifier.ratio = 0.3  # Set the desired decimation ratio (0.5 = 50% reduction)
@@ -64,7 +64,7 @@ class VisualizeHausdorff(bpy.types.Operator):
             bpy.ops.object.modifier_apply(modifier=modifier.name)
 
         color_map = obj1_copy.data.vertex_colors.active.data
-
+        
         
 
         MW2 = obj2_copy.matrix_world
@@ -97,13 +97,13 @@ class VisualizeHausdorff(bpy.types.Operator):
         # print("Hausdorf calculated")
 
         print('Midway Time =', end_time-start_time)
-
+        
         print("Maximum: ", max(hausdorff))
 
         print("Minimum: ", min(hausdorff))
 
         print("Mean: ", np.mean(hausdorff))
-
+    
         print("Median: ", np.median(hausdorff))
 
         #print("Mean trans: ", np.mean(hausdorff_trans))
@@ -299,7 +299,7 @@ class OutputHausdorff(bpy.types.Operator):
     
 
     def execute(self, context):
-        
+        print("sdfhl")
         start_time=time.time()
 
         obj1 = context.view_layer.objects.active

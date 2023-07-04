@@ -1,7 +1,8 @@
 import bpy 
 
-class HausdorffPanel(bpy.types.Panel):
+class HAUSDORFF_PT_panel(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
+    bl_idname = "HAUSDORFF_PT_panel"
     bl_region_type = "UI"
     bl_label = "Hausdorff Visualization"
     bl_category = "Hausdorff"

@@ -22,18 +22,26 @@ bl_info = {
     "category" : "Generic"
 }
 
-import bpy
+if "bpy" in locals():
+    print("\n---------------RELOAD---------------\n")
+    if "Hausdorff_PT_op" and "Hausdorff_PT_pnl" in locals():
+        importlib.reload(Hausdorff_PT_op)
+        importlib.reload(Hausdorff_PT_pnl)
+else:        
+    print("\n---------------INITIAL---------------\n")
+    import importlib
+    import bpy
 
-from .Hausdorff_PT_op import VisualizeHausdorff, ResetColors, OutputHausdorff, HausdorffProperty
-from .Hausdorff_PT_pnl import HausdorffPanel
-classes = (VisualizeHausdorff, HausdorffPanel, ResetColors, OutputHausdorff, HausdorffProperty )
+    from .Hausdorff_PT_op import VisualizeHausdorff, ResetColors, OutputHausdorff, HausdorffProperty
+    from .Hausdorff_PT_pnl import HAUSDORFF_PT_panel
+    classes = (VisualizeHausdorff, HAUSDORFF_PT_panel, ResetColors, OutputHausdorff, HausdorffProperty )
 
-def register():
-    for c in classes:
-        bpy.utils.register_class(c)
-    bpy.types.Scene.theReferenceObject = bpy.props.StringProperty()
-    bpy.types.Scene.hausdorff=bpy.props.CollectionProperty(type=HausdorffProperty)
-def unregister():
-    for c in classes:
-        bpy.utils.unregister_class(c)
-    del bpy.types.Scene.hausdorff
+    def register():
+        for c in classes:
+            bpy.utils.register_class(c)
+        bpy.types.Scene.theReferenceObject = bpy.props.StringProperty()
+        bpy.types.Scene.hausdorff = bpy.props.CollectionProperty(type=HausdorffProperty)
+    def unregister():
+        for c in classes:
+            bpy.utils.unregister_class(c)
+        del bpy.types.Scene.hausdorff
