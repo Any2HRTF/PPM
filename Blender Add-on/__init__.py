@@ -13,7 +13,7 @@
 
 bl_info = {
     "name" : "Hausdorff distance",
-    "author" : "Yasen",
+    "author" : "Yasen, Jonathan",
     "description" : "",
     "blender" : (2, 80, 0),
     "version" : (0, 0, 1),
@@ -23,25 +23,48 @@ bl_info = {
 }
 
 if "bpy" in locals():
-    print("\n---------------RELOAD---------------\n")
-    if "Hausdorff_PT_op" and "Hausdorff_PT_pnl" in locals():
-        importlib.reload(Hausdorff_PT_op)
-        importlib.reload(Hausdorff_PT_pnl)
+    print("\n---------------RELOADD---------------\n")
+    import importlib
+
+    importlib.reload(Hausdorff_PT_op)
+    importlib.reload(Hausdorff_PT_pnl)
+    print("Succesfully reloaded")
+
 else:        
     print("\n---------------INITIAL---------------\n")
-    import importlib
-    import bpy
+    from . import Hausdorff_PT_op
+    from . import Hausdorff_PT_pnl
+import bpy
 
-    from .Hausdorff_PT_op import VisualizeHausdorff, ResetColors, OutputHausdorff, HausdorffProperty
-    from .Hausdorff_PT_pnl import HAUSDORFF_PT_panel
-    classes = (VisualizeHausdorff, HAUSDORFF_PT_panel, ResetColors, OutputHausdorff, HausdorffProperty )
 
-    def register():
-        for c in classes:
-            bpy.utils.register_class(c)
-        bpy.types.Scene.theReferenceObject = bpy.props.StringProperty()
-        bpy.types.Scene.hausdorff = bpy.props.CollectionProperty(type=HausdorffProperty)
-    def unregister():
-        for c in classes:
-            bpy.utils.unregister_class(c)
-        del bpy.types.Scene.hausdorff
+classes= [Hausdorff_PT_op.VisualizeDistance,
+          Hausdorff_PT_op.DistanceProperty,
+          Hausdorff_PT_pnl.HAUSDORFF_PT_panel]
+
+def register():
+    for c in classes:
+        bpy.utils.register_class(c)
+    bpy.types.Scene.Reference = bpy.props.StringProperty()
+    bpy.types.Scene.distances = bpy.props.CollectionProperty(type=Hausdorff_PT_op.DistanceProperty)
+    
+    
+
+
+
+
+
+
+
+def unregister():
+    for c in classes:
+        bpy.utils.unregister_class(c)
+    del bpy.types.Scene.distances
+    
+    
+
+
+if __name__ == "__main__":
+    register()
+
+
+
