@@ -1,15 +1,15 @@
-#import os
+
 import bpy
-#import bpy.utils.previews
+
+
 
 class HAUSDORFF_PT_panel(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_idname = "HAUSDORFF_PT_panel"
     bl_region_type = "UI"
     bl_label = "Distance Visualization"
-    bl_category = "Hausdorff"
-
-
+    bl_category = "Distance Calculation"
+    
     def draw(self, context):
 
             layout= self.layout
@@ -20,38 +20,68 @@ class HAUSDORFF_PT_panel(bpy.types.Panel):
 
             row = layout.row()
             col = row.column()
-            col.operator("object.visualize_distance", text="Distance visualization")
+            #layout.prop(context.scene,"distance_selector")
+            
+            layout.prop(context.scene.distance_selector,"selector")
+            if context.scene.distance_selector.selector == "OP3":
+               layout.prop(context.scene.jaccard_resolution,"selector")  
 
+
+            #layout.prop_search(context.scene, "distance_selector", context.scene, "EnumProperty")
+            row = layout.row()
+            col = row.column()
+            if context.object is not None:
+                current_mode = bpy.context.object.mode
+                if current_mode == "OBJECT":
+                    col.operator("object.visualize_distance", text="Distance visualization")
+                else:
+                    layout.label(text = "Select an Object and ensure you are in OBJECT Mode!")
+            else:
+                layout.label(text = "Select an Object and ensure you are in OBJECT Mode!")
 
             # Get the latest hausdorff property item
             distance_items = context.scene.distances
             if distance_items:
                 latest_distance_item = distance_items[-1]
+                if latest_distance_item.dist_type == "OP1" or latest_distance_item.dist_type == "OP2":
+                    row = layout.row()
+                    col=row.column()
+                    layout.label(text='Types         | |         From Ref         | |        To Ref')
 
-                row = layout.row()
-                col=row.column()
-                layout.label(text='Types         | |         From Ref         | |        To Ref')
+                    col=row.column()
+                    layout.label(text="Mean                        %.3f                        %.3f" 
+                                % (latest_distance_item.mean_QP,latest_distance_item.mean_PQ))
+                    
+                    row = layout.row()
+                    col=row.column()
+                    layout.label(text="Median                      %.3f                        %.3f" 
+                                % (latest_distance_item.median_QP,latest_distance_item.median_PQ))
 
-                col=row.column()
-                layout.label(text="Mean                        %.3f                        %.3f" 
-                             % (latest_distance_item.mean_QP,latest_distance_item.mean_PQ))
-                
-                row = layout.row()
-                col=row.column()
-                layout.label(text="Median                      %.3f                        %.3f" 
-                             % (latest_distance_item.median_QP,latest_distance_item.median_PQ))
+                    row = layout.row()
+                    col=row.column()
+                    layout.label(text="Hausdorff                  %.3f                        %.3f" 
+                                % (latest_distance_item.max_QP,latest_distance_item.max_PQ))
 
-                row = layout.row()
-                col=row.column()
-                layout.label(text="Hausdorff                  %.3f                        %.3f" 
-                             % (latest_distance_item.max_QP,latest_distance_item.max_PQ))
+                    row = layout.row()
+                    col=row.column()
+                    layout.label(text="Minimum                   %.3f                        %.3f" 
+                                % (latest_distance_item.min_QP,latest_distance_item.min_PQ))
+                elif latest_distance_item.dist_type == "OP3":
+                    row = layout.row()
+                    col=row.column()
+                    layout.label(text='Types                  | |         Jaccard')
 
-                row = layout.row()
-                col=row.column()
-                layout.label(text="Minimum                   %.3f                        %.3f" 
-                             % (latest_distance_item.min_QP,latest_distance_item.min_PQ))
-                
-                
+                    col=row.column()
+                    layout.label(text="Bool                                  %.3f" 
+                                % (latest_distance_item.jaccard_bool))
+                    
+                    col=row.column()
+                    layout.label(text="Point preserve                  %.3f" 
+                                % (latest_distance_item.jaccard_point_preserve))
+                    
+                    col=row.column()
+                    layout.label(text="Alternative OR                 %.3f" 
+                                % (latest_distance_item.jaccard_altnerative_or))
                 """
                 pcoll = bpy.utils.previews.new()
 

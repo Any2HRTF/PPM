@@ -11,8 +11,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+
 bl_info = {
-    "name" : "Hausdorff distance",
+    "name" : "Calculate several distances between two objects",
     "author" : "Yasen, Jonathan",
     "description" : "",
     "blender" : (2, 80, 0),
@@ -22,6 +23,8 @@ bl_info = {
     "category" : "Generic"
 }
 
+#With this section it is possible to reload all scripts:
+# "blender icon" -> System -> reload scripts
 if "bpy" in locals():
     print("\n---------------RELOADD---------------\n")
     import importlib
@@ -39,26 +42,25 @@ import bpy
 
 classes= [Hausdorff_PT_op.VisualizeDistance,
           Hausdorff_PT_op.DistanceProperty,
+          Hausdorff_PT_op.DistanceSelector,
+          Hausdorff_PT_op.JaccardResolutionSelector,
           Hausdorff_PT_pnl.HAUSDORFF_PT_panel]
 
 def register():
     for c in classes:
         bpy.utils.register_class(c)
     bpy.types.Scene.Reference = bpy.props.StringProperty()
-    bpy.types.Scene.distances = bpy.props.CollectionProperty(type=Hausdorff_PT_op.DistanceProperty)
+    bpy.types.Scene.distances = bpy.props.CollectionProperty(type = Hausdorff_PT_op.DistanceProperty)
+    bpy.types.Scene.distance_selector = bpy.props.PointerProperty(type = Hausdorff_PT_op.DistanceSelector)
+    bpy.types.Scene.jaccard_resolution = bpy.props.PointerProperty(type = Hausdorff_PT_op.JaccardResolutionSelector)
     
     
-
-
-
-
-
-
-
 def unregister():
     for c in classes:
         bpy.utils.unregister_class(c)
     del bpy.types.Scene.distances
+    del bpy.types.Scene.distance_selector
+    del bpy.types.Scene.jaccard_resolution
     
     
 
