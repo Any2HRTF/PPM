@@ -29,30 +29,31 @@ if "bpy" in locals():
     print("\n---------------RELOADD---------------\n")
     import importlib
 
-    importlib.reload(Hausdorff_PT_op)
-    importlib.reload(Hausdorff_PT_pnl)
+    importlib.reload(PointCloudCompare_PT_op)
+    importlib.reload(PointCloudCompare_PT_pnl)
     print("Succesfully reloaded")
 
 else:        
     print("\n---------------INITIAL---------------\n")
-    from . import Hausdorff_PT_op
-    from . import Hausdorff_PT_pnl
+    from . import PointCloudCompare_PT_op
+    from . import PointCloudCompare_PT_pnl
+
 import bpy
 
 
-classes= [Hausdorff_PT_op.VisualizeDistance,
-          Hausdorff_PT_op.DistanceProperty,
-          Hausdorff_PT_op.DistanceSelector,
-          Hausdorff_PT_op.JaccardResolutionSelector,
-          Hausdorff_PT_pnl.HAUSDORFF_PT_panel]
+classes= [PointCloudCompare_PT_op.VisualizeDistance,
+          PointCloudCompare_PT_op.DistanceProperty,
+          PointCloudCompare_PT_op.DistanceSelector,
+          PointCloudCompare_PT_op.JaccardResolutionSelector,
+          PointCloudCompare_PT_pnl.INTERFACE_PT_panel]
 
 def register():
     for c in classes:
         bpy.utils.register_class(c)
     bpy.types.Scene.Reference = bpy.props.StringProperty()
-    bpy.types.Scene.distances = bpy.props.CollectionProperty(type = Hausdorff_PT_op.DistanceProperty)
-    bpy.types.Scene.distance_selector = bpy.props.PointerProperty(type = Hausdorff_PT_op.DistanceSelector)
-    bpy.types.Scene.jaccard_resolution = bpy.props.PointerProperty(type = Hausdorff_PT_op.JaccardResolutionSelector)
+    bpy.types.Scene.distances = bpy.props.CollectionProperty(type = PointCloudCompare_PT_op.DistanceProperty)
+    bpy.types.Scene.distance_selector = bpy.props.PointerProperty(type = PointCloudCompare_PT_op.DistanceSelector)
+    bpy.types.Scene.jaccard_resolution = bpy.props.PointerProperty(type = PointCloudCompare_PT_op.JaccardResolutionSelector)
     
     
 def unregister():
@@ -62,8 +63,6 @@ def unregister():
     del bpy.types.Scene.distance_selector
     del bpy.types.Scene.jaccard_resolution
     
-    
-
 
 if __name__ == "__main__":
     register()
