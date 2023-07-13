@@ -7,7 +7,7 @@ on:
 jobs:
     deploy:
         if: startsWith(github.ref, 'refs/tags/Blender_Add-on')
-        runs-on: [ubuntu-latest, macos-latest, windows-latest]
+        runs-on: ubuntu-latest
         steps:
         - uses: actions/checkout@v1
 
@@ -25,12 +25,12 @@ jobs:
             
         - name: Compile
           run: |
-            gcc -c -fpic Johnny_test/TEST/c_sum.c
-            gcc -shared -o haus_47.so c_sum.o
+            gcc -c -fpic CLibrary/c_sum.c
+            gcc -shared -o haus_46.so c_sum.o
             
         - name: Move Exe
           run: |
-            mv haus_47.so Blender\ Add-on/haus_47.so
+            mv haus_46.so Blender\ Add-on/haus_46.so
 
         - name: Make zip
           run: |
