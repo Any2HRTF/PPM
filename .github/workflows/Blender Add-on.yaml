@@ -16,6 +16,21 @@ jobs:
           uses: bruceadams/get-release@v1.3.2
           env:
             GITHUB_TOKEN: ${{ github.token }}
+            
+        - name: Set up Clang
+          uses: egor-tensin/setup-clang@v1
+          with:
+            version: latest
+            platform: x64
+            
+        - name: Compile
+          run: |
+            gcc -c -fpic Johnny_test/TEST/c_sum.c
+            gcc -shared -o haus_46.so c_sum.o
+            
+        - name: Move Exe
+          run: |
+            mv haus_46.so Blender\ Add-on/haus_46.so
 
         - name: Make zip
           run: |
