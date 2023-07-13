@@ -174,6 +174,13 @@ class PPM():
         else:
             self.__load_blender_file(f'{CURRENT_DIR}/resources/PPM_modified_v1.blend')
 
+    @property
+    def working_unit(self, unit):
+        return self.__working_unit
+    
+    @working_unit.setter
+    def working_unit(self, unit):
+        self.__working_unit = unit
 
     @property
     def points(self):
@@ -238,7 +245,16 @@ class PPM():
         parameter_type = parameter_type.lower().capitalize()
         axis = axis.upper() if axis != None else None
         point = point.lower().capitalize() if point != None else None
-        
+
+        if self.__working_unit == 'm':
+            unit_scale = 1000
+        elif self.__working_unit == 'cm':
+            unit_scale = 100
+        elif self.__working_unit == 'mm':
+            unit_scale = 1
+        else:
+            raise Exception('unit must be one of m, cm, mm')
+
         if parameter_type not in ['Shape_key', 'Scale', 'Rotation', 'Location']:
             raise Exception('parameter_type must be one of Shape_key, Scale, Rotation, Location')
         
@@ -264,7 +280,7 @@ class PPM():
                     if a not in ['X', 'Y', 'Z']:
                         raise Exception('axis must be X, Y, Z')
                 for i in range(len(value)):
-                    self.__parameters[parameter][point][parameter_type][axis[i]] = value[i]
+                    self.__parameters[parameter][point][parameter_type][axis[i]] = unit_scale*value[i]
             
             elif parameter_type == 'Rotation':
                 # rotation defined in euler angles
