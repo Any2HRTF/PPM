@@ -243,6 +243,8 @@ class PPM():
             axis (str): The axis to set the parameter to (e.g. X, Y, Z, XY, XYZ, WXYZ, ... or None) 
             value (tuple): The value to set the parameter to
         """
+        if type(value) is not tuple:
+            value = (value,)
 
         parameter_type = parameter_type.lower().capitalize()
         axis = axis.upper() if axis != None else None
