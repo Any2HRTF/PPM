@@ -39,7 +39,7 @@ class VisualizeDistance(bpy.types.Operator):
     
 
     def execute(self, context):
-
+        
         #fetch data for P
         obj1 = context.view_layer.objects.active
         P = fetch_data_array(obj1)
@@ -49,6 +49,15 @@ class VisualizeDistance(bpy.types.Operator):
         Q = fetch_data_array(obj2)
 
 
+        #ERROR HANDLING
+        if np.isnan(Q).all() or np.isnan(P).all():
+            #self.report({'ERROR'},"Both objects must contain geometry data!")
+            self.report({'WARNING'},"Both objects must contain geometry data!")
+            stats_distance = context.scene.distances.add()
+            stats_distance.ERROR = "Both objects must contain geometry data!"
+            return {'CANCELLED'}
+        
+
         #select distance type from drop down menu
         dist_type = context.scene.distance_selector.selector        
         if dist_type == "OP3":
@@ -56,30 +65,13 @@ class VisualizeDistance(bpy.types.Operator):
          
 
 
-        """
-        
-        obj1 = context.view_layer.objects.active
-        check_if_nomats(obj1)
-        set_use_nodes_False(obj1)
-        check_if_nocols(obj1)
-
-        #setting up reference object
-        obj2= context.scene.objects[context.scene.Reference] 
-        #load data from the two objects
-        MW2 = obj2.matrix_world
-        MW1 = obj1.matrix_world
-        P= np.array([MW1 @ vert.co for vert in obj1.data.vertices ])
-        Q= np.array([MW2 @ vert.co for vert in obj2.data.vertices ])
-        """
-
-
         #calculate the actual distances
         if dist_type == "OP1":
             #minimal pontwise distance to Ref 
             # P -> Q
             distance_values, dealloc_array  = distance_calulation_min_pointwise(P,Q)
-            stats_distance = context.scene.distances.add()
-
+            
+            stats_distance = context.scene.distances.add()  
             stats_distance.mean_PQ = np.round(np.mean(distance_values), decimals=2)
             print("Mean: ", stats_distance.mean_PQ)
             stats_distance.median_PQ = np.round(np.median(distance_values), decimals=2)
@@ -94,7 +86,7 @@ class VisualizeDistance(bpy.types.Operator):
             # Q -> P      
             distance_values, dealloc_array  = distance_calulation_min_pointwise(Q,P)  
 
-            stats_distance = context.scene.distances.add()
+            stats_distance = context.scene.distances.add()  
             stats_distance.mean_QP = np.round(np.mean(distance_values), decimals=2)
             print("Mean: ", stats_distance.mean_QP)
             stats_distance.median_QP = np.round(np.median(distance_values), decimals=2)
@@ -112,7 +104,7 @@ class VisualizeDistance(bpy.types.Operator):
             bin_grid_q = bin_mask_idx(Q,res,len_x,len_y,xmin,ymin,zmin)
             jaccard_coef = jaccard_dist(bin_grid_p,bin_grid_q)
 
-            stats_distance = context.scene.distances.add()
+            stats_distance = context.scene.distances.add()  
             stats_distance.jaccard_coef = np.round(jaccard_coef, decimals=2)
             print("jaccard coefficient: ", stats_distance.jaccard_coef)
 
@@ -127,30 +119,35 @@ class VisualizeDistance(bpy.types.Operator):
 
         #painting is only usefull in the first case
         if dist_type == "OP1":
-            #COLOR YASEN
+            
+            #Color
             color_map = obj1.data.vertex_colors.active.data
             bpy.ops.object.mode_set(mode='VERTEX_PAINT')
-            hausdorff_trans=list((distance_values - np.mean(distance_values))*(1/(np.mean(distance_values)+0.1))+1)
+            
             # setting up color array
             color_array = np.zeros(len(obj1.data.vertices) * 4, dtype=np.float32)
             color_array.shape = (len(obj1.data.vertices), 4)
             # iterating through vertices and setting colors
             for i, vert in enumerate(obj1.data.vertices):
-                if hausdorff_trans[i] <= 1:
-                    color_array[i] = [0, 0, 1, 1]
-                elif hausdorff_trans[i] > 1 and hausdorff_trans[i]<=2:
-                    color_array[i] = [0, 1, 3, 1]
-                elif hausdorff_trans[i] > 2 and hausdorff_trans[i]<=4:
-                    color_array[i] = [0, 1, 0, 1]
-                elif hausdorff_trans[i] > 4:
-                    color_array[i] = [1, 0, 0, 1]
+
+                if distance_values[i] <= 1:
+                    color_array[i] = [0, 0, 1, 1] #blue
+                elif distance_values[i] > 1 and distance_values[i]<=1.5:
+                    color_array[i] = [0, 1, 3, 1] #türkis
+                elif distance_values[i] > 1.5 and distance_values[i]<=2:
+                    color_array[i] = [0, 1, 0, 1] #green
+                elif distance_values[i] > 2 and distance_values[i]<=3:
+                    color_array[i] = [3, 0.8, 0, 1] #yellow/orange
+                elif distance_values[i] > 3 and distance_values[i] <= 5:
+                    color_array[i] = [3, 0.5, 0, 1] #orange
+                elif distance_values[i] > 5:
+                    color_array[i] = [1, 0, 0, 1] #red
+
             # setting colors for the object
             for loop in obj1.data.loops:
                 color_map[loop.index].color=list(color_array[loop.vertex_index])
             obj1.select_set(True)
             bpy.context.view_layer.objects.active = obj1
-
-
         return {'FINISHED'}
 
     
@@ -181,6 +178,8 @@ class DistanceProperty(bpy.types.PropertyGroup):
         the min distance from Reference
     jaccard_coef bpy.props.FloatProperty
         jaccard distance
+    ERROR: string
+        an string object to display potential errors
     """ 
     dist_type: bpy.props.StringProperty(name="Dist_type")
     
@@ -202,6 +201,9 @@ class DistanceProperty(bpy.types.PropertyGroup):
     #dice
     dice_coef: bpy.props.FloatProperty(name="dice_coef", default =0.0)
 
+    #ERROR
+    ERROR: bpy.props.StringProperty(name="ERROR", default ="")
+
 
 class DistanceSelector(bpy.types.PropertyGroup):
     """
@@ -220,7 +222,7 @@ class DistanceSelector(bpy.types.PropertyGroup):
         description = "",
         items = [('OP1','Minimal pointwise Distance to Ref', ""),
                  ('OP2','Minimal pointwise Distance from Ref', ""),
-                 ('OP3','Dice Index', "")
+                 ('OP3','Jaccard/Dice Index', "")
         ]
     )
 
@@ -268,15 +270,19 @@ def fetch_data_array(obj):
         array with x,y,z of the point cloud
     """
 
-    check_if_nomats(obj)
-    set_use_nodes_False(obj)
-    check_if_nocols(obj)
+    #check_if_nomats(obj)
+    #set_use_nodes_False(obj)
+    #check_if_nocols(obj)
     if bpy.ops.object.mode_set.poll():
         bpy.ops.object.mode_set(mode='OBJECT')
     depsgraph = bpy.context.evaluated_depsgraph_get()
     obj_eval = obj.evaluated_get(depsgraph)
     bm = bmesh.new()
-    me = obj_eval.to_mesh()
+    try:
+        me = obj_eval.to_mesh()
+    except:
+        return np.array([[np.nan]])
+        
     me.transform(obj.matrix_world)
     bm.from_mesh(me)
     obj.to_mesh_clear()

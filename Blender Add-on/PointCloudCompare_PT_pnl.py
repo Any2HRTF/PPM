@@ -77,6 +77,21 @@ class INTERFACE_PT_panel(bpy.types.Panel):
                     col=row.column()
                     layout.label(text="Minimum                   %.3f                        %.3f" 
                                 % (latest_distance_item.min_QP,latest_distance_item.min_PQ))
+                    if latest_distance_item.dist_type == "OP1":
+                        
+                        col=row.column()
+                        layout.label(text= "               Blue      <=1")
+                        col=row.column()
+                        layout.label(text="   1<=    Cyan    <1.5")
+                        col=row.column()
+                        layout.label(text="1.5<=   Green   <2")
+                        col=row.column()
+                        layout.label(text="   2<=   Yellow  <3")
+                        col=row.column()
+                        layout.label(text="   3<=  Orange  <5")
+                        col=row.column()
+                        layout.label(text="   5<=     Red")
+
                 elif latest_distance_item.dist_type == "OP3":
                     row = layout.row()
                     col=row.column()
@@ -88,7 +103,10 @@ class INTERFACE_PT_panel(bpy.types.Panel):
                     col=row.column()
                     layout.label(text="Dice                                  %.3f" 
                                 % (latest_distance_item.dice_coef))
-                    
+                col=row.column()
+                layout.label(text=latest_distance_item.ERROR)
+ 
+            
                 """
                 pcoll = bpy.utils.previews.new()
 
