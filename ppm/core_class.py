@@ -124,6 +124,8 @@ class PPM():
 
         self.backend = backend
 
+        self.__working_unit = 'mm'
+
         # load init parameters
         self.__parameters = self.__load_parameters_from_csv()
 
@@ -175,7 +177,7 @@ class PPM():
             self.__load_blender_file(f'{CURRENT_DIR}/resources/PPM_modified_v1.blend')
 
     @property
-    def working_unit(self, unit):
+    def working_unit(self):
         return self.__working_unit
     
     @working_unit.setter
@@ -249,7 +251,7 @@ class PPM():
         if self.__working_unit == 'm':
             unit_scale = 1000
         elif self.__working_unit == 'cm':
-            unit_scale = 100
+            unit_scale = 10
         elif self.__working_unit == 'mm':
             unit_scale = 1
         else:
