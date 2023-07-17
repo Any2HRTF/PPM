@@ -72,29 +72,28 @@ class VisualizeDistance(bpy.types.Operator):
             distance_values, dealloc_array  = distance_calulation_min_pointwise(P,Q)
             
             stats_distance = context.scene.distances.add()  
-            stats_distance.mean_PQ = np.round(np.mean(distance_values), decimals=2)
-            print("Mean: ", stats_distance.mean_PQ)
-            stats_distance.median_PQ = np.round(np.median(distance_values), decimals=2)
-            print("Median: ", stats_distance.median_PQ)
-            stats_distance.max_PQ = np.round(np.max(distance_values), decimals=2)
-            print("Maximum: ", stats_distance.max_PQ)
-            stats_distance.min_PQ = np.round(np.min(distance_values), decimals=2)
-            print("Minimum: ", stats_distance.min_PQ)
+            stats_distance.mean_pmin = np.round(np.mean(distance_values), decimals=2)
+            print("Mean: ", stats_distance.mean_pmin)
+            stats_distance.median_pmin = np.round(np.median(distance_values), decimals=2)
+            print("Median: ", stats_distance.median_pmin)
+            stats_distance.max_pmin = np.round(np.max(distance_values), decimals=2)
+            print("Maximum: ", stats_distance.max_pmin)
+            stats_distance.min_pmin = np.round(np.min(distance_values), decimals=2)
+            print("Minimum: ", stats_distance.min_pmin)
             
         elif dist_type == "OP2":
             #minimal pontwise distance from Ref 
-            # Q -> P      
-            distance_values, dealloc_array  = distance_calulation_min_pointwise(Q,P)  
-
+            # Q -> P   
+            distance_values, dealloc_array  = distance_calulation_min_pointwise(Q,P)
             stats_distance = context.scene.distances.add()  
-            stats_distance.mean_QP = np.round(np.mean(distance_values), decimals=2)
-            print("Mean: ", stats_distance.mean_QP)
-            stats_distance.median_QP = np.round(np.median(distance_values), decimals=2)
-            print("Median: ", stats_distance.median_QP)
-            stats_distance.max_QP = np.round(np.max(distance_values), decimals=2)
-            print("Maximum: ", stats_distance.max_QP)
-            stats_distance.min_QP = np.round(np.min(distance_values), decimals=2)
-            print("Minimum: ", stats_distance.min_QP)
+            stats_distance.mean_pmin = np.round(np.mean(distance_values), decimals=2)
+            print("Mean: ", stats_distance.mean_pmin)
+            stats_distance.median_pmin = np.round(np.median(distance_values), decimals=2)
+            print("Median: ", stats_distance.median_pmin)
+            stats_distance.max_pmin = np.round(np.max(distance_values), decimals=2)
+            print("Maximum: ", stats_distance.max_pmin)
+            stats_distance.min_pmin = np.round(np.min(distance_values), decimals=2)
+            print("Minimum: ", stats_distance.min_pmin)
 
         elif dist_type == "OP3":
             res = float(jaccard_res)
@@ -122,6 +121,10 @@ class VisualizeDistance(bpy.types.Operator):
             
             #Color
             color_map = obj1.data.vertex_colors.active.data
+            bpy.context.view_layer.objects.active = obj1
+            
+            obj1.hide_set(False)
+            #obj1.hide_viewport = obj1.hide_render = True  
             bpy.ops.object.mode_set(mode='VERTEX_PAINT')
             
             # setting up color array
@@ -147,7 +150,7 @@ class VisualizeDistance(bpy.types.Operator):
             for loop in obj1.data.loops:
                 color_map[loop.index].color=list(color_array[loop.vertex_index])
             obj1.select_set(True)
-            bpy.context.view_layer.objects.active = obj1
+            
         return {'FINISHED'}
 
     
@@ -160,22 +163,14 @@ class DistanceProperty(bpy.types.PropertyGroup):
     -------
     dist_type : string
         specifies the used dist_type
-    mean_PQ   : bpy.props.FloatProperty
+    mean_pmin   : bpy.props.FloatProperty
         the mean distance to Reference
-    median_PQ : bpy.props.FloatProperty
+    median_pmin : bpy.props.FloatProperty
         the median distance to Reference
-    max_PQ    : bpy.props.FloatProperty
+    max_pmin    : bpy.props.FloatProperty
         the max distance to Reference
-    min_PQ    : bpy.props.FloatProperty
+    min_pmin    : bpy.props.FloatProperty
         the min distance to Reference
-    mean_QP   : bpy.props.FloatProperty
-        the mean distance from Reference
-    median_QP : bpy.props.FloatProperty
-        the median distance from Reference
-    max_QP    : bpy.props.FloatProperty
-        the max distance from Reference
-    min_QP    : bpy.props.FloatProperty
-        the min distance from Reference
     jaccard_coef bpy.props.FloatProperty
         jaccard distance
     ERROR: string
@@ -184,16 +179,11 @@ class DistanceProperty(bpy.types.PropertyGroup):
     dist_type: bpy.props.StringProperty(name="Dist_type")
     
     #to ref
-    mean_PQ: bpy.props.FloatProperty(name="Mean_PQ", default =0.0)
-    median_PQ: bpy.props.FloatProperty(name="Median_PQ",default =0.0 )
-    max_PQ: bpy.props.FloatProperty(name="Maximum_PQ",default =0.0 )
-    min_PQ: bpy.props.FloatProperty(name="Minimum_PQ",default =0.0 )
+    mean_pmin: bpy.props.FloatProperty(name="Mean_PQ", default =0.0)
+    median_pmin: bpy.props.FloatProperty(name="Median_PQ",default =0.0 )
+    max_pmin: bpy.props.FloatProperty(name="Maximum_PQ",default =0.0 )
+    min_pmin: bpy.props.FloatProperty(name="Minimum_PQ",default =0.0 )
     
-    #from ref
-    mean_QP: bpy.props.FloatProperty(name="Mean_QP", default =0.0)
-    median_QP: bpy.props.FloatProperty(name="Median_QP",default =0.0 )
-    max_QP: bpy.props.FloatProperty(name="Maximum_QP",default =0.0 )
-    min_QP: bpy.props.FloatProperty(name="Minimum_QP",default =0.0 )
 
     #jaccard
     jaccard_coef: bpy.props.FloatProperty(name="jaccard_coef", default =0.0)

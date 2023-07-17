@@ -43,68 +43,80 @@ class INTERFACE_PT_panel(bpy.types.Panel):
             if context.object is not None:
                 current_mode = bpy.context.object.mode
                 if current_mode == "OBJECT":
-                    col.operator("object.visualize_distance", text="Distance visualization")
+                    col.operator("object.visualize_distance", text="Calculate")
                 else:
-                    layout.label(text = "Select an Object and ensure you are in OBJECT Mode!")
+                    col.alert = True
+                    col.label(text = "Select an Object and Object Mode!")
             else:
-                layout.label(text = "Select an Object and ensure you are in OBJECT Mode!")
+                col.alert = True
+                col.label(text = "Select an Object and Object Mode!")
 
             # Get the latest property item
             distance_items = context.scene.distances
             #print( context.scene.distances)
             if distance_items:
                 latest_distance_item = distance_items[-1]
-                if latest_distance_item.dist_type == "OP1" or latest_distance_item.dist_type == "OP2":
-                    row = layout.row()
-                    col=row.column()
-                    layout.label(text='Types         | |         From Ref         | |        To Ref')
-
-                    col=row.column()
-                    layout.label(text="Mean                        %.3f                        %.3f" 
-                                % (latest_distance_item.mean_QP,latest_distance_item.mean_PQ))
+                
+                
+                
+                if latest_distance_item.dist_type == "OP1" or latest_distance_item.dist_type == "OP2":               
                     
                     row = layout.row()
                     col=row.column()
-                    layout.label(text="Median                      %.3f                        %.3f" 
-                                % (latest_distance_item.median_QP,latest_distance_item.median_PQ))
+                    layout.label(text='   Types             | |            Value')
+
+                    col=row.column()
+                    layout.label(text="   Mean                             %.3f" 
+                                % (latest_distance_item.mean_pmin))
+                    
+                    row = layout.row()
+                    col=row.column()
+                    layout.label(text="   Median                          %.3f" 
+                                % (latest_distance_item.median_pmin))
 
                     row = layout.row()
                     col=row.column()
-                    layout.label(text="Hausdorff                  %.3f                        %.3f" 
-                                % (latest_distance_item.max_QP,latest_distance_item.max_PQ))
+                    layout.label(text="   Max                               %.3f" 
+                                % (latest_distance_item.max_pmin))
 
                     row = layout.row()
                     col=row.column()
-                    layout.label(text="Minimum                   %.3f                        %.3f" 
-                                % (latest_distance_item.min_QP,latest_distance_item.min_PQ))
+                    layout.label(text="   Min                                %.3f" 
+                                % (latest_distance_item.min_pmin))
                     if latest_distance_item.dist_type == "OP1":
                         
                         col=row.column()
-                        layout.label(text= "               Blue      <=1")
                         col=row.column()
-                        layout.label(text="   1<=    Cyan    <1.5")
+                        layout.label(text="\n")
                         col=row.column()
-                        layout.label(text="1.5<=   Green   <2")
+                        layout.label(text=" Theme for Distance visualisation")
+                        layout.label(text= "                       Blue    <= 1mm")
                         col=row.column()
-                        layout.label(text="   2<=   Yellow  <3")
+                        layout.label(text="   1mm <=    Cyan    < 1.5mm")
                         col=row.column()
-                        layout.label(text="   3<=  Orange  <5")
+                        layout.label(text="1.5mm <=   Green   < 2mm")
                         col=row.column()
-                        layout.label(text="   5<=     Red")
+                        layout.label(text="   2mm <=   Yellow   < 3mm")
+                        col=row.column()
+                        layout.label(text="   3mm <=  Orange  < 5mm")
+                        col=row.column()
+                        layout.label(text="   5mm <=     Red")
 
                 elif latest_distance_item.dist_type == "OP3":
-                    row = layout.row()
+                    
+                    
                     col=row.column()
-                    layout.label(text='Types                  | |         Value')
-
+                    layout.label(text='   Types             | |            Value')
                     col=row.column()
-                    layout.label(text="Jaccard                             %.3f" 
+                    layout.label(text="   Jaccard                          %.3f" 
                                 % (latest_distance_item.jaccard_coef))
                     col=row.column()
-                    layout.label(text="Dice                                  %.3f" 
+                    layout.label(text="   Dice                              %.3f" 
                                 % (latest_distance_item.dice_coef))
+                row = layout.row()
                 col=row.column()
-                layout.label(text=latest_distance_item.ERROR)
+                col.alert = True
+                col.label(text=latest_distance_item.ERROR)
  
             
                 """
