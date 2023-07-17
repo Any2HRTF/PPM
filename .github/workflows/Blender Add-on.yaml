@@ -20,7 +20,14 @@ jobs:
           uses: bruceadams/get-release@v1.3.2
           env:
             GITHUB_TOKEN: ${{ github.token }}
-            
+
+        - name: Checkout code
+          uses: actions/checkout@v2
+
+        - name: Set up C environment
+          uses: actions/setup-cmake@v1 # or actions/setup-node@v2, actions/setup-python@v2, etc.
+
+          
         - name: Compile
           run: |
             clang -shared -c -fpic -o haus_46.so CLibrary/c_sum.c
