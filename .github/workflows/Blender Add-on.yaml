@@ -23,7 +23,7 @@ jobs:
             
         - name: Compile
           run: |
-            gcc -shared -c -fpic -o haus_46.so CLibrary/c_sum.c
+            clang -shared -c -fpic -o haus_46.so CLibrary/c_sum.c
             
         - name: Move Exe
           run: |
