@@ -16,6 +16,4 @@ Open a BLEND file containing the PPM to be manually aligned with a target mesh. 
 ### Minimal pointwise distance to Ref
 This distance is defined by the minimal pointwise distance from each data point of the PPM to the reference mesh. Therefore for each point in the PPM the distances to all the points of the ground truth mesh are calculated and the minimum is stored. As a result, this calculation returns N values, where in is the length of the PPM array. The PPM object gets then colored accoring to the individual distances. The color scheme is as follows:
 colorbar_test1
-![My Image](colorbar_test1.jpg)
-
-<img src="colorbar_test1.jpg" width="728",align="center"/>
+<img src="colorbar_test1.jpg" width="728" align="center"/>
