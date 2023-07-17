@@ -18,4 +18,4 @@ This distance is defined by the minimal pointwise distance from each data point 
 colorbar_test1
 ![My Image](colorbar_test1.jpg)
 
-<img src="colorbar_test1.jpg" width="528"/>
+<img src="colorbar_test1.jpg" width="728",align="center"/>
