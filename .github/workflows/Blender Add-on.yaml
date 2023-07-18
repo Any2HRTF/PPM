@@ -22,15 +22,6 @@ jobs:
           with:
             version: latest
             platform: x64
-            
-        - name: Compile
-          run: |
-            gcc -c -fpic CLibrary/c_sum.c
-            gcc -shared -o haus_46.so c_sum.o
-            
-        - name: Move Exe
-          run: |
-            mv haus_46.so Blender\ Add-on/haus_46.so
 
         - name: Make zip
           run: |
