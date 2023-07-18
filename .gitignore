@@ -5,3 +5,6 @@
 *.egg-info
 __pycache__
 *.blend1
+
+./Blender Add-on/colorbar_test1.jpg
+./Blender Add-on/.ipynb_checkpoints

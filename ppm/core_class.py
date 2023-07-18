@@ -11,10 +11,6 @@ import bpy
 import bmesh
 import mathutils
 
-CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
-PPM_FILE = f'{CURRENT_DIR}/resources/PPM.blend'
-PPM_FILE_EAR_CANAL_CLOSED = f'{CURRENT_DIR}/resources/PPM_closed_ear_canal.blend'
-PPM_PARAMETERS_FILE = f'{CURRENT_DIR}/resources/PPM_params.csv'
 
 def euler_to_quaternion(euler_matrix:np.array, sequence:str='ZYX') -> np.array:
     """Transforms a rotation matrix into a quaternion.
@@ -102,6 +98,8 @@ def euler_to_quaternion(euler_matrix:np.array, sequence:str='ZYX') -> np.array:
 
     return quaternion
 
+CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
+
 class PPM():
     """PPM class
 
@@ -116,7 +114,6 @@ class PPM():
                  from_csv_file=None,
                  from_dict=None,
                  ear_canal_closed=False,
-                 reference_point=None,
                  backend='blender'):
 
         if from_blender_file != None and from_csv_file != None:
@@ -127,22 +124,30 @@ class PPM():
 
         self.backend = backend
 
+        self.__working_unit = 'mm'
+
         # load init parameters
         self.__parameters = self.__load_parameters_from_csv()
 
-
-        if from_blender_file != None and self.backend == 'blender':
-            self.__load_blender_file(from_blender_file)
+        if self.backend == 'blender':
+            if from_blender_file != None:
+                self.__load_blender_file(from_blender_file)
+            else:
+                self.__load_blender_file(f'{CURRENT_DIR}/resources/PPM_modified_v1.blend')
             self.__get_parameters_from_blender()
         
+        # rerun fct to load parameters from csv file
         if from_csv_file != None:
             self.__parameters = self.__load_parameters_from_csv(from_csv_file)
         
         if from_dict != None:
             self.__parameters = self.__load_parameters_from_dict(from_dict)
 
-        self.__ear_canal_closed = ear_canal_closed
-        self.__reference_point = reference_point
+        self.ear_canal_closed = ear_canal_closed
+        if self.ear_canal_closed:
+            self.__load_blender_file(f'{CURRENT_DIR}/resources/PPM_modified_v1_closed.blend')
+        
+        bpy.ops.object.mode_set(mode='OBJECT')
 
     def __load_blender_file(self, filepath):
         logfile = tempfile.mktemp()
@@ -164,30 +169,20 @@ class PPM():
     
     @ear_canal_closed.setter
     def ear_canal_closed(self, ear_canal_closed):
-        self.close_ear_canal(ear_canal_closed)
+        self.__ear_canal_closed = ear_canal_closed
+
+        if self.__ear_canal_closed:
+            self.__load_blender_file(f'{CURRENT_DIR}/resources/PPM_modified_v1_closed.blend')
+        else:
+            self.__load_blender_file(f'{CURRENT_DIR}/resources/PPM_modified_v1.blend')
 
     @property
-    def mesh_reference_point(self):
-        return self.__reference_point
-
-    @mesh_reference_point.setter
-    def mesh_reference_point(self, reference_point):
-
-        self.center_mesh(reference_point=reference_point)
-
-    def __prepare_blend_file(self):
-        '''Here all the preparation steps for the blend file should be done.'''
-        if self.__ear_canal_closed:
-            self.__load_blender_file(PPM_FILE_EAR_CANAL_CLOSED)
-        else:
-            self.__load_blender_file(PPM_FILE)
-
-        self.__set_parameters_in_blender()
-
-        if self.__reference_point != None:
-            self.__center_mesh_blender(
-                    reference_point=self.__reference_point,
-                )
+    def working_unit(self):
+        return self.__working_unit
+    
+    @working_unit.setter
+    def working_unit(self, unit):
+        self.__working_unit = unit
 
     @property
     def points(self):
@@ -207,7 +202,7 @@ class PPM():
                     self.__parameters[parameter_name][point_name] = point
                 else:
                     for type_name, type in point.items():
-                        if type_name == 'Scale' and parameter_name != 'Parent':
+                        if type_name == 'Scale' and parameter_name != 'Size':
                             self.__parameters[parameter_name][point_name][type_name] = type
                         else:
                             for axis_name, axis in type.items():
@@ -226,7 +221,7 @@ class PPM():
                 else:
                     for type_name, type in point.items():
                         string += f'    ∟{type_name}:\n'
-                        if type_name == 'Scale' and parameter_name != 'Parent':
+                        if type_name == 'Scale' and parameter_name != 'Size':
                             string += f'      ∟{type}\n'
                         else:
 
@@ -248,11 +243,24 @@ class PPM():
             axis (str): The axis to set the parameter to (e.g. X, Y, Z, XY, XYZ, WXYZ, ... or None) 
             value (tuple): The value to set the parameter to
         """
+        if type(value) is list:
+            value = tuple(value)
+        elif type(value) is not tuple:
+            value = (value,)
 
         parameter_type = parameter_type.lower().capitalize()
         axis = axis.upper() if axis != None else None
         point = point.lower().capitalize() if point != None else None
-        
+
+        if self.__working_unit == 'm':
+            unit_scale = 1000
+        elif self.__working_unit == 'cm':
+            unit_scale = 10
+        elif self.__working_unit == 'mm':
+            unit_scale = 1
+        else:
+            raise Exception('unit must be one of m, cm, mm')
+
         if parameter_type not in ['Shape_key', 'Scale', 'Rotation', 'Location']:
             raise Exception('parameter_type must be one of Shape_key, Scale, Rotation, Location')
         
@@ -260,14 +268,14 @@ class PPM():
             if len(value) > 1:
                 raise Exception('value must be a single float value')
             self.__parameters[parameter][parameter_type] = value
-        elif parameter_type == 'Scale' and parameter != 'Parent':
+        elif parameter_type == 'Scale' and parameter != 'Size':
             if len(value) > 1:
                 raise Exception('value must be a single float value')
             self.__parameters[parameter]['Bendy'][parameter_type] = value
         else:
-            if point not in ['Start', 'End'] and parameter != 'Parent':
+            if point not in ['Start', 'End'] and parameter != 'Size':
                 raise Exception('point must be one of Start, End')
-            elif parameter == 'Parent':
+            elif parameter == 'Size':
                 point = 'Bendy'
             
             if len(value) != len(axis):
@@ -278,7 +286,7 @@ class PPM():
                     if a not in ['X', 'Y', 'Z']:
                         raise Exception('axis must be X, Y, Z')
                 for i in range(len(value)):
-                    self.__parameters[parameter][point][parameter_type][axis[i]] = value[i]
+                    self.__parameters[parameter][point][parameter_type][axis[i]] = unit_scale*value[i]
             
             elif parameter_type == 'Rotation':
                 # rotation defined in euler angles
@@ -313,7 +321,7 @@ class PPM():
                 type = 'Scale'
                 name = '_'.join(key.split('-')[0].split('_')[1:])
                 point = '_'.join(key.split('-')[1].split('_'))
-                if 'Parent' in key:
+                if 'Size' in key:
                     axis = point.split('_')[-1]
                     point = point.split('_')[0]
                 else:
@@ -350,10 +358,11 @@ class PPM():
 
         return parameters
 
+
     def __load_parameters_from_csv(self, csv_file=None) -> dict:
 
         if csv_file is None:
-            csv_file = PPM_PARAMETERS_FILE
+            csv_file = f'{CURRENT_DIR}/resources/PPM_params_default_v1.csv'
 
         with open(csv_file, newline='', encoding='utf-8') as csvfile:
             reader = csv.reader(csvfile)
@@ -368,7 +377,7 @@ class PPM():
                     type = 'Scale'
                     name = '_'.join(row[0].split('-')[0].split('_')[1:])
                     point = '_'.join(row[0].split('-')[1].split('_'))
-                    if 'Parent' in row[0]:
+                    if 'Size' in row[0]:
                         axis = point.split('_')[-1]
                         point = point.split('_')[0]
                     else:
@@ -416,12 +425,12 @@ class PPM():
         for parameter_name, parameter in self.__parameters.items():
             # shape keys
             if 'Shape_key' in parameter.keys():
-                bpy.data.shape_keys['Key'].key_blocks[parameter_name].value = self.__parameters[parameter_name]['Shape_key']
+                bpy.data.shape_keys['Key.002'].key_blocks[parameter_name].value = self.__parameters[parameter_name]['Shape_key']
             else:
                 for point_name, point in parameter.items():
                     # scale
                     if 'Scale' in point.keys():
-                        if 'Parent' in parameter_name:
+                        if 'Size' in parameter_name:
                             for axis, axis_value in point['Scale'].items():
                                 obj.pose.bones[parameter_name + "-" + point_name].scale[
                                         0 if axis == 'X' else 
@@ -458,12 +467,12 @@ class PPM():
         for parameter_name, parameter in self.__parameters.items():
             # shape keys
             if 'Shape_key' in parameter.keys():
-                self.__parameters[parameter_name]['Shape_key'] = bpy.data.shape_keys['Key'].key_blocks[parameter_name].value
+                self.__parameters[parameter_name]['Shape_key'] = bpy.data.shape_keys['Key.002'].key_blocks[parameter_name].value
             else:
                 for point_name, point in parameter.items():
                     # scale
                     if 'Scale' in point.keys():
-                        if 'Parent' in parameter_name:
+                        if 'Size' in parameter_name:
                             for axis, axis_value in point['Scale'].items():
                                 self.__parameters[parameter_name][point_name]['Scale'][axis] = \
                                     obj.pose.bones[parameter_name + "-" + point_name].scale[
@@ -495,7 +504,7 @@ class PPM():
 
     def __get_point_cloud_blender(self):
 
-        obj = bpy.data.objects['Mesh']
+        obj = bpy.data.objects['ARI_PPM_v1']
         
         if bpy.ops.object.mode_set.poll():
             bpy.ops.object.mode_set(mode='OBJECT')
@@ -521,7 +530,7 @@ class PPM():
             Point cloud of the PPM.
         """
         if self.backend == 'blender':
-            self.__prepare_blend_file()
+            self.__set_parameters_in_blender()
             return self.__get_point_cloud_blender()
         else:
             raise NotImplementedError
@@ -529,8 +538,8 @@ class PPM():
     def __export_ply_blender(self, filepath):
         
         bpy.ops.object.select_all(action='DESELECT')
-        bpy.data.objects['Mesh'].select_set(True)
-        # bpy.context.view_layer.objects.active = bpy.data.objects['Mesh']
+        bpy.data.objects['ARI_PPM_v1'].select_set(True)
+        # bpy.context.view_layer.objects.active = bpy.data.objects['ARI_PPM_v1']
 
         with redirect_stdout(io.StringIO()):
             bpy.ops.export_mesh.ply(
@@ -549,7 +558,7 @@ class PPM():
         if filepath[-4:] != '.ply':
             filepath += '.ply'
         if self.backend == 'blender':
-            self.__prepare_blend_file()
+            self.__set_parameters_in_blender()
             self.__export_ply_blender(filepath)
         else:
             raise NotImplementedError
@@ -557,7 +566,7 @@ class PPM():
     def __export_stl_blender(self, filepath):
 
         bpy.ops.object.select_all(action='DESELECT')
-        bpy.data.objects['Mesh'].select_set(True)
+        bpy.data.objects['ARI_PPM_v1'].select_set(True)
 
         with redirect_stdout(io.StringIO()):
             bpy.ops.export_mesh.stl(
@@ -576,7 +585,7 @@ class PPM():
         if filepath[-4:] != '.stl':
             filepath += '.stl'
         if self.backend == 'blender':
-            self.__prepare_blend_file()
+            self.__set_parameters_in_blender()
             self.__export_stl_blender(filepath)
         else:
             raise NotImplementedError
@@ -597,9 +606,10 @@ class PPM():
         if self.backend != 'blender':
             raise NotImplementedError
 
-        self.__prepare_blend_file()
+        self.__set_parameters_in_blender()
         self.__export_blend_blender(filepath=filepath)
 
+     
     def export_csv(self, filepath):
         """Exports the PPM as a CSV file.
 
@@ -609,13 +619,7 @@ class PPM():
             Path to the CSV file.
         """
 
-        if filepath[-4:] != '.csv':
-            filepath += '.csv'
-
-        if self.backend == 'blender':
-            self.__prepare_blend_file()
-        else:
-            raise NotImplementedError
+        self.__set_parameters_in_blender()
 
         export_dict = {}
 
@@ -627,7 +631,7 @@ class PPM():
                 for point_name, point in parameter.items():
                     # scale
                     if 'Scale' in point.keys():
-                        if 'Parent' in parameter_name:
+                        if 'Size' in parameter_name:
                             for axis, axis_value in point['Scale'].items():
                                 export_dict[f'Scale_{parameter_name}-{point_name}_{axis}'] = self.__parameters[parameter_name][point_name]['Scale'][axis]
                         else:
@@ -702,6 +706,7 @@ class PPM():
         bpy.context.view_layer.update()
 
         # render image and depth information, and store as png and exr files
+
         bpy.context.scene.render.use_compositing = True
         bpy.context.scene.render.filepath = file_path + '/' + filename 
 
@@ -800,6 +805,7 @@ class PPM():
                     file_path+ f'/{filename}.png')
                 break
 
+
     def render(self, *args, **kwargs):
         """Renders the PPM.
 
@@ -837,7 +843,7 @@ class PPM():
             Compression of the depth map.
         """
         if self.backend == 'blender':
-            self.__prepare_blend_file()
+            self.__set_parameters_in_blender()
             # redirect output to temporary file
             logfile = tempfile.mktemp()
             open(logfile, 'a').close()
@@ -868,84 +874,5 @@ class PPM():
             os.close(fd)
             os.dup(old)
             os.close(old)
-            self.__wind_down_blend_file()
         else:
             raise NotImplementedError
-    
-    def __center_mesh_blender(self, reference_point='ear_canal_entrance'):
-        """Centers a reference point of the PPM in the origin of the global coordinate system.
-
-        Parameters
-        ----------
-        reference_point : str
-            Reference point to be centered. Can be either 'ear_canal_entrance' or 'center_of_mass'.
-        """
-
-        # get reference point
-        if reference_point == 'ear_canal_entrance':
-            reference_point = self.__get_ear_canal_entrance_blender()
-        elif reference_point == 'center_of_mass':
-            reference_point = self.__get_center_of_mass_blender()
-        else:
-            raise ValueError("reference_point must be either 'ear_canal_entrance' or 'center_of_mass'.")
-        
-        # move object so that the reference point coincides with the center of the global coordinate system
-        obj = bpy.data.objects['Armature']
-        obj.matrix_world = mathutils.Matrix.Translation(-reference_point) @ obj.matrix_world
-        
-    def __get_ear_canal_entrance_blender(self):
-        """Returns the location of the ear canal entrance in global coordinates.
-
-        Returns
-        -------
-        ear_canal_entrance : Vector
-            Location of the ear canal entrance in global coordinates.
-        """
-        
-        vs = [vert for vert in bpy.context.object.data.vertices if bpy.context.object.vertex_groups['Ear_canal_entrance_center'].index in [i.group for i in vert.groups]]
-        local_ear_canal_entrance = vs[0].co
-
-        obj = bpy.data.objects['Mesh']
-        ear_canal_entrance = obj.matrix_world @ local_ear_canal_entrance
-
-        return ear_canal_entrance
-
-    def __get_center_of_mass_blender(self):
-        """Returns the location of the center of mass of the PPM in global coordinates.
-
-        Returns
-        -------
-        center_of_mass : Vector
-            Location of the center of mass in global coordinates.
-        """
-
-        # get center of mass of PPM template mesh bounding box
-        obj = bpy.data.objects['Mesh']
-        local_bbox_center = 1/8 * sum((mathutils.Vector(b) for b in obj.bound_box), mathutils.Vector())
-
-        # convert to world coordinates
-        center_of_mass = obj.matrix_world @ local_bbox_center
-
-        return center_of_mass
-
-    def center_mesh(self, reference_point='ear_canal_entrance'):
-        """Centers a reference point of the PPM in the origin of the global coordinate system.
-
-        Parameters
-        ----------
-        reference_point : str
-            Reference point to be centered. Can be either 'ear_canal_entrance' or 'center_of_mass'.
-        """
-
-        self.__reference_point = reference_point
-        
-    def close_ear_canal(self, closed=True):
-        """Closes the ear canal of the PPM.
-
-        Parameters
-        ----------
-        closed : bool
-            Whether to close the ear canal.
-        """
-        
-        self.__ear_canal_closed = closed
