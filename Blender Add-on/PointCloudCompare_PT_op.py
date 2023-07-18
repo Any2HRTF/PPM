@@ -126,6 +126,8 @@ class VisualizeDistance(bpy.types.Operator):
         if dist_type == "OP1":
             
             #Color
+            if obj1.data.vertex_colors.active == None:
+                obj1.data.vertex_colors.new()    
             color_map = obj1.data.vertex_colors.active.data
             bpy.context.view_layer.objects.active = obj1
             
@@ -331,10 +333,10 @@ def loadCfile():
         print("Mac Architecture detected")
         if "arm" in platform.machine().lower():
             print("ARM Processor detected")
-            DLL_NAME = absolute_path + "/clib_mac.so"
+            DLL_NAME = absolute_path + "/clib_mac_arm.so" #arm
         elif "intel" in platform.machine().lower():
             print("Intel Processor detected")
-            DLL_NAME = absolute_path + "/clib_mac.so"
+            DLL_NAME = absolute_path + "/clib_mac_arm.so"
             print("THIS case was not tested")
         else:
             print("Unknown Mac Processor")
@@ -365,7 +367,6 @@ def set_use_nodes_False(obj):
 
 def check_if_nocols(obj):
     if obj.data.vertex_colors.active == None:
-        print("Check if no Cols acitve")
         obj.data.vertex_colors.new()    
 
 
