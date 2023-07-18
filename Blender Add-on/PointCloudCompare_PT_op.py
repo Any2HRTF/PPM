@@ -5,6 +5,7 @@ import time
 import ctypes as cts
 import sys
 import numpy.matlib
+import platform
 import bmesh
 
 class VisualizeDistance(bpy.types.Operator):
@@ -328,7 +329,15 @@ def loadCfile():
         DLL_NAME = absolute_path + "/clib_lin.so"
     elif sys.platform[:3].lower() == "dar":
         print("Mac Architecture detected")
-        DLL_NAME = absolute_path + "/clib_mac.so"
+        if "arm" in platform.machine().lower():
+            print("ARM Processor detected")
+            DLL_NAME = absolute_path + "/clib_mac.so"
+        elif "intel" in platform.machine().lower():
+            print("Intel Processor detected")
+            DLL_NAME = absolute_path + "/clib_mac.so"
+            print("THIS case was not tested")
+        else:
+            print("Unknown Mac Processor")
     else:
         print("The operating system used is not supported for the Clibary")
         return None
