@@ -28,9 +28,6 @@ jobs:
             gcc -c -fpic CLibrary/c_sum.c
             gcc -shared -o haus_46.so c_sum.o
             
-        - name: Move Exe
-          run: |
-            MOVE haus_46.so Blender\ Add-on/haus_46.so
 
         - name: Make zip
           run: |
