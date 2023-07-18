@@ -1,23 +1,21 @@
 from setuptools import setup, find_packages
 
-version = '0.1'
+version = '0.9'
 
 setup(
     name='PyPPM',
     version=version,
-    description='Python PPM library.',
+    description='Python PPM module.',
     url='https://github.com/Any2HRTF/PPM',
-    author='Felix Perfler',
-    author_email='felix.perfler@oeaw.ac.at',
+    author='The PPM authors',
     license='EUPL-1.2',
-    license_files = ('LICENSE.txt',),
-    readme='README.md',
+    license_files = ('LICENSE',),
     packages=find_packages(),
     package_data={
         'ppm': ['resources/*.csv', 'resources/*.blend'],
     },
     include_package_data=True,
-    python_requires='<3.11',
+    python_requires='==3.10.*',
     zip_safe=False,
     install_requires=[
         "numpy",

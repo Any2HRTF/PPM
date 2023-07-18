@@ -1,7 +1,6 @@
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-from mpl_toolkits.axes_grid1 import ImageGrid
 from mpl_toolkits import mplot3d
 import numpy as np
 from .math_helpers import minimal_distances
