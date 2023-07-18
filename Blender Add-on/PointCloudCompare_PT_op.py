@@ -70,7 +70,9 @@ class VisualizeDistance(bpy.types.Operator):
             #minimal pontwise distance to Ref 
             # P -> Q
             distance_values, dealloc_array  = distance_calulation_min_pointwise(P,Q)
-            
+            if distance_values is None:
+                distance_values = distance_calulation_min_pointwise_np(P,Q)
+
             stats_distance = context.scene.distances.add()  
             stats_distance.mean_pmin = np.round(np.mean(distance_values), decimals=2)
             print("Mean: ", stats_distance.mean_pmin)
@@ -85,6 +87,9 @@ class VisualizeDistance(bpy.types.Operator):
             #minimal pontwise distance from Ref 
             # Q -> P   
             distance_values, dealloc_array  = distance_calulation_min_pointwise(Q,P)
+            if distance_values is None:
+                distance_values = distance_calulation_min_pointwise_np(P,Q)
+
             stats_distance = context.scene.distances.add()  
             stats_distance.mean_pmin = np.round(np.mean(distance_values), decimals=2)
             print("Mean: ", stats_distance.mean_pmin)
@@ -111,7 +116,7 @@ class VisualizeDistance(bpy.types.Operator):
             print("dice coefficient: ", stats_distance.dice_coef)
 
         stats_distance.dist_type = dist_type
-        if dist_type != "OP3":
+        if dist_type != "OP3" and dealloc_array is not None:
             #free memory
             dealloc_array(distance_values)
 
@@ -312,11 +317,31 @@ def loadCfile():
     Return: class 'ctypes.CDLL'
         an instance of a class where the compiled function are stored
     """
+
     #get path of compiled C file
     absolute_path = os.path.dirname(__file__)
-    DLL_NAME = absolute_path + "/haus_46.{:s}".format("dll" if sys.platform[:3].lower() == "win" else "so")
-    c_function = cts.CDLL(DLL_NAME)
-    return c_function
+    if sys.platform[:3].lower() == "win":
+        print("Windows Architecture detected")
+        DLL_NAME = absolute_path + "/clib_win.dll"
+    elif sys.platform[:3].lower() == "lin":
+        print("Linux Architecture detected")
+        DLL_NAME = absolute_path + "/clib_lin.so"
+    elif sys.platform[:3].lower() == "dar":
+        print("Mac Architecture detected")
+        DLL_NAME = absolute_path + "/clib_mac.so"
+    else:
+        print("The operating system used is not supported for the Clibary")
+        return None
+    #DLL_NAME = absolute_path + "/haus_46.{:s}".format("dll" if sys.platform[:3].lower() == "win" else "so")
+
+
+    try:
+        c_function = cts.CDLL(DLL_NAME)
+        print("C Libary loaded succesfully")
+        return c_function
+    except:
+        print("C Libary cannot be loaded on this machine!")
+        return None
 
 def check_if_nomats(obj):
     if len(obj.data.materials)==0:
@@ -334,6 +359,26 @@ def check_if_nocols(obj):
         print("Check if no Cols acitve")
         obj.data.vertex_colors.new()    
 
+
+def distance_calulation_min_pointwise_np(P,Q):
+
+    #inputs P and Q are arrays of vert coordinates
+
+    dist = np.zeros((P.shape[0], 1))
+
+    for p in range(P.shape[0]):
+
+        # Calculate the minimum distance from points in P to Q
+
+        minP = np.min(np.sum((P[p, :] - Q)**2, axis=1))
+
+        dist[p, 0] = minP
+
+
+
+    hd = np.sqrt(dist)
+
+    return hd
 
 
 #Minimal pointwise distance Helper Functions
@@ -354,13 +399,17 @@ def distance_calulation_min_pointwise(P,Q):
     Return: function_handler
         returns the used function for freeing memory of the returned array
     """
+
+    c_func = loadCfile()
+    if c_func is None:
+        return None,None
     
     rows_p,cols_p = P.shape
     rows_q,cols_q = Q.shape
     P = np.ascontiguousarray(P.astype(cts.c_double))
     Q = np.ascontiguousarray(Q.astype(cts.c_double))
 
-    c_func = loadCfile()
+    
 
     #consider freeing memory
     dealloc_array = c_func.deallocArray

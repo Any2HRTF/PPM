@@ -13,14 +13,14 @@
 
 
 bl_info = {
-    "name" : "Calculate several distances between two objects",
+    "name" : "Compare two point clouds",
     "author" : "Yasen, Jonathan",
     "description" : "",
     "blender" : (2, 80, 0),
     "version" : (0, 0, 1),
     "location" : "",
     "warning" : "",
-    "category" : "Generic"
+    "category" : "PointCloudCompare"
 }
 
 #With this section it is possible to reload all scripts:
@@ -37,6 +37,7 @@ else:
     print("\n---------------INITIAL---------------\n")
     from . import PointCloudCompare_PT_op
     from . import PointCloudCompare_PT_pnl
+
 
 import bpy
 

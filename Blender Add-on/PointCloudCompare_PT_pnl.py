@@ -17,8 +17,8 @@ class INTERFACE_PT_panel(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_idname = "INTERFACE_PT_panel"
     bl_region_type = "UI"
-    bl_label = "Distance Visualization"
-    bl_category = "Distance Calculation"
+    bl_label = "PointCloudCompare"
+    bl_category = "PointCloudCompare"
     
     def draw(self, context):
 
