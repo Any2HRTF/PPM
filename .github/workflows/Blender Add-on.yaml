@@ -30,7 +30,7 @@ jobs:
             
         - name: Move Exe
           run: |
-            mv haus_46.so Blender\ Add-on/haus_46.so
+            MOVE haus_46.so Blender\ Add-on/haus_46.so
 
         - name: Make zip
           run: |
