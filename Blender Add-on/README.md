@@ -39,3 +39,7 @@ To gain intuition: If you compute the Jaccard from A to A, or you choose the res
 2) If changes are made to the script, the scripts can be reloaded by clicking on the blender icon (top left) -> System -> Reload scripts.
 3) The colored visualisation for the "Minimal pointwise distance to Ref" can only be seen in the VERTEX Mode.
 4) Go to Window -> Toggle System Console to open a terminal showing Python print commands.
+
+
+# Code and functions
+The overall add on consists of 3 Python Files, one init file, one for the panel and one for all the calculation.
