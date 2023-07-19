@@ -88,7 +88,7 @@ def jaccard_similarity(P, Q, resolution_x=None, resolution_y=None, resolution_z=
 
 
 
-def minimal_distances(P, Q) -> np.array:
+def minimal_distances(P, Q) -> np.ndarray:
     """ Computes the minimal distances between two point clouds P and Q.
     P and Q can be of type PPM or np.ndarray.
 
@@ -99,18 +99,18 @@ def minimal_distances(P, Q) -> np.array:
 
     Returns
     -------
-    np.array
+    np.ndarray
         Minimal distances between P and Q.
     """
 
     P_points = _get_point_cloud(P)
     Q_points = _get_point_cloud(Q)
 
-    dist = np.zeros(P_points.shape[0], dtype=np.float32)
-    for idx_pred in range(dist.shape[0]):
-        dist[idx_pred] = np.min(np.sum((P_points[idx_pred, :] - Q_points)**2, axis=1))
+    distances = np.sum((P_points[:, np.newaxis, :] - Q_points)**2, axis=2)
+    min_distances = np.min(distances, axis=1)
 
-    return np.sqrt(dist)
+    return np.sqrt(min_distances)
+
 
 def hausdorff_distance(P, Q) -> np.float32:
     """ Computes the Hausdorff distance between two point clouds P and Q.
