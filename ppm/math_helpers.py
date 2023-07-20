@@ -1,4 +1,5 @@
 import numpy as np
+import numba as nb
 
 def _get_point_cloud(P) -> np.ndarray:
     """ Returns the point cloud of P.
@@ -86,7 +87,6 @@ def jaccard_similarity(P, Q, resolution_x=None, resolution_y=None, resolution_z=
 
     return np.sum(np.logical_and(grid_points[:, 3], grid_points[:, 7])) / (np.sum(np.logical_or(grid_points[:, 3], grid_points[:, 7])) + np.finfo(np.float32).eps)
 
-import numba as nb
 @nb.njit('float32(float32[:], float32[:,:])', parallel=True, fastmath=True)
 def _distance_calculation(point, point_array):
     return np.min(np.sum((point - point_array)**2, axis=1))
