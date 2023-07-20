@@ -107,10 +107,8 @@ def minimal_distances(P, Q) -> np.ndarray:
         Minimal distances between P and Q.
     """
 
-    # P_points = _get_point_cloud(P)
-    # Q_points = _get_point_cloud(Q)
-    P_points = P
-    Q_points = Q
+    P_points = _get_point_cloud(P)
+    Q_points = _get_point_cloud(Q)
 
     min_distances = np.zeros(P_points.shape[0], dtype=np.float32)
     for idx_pred in nb.prange(min_distances.shape[0]):
