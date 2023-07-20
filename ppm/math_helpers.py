@@ -86,6 +86,10 @@ def jaccard_similarity(P, Q, resolution_x=None, resolution_y=None, resolution_z=
 
     return np.sum(np.logical_and(grid_points[:, 3], grid_points[:, 7])) / (np.sum(np.logical_or(grid_points[:, 3], grid_points[:, 7])) + np.finfo(np.float32).eps)
 
+import numba as nb
+@nb.njit('float32(float32[:], float32[:,:])', parallel=True, fastmath=True)
+def _distance_calculation(point, point_array):
+    return np.min(np.sum((point - point_array)**2, axis=1))
 
 
 def minimal_distances(P, Q) -> np.ndarray:
@@ -103,11 +107,14 @@ def minimal_distances(P, Q) -> np.ndarray:
         Minimal distances between P and Q.
     """
 
-    P_points = _get_point_cloud(P)
-    Q_points = _get_point_cloud(Q)
+    # P_points = _get_point_cloud(P)
+    # Q_points = _get_point_cloud(Q)
+    P_points = P
+    Q_points = Q
 
-    distances = np.sum((P_points[:, np.newaxis, :] - Q_points)**2, axis=2)
-    min_distances = np.min(distances, axis=1)
+    min_distances = np.zeros(P_points.shape[0], dtype=np.float32)
+    for idx_pred in nb.prange(min_distances.shape[0]):
+        min_distances[idx_pred] = _distance_calculation(P_points[idx_pred, :], Q_points)
 
     return np.sqrt(min_distances)
 

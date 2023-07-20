@@ -19,7 +19,8 @@ setup(
     zip_safe=False,
     install_requires=[
         "numpy",
-        "bpy"
+        "bpy",
+        "numba",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
