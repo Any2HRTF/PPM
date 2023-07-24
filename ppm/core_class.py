@@ -414,9 +414,9 @@ class PPM():
         self.__parameters = self.__load_parameters_from_csv()
 
     def __set_parameters_in_blender(self):
-        self.__center_mesh_blender(
-                    reference_point=self.__reference_point,
-                )
+        # self.__center_mesh_blender(
+        #             reference_point=self.__reference_point,
+        #         )
 
         obj = bpy.data.objects["Armature"]
 
@@ -536,8 +536,8 @@ class PPM():
     def __export_ply_blender(self, filepath):
         
         bpy.ops.object.select_all(action='DESELECT')
-        bpy.data.objects['ARI_PPM_v1'].select_set(True)
-        # bpy.context.view_layer.objects.active = bpy.data.objects['ARI_PPM_v1']
+        bpy.data.objects['Mesh'].select_set(True)
+        # bpy.context.view_layer.objects.active = bpy.data.objects['Mesh']
 
         with redirect_stdout(io.StringIO()):
             bpy.ops.export_mesh.ply(
@@ -564,7 +564,7 @@ class PPM():
     def __export_stl_blender(self, filepath):
 
         bpy.ops.object.select_all(action='DESELECT')
-        bpy.data.objects['ARI_PPM_v1'].select_set(True)
+        bpy.data.objects['Mesh'].select_set(True)
 
         with redirect_stdout(io.StringIO()):
             bpy.ops.export_mesh.stl(
