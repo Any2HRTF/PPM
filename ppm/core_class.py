@@ -202,6 +202,40 @@ class PPM():
                             for axis_name, axis in type.items():
                                 self.__parameters[parameter_name][point_name][type_name][axis_name] = axis
 
+    def get_parameter_dict(self):
+        """Returns the PPM parameters as a dictionary.
+
+        Returns
+        -------
+        dict
+            The PPM parameters.
+        """
+        export_dict = {}
+
+        for parameter_name, parameter in self.__parameters.items():
+            # shape keys
+            if 'Shape_key' in parameter.keys():
+                export_dict[f'Shape_key_{parameter_name}'] = self.__parameters[parameter_name]['Shape_key']
+            else:
+                for point_name, point in parameter.items():
+                    # scale
+                    if 'Scale' in point.keys():
+                        if 'Parent' in parameter_name:
+                            for axis, axis_value in point['Scale'].items():
+                                export_dict[f'Scale_{parameter_name}-{point_name}_{axis}'] = self.__parameters[parameter_name][point_name]['Scale'][axis]
+                        else:
+                            export_dict[f'Scale_{parameter_name}-{point_name}'] = self.__parameters[parameter_name][point_name]['Scale']
+                    # rotation
+                    if 'Rotation' in point.keys():
+                        for axis, axis_value in point['Rotation'].items():
+                            export_dict[f'Rotation_{parameter_name}-{point_name}_{axis}'] = self.__parameters[parameter_name][point_name]['Rotation'][axis]
+                    # location
+                    if 'Location' in point.keys():
+                        for axis, axis_value in point['Location'].items():
+                            export_dict[f'Location_{parameter_name}-{point_name}_{axis}'] = self.__parameters[parameter_name][point_name]['Location'][axis]
+        
+
+        return export_dict
 
     def __str__(self):
 
@@ -617,32 +651,8 @@ class PPM():
             Path to the CSV file.
         """
 
-        self.__set_parameters_in_blender()
+        export_dict = self.get_parameter_dict()
 
-        export_dict = {}
-
-        for parameter_name, parameter in self.__parameters.items():
-            # shape keys
-            if 'Shape_key' in parameter.keys():
-                export_dict[f'Shape_key_{parameter_name}'] = self.__parameters[parameter_name]['Shape_key']
-            else:
-                for point_name, point in parameter.items():
-                    # scale
-                    if 'Scale' in point.keys():
-                        if 'Parent' in parameter_name:
-                            for axis, axis_value in point['Scale'].items():
-                                export_dict[f'Scale_{parameter_name}-{point_name}_{axis}'] = self.__parameters[parameter_name][point_name]['Scale'][axis]
-                        else:
-                            export_dict[f'Scale_{parameter_name}-{point_name}'] = self.__parameters[parameter_name][point_name]['Scale']
-                    # rotation
-                    if 'Rotation' in point.keys():
-                        for axis, axis_value in point['Rotation'].items():
-                            export_dict[f'Rotation_{parameter_name}-{point_name}_{axis}'] = self.__parameters[parameter_name][point_name]['Rotation'][axis]
-                    # location
-                    if 'Location' in point.keys():
-                        for axis, axis_value in point['Location'].items():
-                            export_dict[f'Location_{parameter_name}-{point_name}_{axis}'] = self.__parameters[parameter_name][point_name]['Location'][axis]
-        
         with open(filepath, 'w', newline='') as csvfile:
             for key, value in export_dict.items():
                 csvfile.write(f'{key},{value}\n')
