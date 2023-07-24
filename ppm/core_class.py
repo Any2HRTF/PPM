@@ -132,7 +132,7 @@ class PPM():
             if from_blender_file != None:
                 self.__load_blender_file(from_blender_file)
             else:
-                self.__load_blender_file(f'{CURRENT_DIR}/resources/PPM_modified_v1.blend')
+                self.__load_blender_file(f'{CURRENT_DIR}/resources/PPM.blend')
             self.__get_parameters_from_blender()
         
         # rerun fct to load parameters from csv file
@@ -344,7 +344,7 @@ class PPM():
     def __load_parameters_from_csv(self, csv_file=None) -> dict:
 
         if csv_file is None:
-            csv_file = f'{CURRENT_DIR}/resources/PPM_params_default_v1.csv'
+            csv_file = f'{CURRENT_DIR}/resources/PPM_params.csv'
 
         with open(csv_file, newline='', encoding='utf-8') as csvfile:
             reader = csv.reader(csvfile)
