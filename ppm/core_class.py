@@ -113,7 +113,6 @@ class PPM():
                  from_blender_file=None,
                  from_csv_file=None,
                  from_dict=None,
-                 ear_canal_closed=False,
                  backend='blender'):
 
         if from_blender_file != None and from_csv_file != None:
@@ -142,10 +141,6 @@ class PPM():
         
         if from_dict != None:
             self.__parameters = self.__load_parameters_from_dict(from_dict)
-
-        self.ear_canal_closed = ear_canal_closed
-        if self.ear_canal_closed:
-            self.__load_blender_file(f'{CURRENT_DIR}/resources/PPM_modified_v1_closed.blend')
         
         bpy.ops.object.mode_set(mode='OBJECT')
 
@@ -162,19 +157,6 @@ class PPM():
         os.dup(old)
         os.close(old)
         bpy.ops.object.mode_set(mode='OBJECT')
-
-    @property
-    def ear_canal_closed(self):
-        return self.__ear_canal_closed
-    
-    @ear_canal_closed.setter
-    def ear_canal_closed(self, ear_canal_closed):
-        self.__ear_canal_closed = ear_canal_closed
-
-        if self.__ear_canal_closed:
-            self.__load_blender_file(f'{CURRENT_DIR}/resources/PPM_modified_v1_closed.blend')
-        else:
-            self.__load_blender_file(f'{CURRENT_DIR}/resources/PPM_modified_v1.blend')
 
     @property
     def working_unit(self):
