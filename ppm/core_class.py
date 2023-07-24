@@ -414,9 +414,9 @@ class PPM():
         self.__parameters = self.__load_parameters_from_csv()
 
     def __set_parameters_in_blender(self):
-        # self.__center_mesh_blender(
-        #             reference_point=self.__reference_point,
-        #         )
+        self.__center_mesh_blender(
+                    reference_point=self.__reference_point,
+                )
 
         obj = bpy.data.objects["Armature"]
 
