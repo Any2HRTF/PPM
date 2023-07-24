@@ -113,6 +113,7 @@ class PPM():
                  from_blender_file=None,
                  from_csv_file=None,
                  from_dict=None,
+                 reference_point='ear_canal_entrance',
                  backend='blender'):
 
         if from_blender_file != None and from_csv_file != None:
@@ -143,6 +144,8 @@ class PPM():
             self.__parameters = self.__load_parameters_from_dict(from_dict)
         
         bpy.ops.object.mode_set(mode='OBJECT')
+        
+        self.__reference_point = reference_point
 
     def __load_blender_file(self, filepath):
         logfile = tempfile.mktemp()
@@ -157,7 +160,16 @@ class PPM():
         os.dup(old)
         os.close(old)
         bpy.ops.object.mode_set(mode='OBJECT')
+    
+    @property
+    def mesh_reference_point(self):
+        return self.__reference_point
 
+    @mesh_reference_point.setter
+    def mesh_reference_point(self, reference_point):
+
+        self.center_mesh(reference_point=reference_point)
+        
     @property
     def working_unit(self):
         return self.__working_unit
@@ -402,6 +414,10 @@ class PPM():
         self.__parameters = self.__load_parameters_from_csv()
 
     def __set_parameters_in_blender(self):
+        self.__center_mesh_blender(
+                    reference_point=self.__reference_point,
+                )
+
         obj = bpy.data.objects["Armature"]
 
         for parameter_name, parameter in self.__parameters.items():
@@ -858,3 +874,71 @@ class PPM():
             os.close(old)
         else:
             raise NotImplementedError
+        
+    def center_mesh(self, reference_point='ear_canal_entrance'):
+
+        """Centers a reference point of the PPM in the origin of the global coordinate system.
+
+        Parameters
+        ----------
+        reference_point : str
+            Reference point to be centered. Can be either 'ear_canal_entrance' or 'center_of_mass'.
+        """
+
+        self.__reference_point = reference_point
+
+    def __center_mesh_blender(self, reference_point):
+        """Centers a reference point of the PPM in the origin of the global coordinate system.
+
+        Parameters
+        ----------
+        reference_point : str
+            Reference point to be centered. Can be either 'ear_canal_entrance' or 'center_of_mass'.
+        """
+
+        # get reference point
+        if reference_point == 'ear_canal_entrance':
+            reference_point = self.__get_ear_canal_entrance_blender()
+        elif reference_point == 'center_of_mass':
+            reference_point = self.__get_center_of_mass_blender()
+        else:
+            raise ValueError("reference_point must be either 'ear_canal_entrance' or 'center_of_mass'.")
+        
+        # move object so that the reference point coincides with the center of the global coordinate system
+        obj = bpy.data.objects['Armature']
+        obj.matrix_world = mathutils.Matrix.Translation(-reference_point) @ obj.matrix_world
+        
+    def __get_ear_canal_entrance_blender(self):
+        """Returns the location of the ear canal entrance in global coordinates.
+
+        Returns
+        -------
+        ear_canal_entrance : Vector
+            Location of the ear canal entrance in global coordinates.
+        """
+        
+        vs = [vert for vert in bpy.context.object.data.vertices if bpy.context.object.vertex_groups['Ear_canal_entrance_center'].index in [i.group for i in vert.groups]]
+        local_ear_canal_entrance = vs[0].co
+
+        obj = bpy.data.objects['Mesh']
+        ear_canal_entrance = obj.matrix_world @ local_ear_canal_entrance
+
+        return ear_canal_entrance
+
+    def __get_center_of_mass_blender(self):
+        """Returns the location of the center of mass of the PPM in global coordinates.
+
+        Returns
+        -------
+        center_of_mass : Vector
+            Location of the center of mass in global coordinates.
+        """
+
+        # get center of mass of PPM template mesh bounding box
+        obj = bpy.data.objects['Mesh']
+        local_bbox_center = 1/8 * sum((mathutils.Vector(b) for b in obj.bound_box), mathutils.Vector())
+
+        # convert to world coordinates
+        center_of_mass = obj.matrix_world @ local_bbox_center
+
+        return center_of_mass
