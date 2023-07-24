@@ -113,7 +113,7 @@ class PPM():
                  from_blender_file=None,
                  from_csv_file=None,
                  from_dict=None,
-                 reference_point='ear_canal_entrance',
+                 reference_point=None,
                  backend='blender'):
 
         if from_blender_file != None and from_csv_file != None:
@@ -448,9 +448,8 @@ class PPM():
         self.__parameters = self.__load_parameters_from_csv()
 
     def __set_parameters_in_blender(self):
-        # self.__center_mesh_blender(
-        #             reference_point=self.__reference_point,
-        #         )
+        if self.__reference_point is not None:
+            self.__center_mesh_blender(reference_point=self.__reference_point)
 
         obj = bpy.data.objects["Armature"]
 
@@ -660,19 +659,19 @@ class PPM():
     def __render_blender(self,
                          file_path,
                          filename,
-                         resolution: int=256,
-                         depth: bool=True,
-                         shade_smooth: bool=True,
-                         image_comp: int=0,
-                         image_col_dep='8',
-                         cam_loc:tuple=(-10,200,5),
-                         cam_rot:tuple=(90, 0, 180),
-                         cam_loc_ref:tuple=None,
-                         depth_farthest=0,
-                         depth_nearest='cam_loc',
-                         depth_codec_exr='NONE',
-                         depth_col_dep_exr='16',
-                         depth_comp_exr=8):
+                         resolution,
+                         depth,
+                         shade_smooth,
+                         image_comp,
+                         image_col_dep,
+                         cam_loc,
+                         cam_rot,
+                         cam_loc_ref,
+                         depth_farthest,
+                         depth_nearest,
+                         depth_codec_exr,
+                         depth_col_dep_exr,
+                         depth_comp_exr):
 
         # Scene-render settings
         bpy.context.scene.render.engine = 'CYCLES' # CYCLES, BLENDER_EEVEE, WORKBENCH
@@ -868,7 +867,7 @@ class PPM():
                 shade_smooth=kwargs['shade_smooth'] if 'shade_smooth' in kwargs else True,
                 image_comp=kwargs['image_comp'] if 'image_comp' in kwargs else 0,
                 image_col_dep=kwargs['image_col_dep'] if 'image_col_dep' in kwargs else '8',
-                cam_loc=kwargs['cam_loc'] if 'cam_loc' in kwargs else (-10,200,5),
+                cam_loc=kwargs['cam_loc'] if 'cam_loc' in kwargs else (-10,170,5),
                 cam_rot=kwargs['cam_rot'] if 'cam_rot' in kwargs else (90, 0, 180),
                 cam_loc_ref=kwargs['cam_loc_ref'] if 'cam_loc_ref' in kwargs else None,
                 depth_farthest=kwargs['depth_farthest'] if 'depth_farthest' in kwargs else 0,
