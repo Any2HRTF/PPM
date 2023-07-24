@@ -414,16 +414,16 @@ class PPM():
         self.__parameters = self.__load_parameters_from_csv()
 
     def __set_parameters_in_blender(self):
-        self.__center_mesh_blender(
-                    reference_point=self.__reference_point,
-                )
+        # self.__center_mesh_blender(
+        #             reference_point=self.__reference_point,
+        #         )
 
         obj = bpy.data.objects["Armature"]
 
         for parameter_name, parameter in self.__parameters.items():
             # shape keys
             if 'Shape_key' in parameter.keys():
-                bpy.data.shape_keys['Key.002'].key_blocks[parameter_name].value = self.__parameters[parameter_name]['Shape_key']
+                bpy.data.shape_keys['Key.001'].key_blocks[parameter_name].value = self.__parameters[parameter_name]['Shape_key']
             else:
                 for point_name, point in parameter.items():
                     # scale
@@ -502,7 +502,7 @@ class PPM():
 
     def __get_point_cloud_blender(self):
 
-        obj = bpy.data.objects['ARI_PPM_v1']
+        obj = bpy.data.objects['Mesh']
         
         if bpy.ops.object.mode_set.poll():
             bpy.ops.object.mode_set(mode='OBJECT')
