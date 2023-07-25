@@ -860,11 +860,10 @@ class PPM():
             os.close(sys.stdout.fileno())
             fd = os.open(logfile, os.O_WRONLY)
 
-            if 'cam_loc' in kwargs:
-                kwargs['cam_loc'] = self.__unit_scale*np.array(kwargs['cam_loc'])
-
-            if 'cam_loc_ref' in kwargs:
-                kwargs['cam_loc_ref'] = self.__unit_scale*np.array(kwargs['cam_loc_ref'])
+            kwargs['cam_loc'] = self.__unit_scale*np.array(kwargs['cam_loc'])
+            kwargs['cam_loc_ref'] = self.__unit_scale*np.array(kwargs['cam_loc_ref'])
+            kwargs['depth_farthest'] = self.__unit_scale*kwargs['depth_farthest']
+            kwargs['depth_nearest'] = self.__unit_scale*kwargs['depth_nearest']
 
             self.__render_blender(
                 file_path=kwargs['filepath'],
@@ -874,11 +873,11 @@ class PPM():
                 shade_smooth=kwargs['shade_smooth'] if 'shade_smooth' in kwargs else True,
                 image_comp=kwargs['image_comp'] if 'image_comp' in kwargs else 0,
                 image_col_dep=kwargs['image_col_dep'] if 'image_col_dep' in kwargs else '8',
-                cam_loc=kwargs['cam_loc'] if 'cam_loc' in kwargs else (-10,170,5),
-                cam_rot=kwargs['cam_rot'] if 'cam_rot' in kwargs else (90, 0, 180),
-                cam_loc_ref=kwargs['cam_loc_ref'] if 'cam_loc_ref' in kwargs else None,
-                depth_farthest=kwargs['depth_farthest'] if 'depth_farthest' in kwargs else 0,
-                depth_nearest=kwargs['depth_nearest'] if 'depth_nearest' in kwargs else 'cam_loc',
+                cam_loc=kwargs['cam_loc'],
+                cam_rot=kwargs['cam_rot'],
+                cam_loc_ref=kwargs['cam_loc_ref'],
+                depth_farthest=kwargs['depth_farthest'],
+                depth_nearest=kwargs['depth_nearest'],
                 depth_codec_exr=kwargs['depth_codec_exr'] if 'depth_codec_exr' in kwargs else 'NONE',
                 depth_col_dep_exr=kwargs['depth_col_dep_exr'] if 'depth_col_dep_exr' in kwargs else '16',
                 depth_comp_exr=kwargs['depth_comp_exr'] if 'depth_comp_exr' in kwargs else 8
