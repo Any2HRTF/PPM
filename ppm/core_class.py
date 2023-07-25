@@ -713,8 +713,7 @@ class PPM():
 
         bpy.context.view_layer.update()
 
-        # render image and depth information, and store as png and exr files
-
+        # Render image and depth information, and store as png and exr files
         bpy.context.scene.render.use_compositing = True
         bpy.context.scene.render.filepath = file_path + '/' + filename 
 
@@ -743,12 +742,11 @@ class PPM():
         if depth:
             # Create map-range node
             tree_map = tree.nodes.new(type='CompositorNodeMapRange')
+            tree_map.use_clamp = False
 
-            # set map minimum in Blender units
-            if depth_farthest=='0': #default
-                tree_map.inputs[1].default_value = 0
-            else:
-                tree_map.inputs[1].default_value = float(depth_farthest)
+            # Set map minimum in Blender units
+            tree_map.inputs[1].default_value = float(depth_farthest)
+
             if depth_nearest=='cam_loc': # default
                 # Set map maximum to Euclidian distance of camera to origin
                 cam = bpy.data.objects['Camera']
@@ -759,10 +757,8 @@ class PPM():
                 # map maximum in Blender units
                 tree_map.inputs[2].default_value = float(depth_nearest)
 
-            # Map values between 1 (white) and zero (black)
-            # map minimum in normalised units (linear steps when using OPEN_EXR)
+            # Map values between 1 (white) and zero (black) in normalised units (linearly spaced when using OPEN_EXR)
             tree_map.inputs[3].default_value = 1
-            # map minimum in normalised units (linear steps when using OPEN_EXR)
             tree_map.inputs[4].default_value = 0
 
             # Link output of render-layers node to input of map node (exr depth)
@@ -773,7 +769,7 @@ class PPM():
             file_output_exr_depth.base_path = file_path
             file_output_exr_depth.format.file_format = "OPEN_EXR"
             file_output_exr_depth.file_slots[0].path = filename +\
-                file_output_exr_depth.format.file_format # file name with appended frame idx
+            file_output_exr_depth.format.file_format # file name with appended frame idx
             file_output_exr_depth.format.color_depth = depth_col_dep_exr
             file_output_exr_depth.format.compression = depth_comp_exr
             file_output_exr_depth.format.exr_codec = depth_codec_exr
@@ -831,7 +827,7 @@ class PPM():
             Location of the reference camera.
         depth_farthest : float
             Farthest depth value.
-        depth_nearest : str
+        depth_nearest : float or str
             Nearest depth value. Default: 'cam_loc'
         resolution : int
             Resolution of the rendered image. Default: 256
