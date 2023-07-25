@@ -863,7 +863,6 @@ class PPM():
             kwargs['cam_loc'] = self.__unit_scale*np.array(kwargs['cam_loc'])
             kwargs['cam_loc_ref'] = self.__unit_scale*np.array(kwargs['cam_loc_ref'])
             kwargs['depth_farthest'] = self.__unit_scale*kwargs['depth_farthest']
-            kwargs['depth_nearest'] = self.__unit_scale*kwargs['depth_nearest']
 
             self.__render_blender(
                 file_path=kwargs['filepath'],
@@ -874,7 +873,7 @@ class PPM():
                 image_comp=kwargs['image_comp'] if 'image_comp' in kwargs else 0,
                 image_col_dep=kwargs['image_col_dep'] if 'image_col_dep' in kwargs else '8',
                 cam_loc=kwargs['cam_loc'],
-                cam_rot=kwargs['cam_rot'],
+                cam_rot=kwargs['cam_rot'] if 'cam_rot' in kwargs else [0, 0, 0],
                 cam_loc_ref=kwargs['cam_loc_ref'],
                 depth_farthest=kwargs['depth_farthest'],
                 depth_nearest=kwargs['depth_nearest'] if 'depth_nearest' in kwargs else 'cam_loc',
