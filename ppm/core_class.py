@@ -761,9 +761,9 @@ class PPM():
 
             # Map values between 1 (white) and zero (black)
             # map minimum in normalised units (linear steps when using OPEN_EXR)
-            tree_map.inputs[3].default_value = 0
+            tree_map.inputs[3].default_value = 1
             # map minimum in normalised units (linear steps when using OPEN_EXR)
-            tree_map.inputs[4].default_value = 1
+            tree_map.inputs[4].default_value = 0
 
             # Link output of render-layers node to input of map node (exr depth)
             links.new(render_layer.outputs['Depth'], tree_map.inputs['Value'])
