@@ -824,15 +824,15 @@ class PPM():
         filename : str
             Name of the rendered image.
         resolution : int
-            Resolution of the rendered image.
+            Resolution of the rendered image. Default: 256
         depth : bool
-            Whether to render the depth map.
+            Whether to render the depth map. Default: False
         shade_smooth : bool
-            Whether to render the image with smooth shading.
+            Whether to render the image with smooth shading. Default: True
         image_comp : int
-            Compression of the rendered image.
-        image_col_dep : int
-            Color depth of the rendered image.
+            Compression of the rendered image. Default: 0
+        image_col_dep : str
+            Color depth of the rendered image. Default: '8'
         cam_loc : list
             Location of the camera.
         cam_rot : list
@@ -844,11 +844,11 @@ class PPM():
         depth_nearest : float
             Nearest depth value.
         depth_codec_exr : str
-            Codec of the depth map.
+            Codec of the depth map. Default: 'NONE'
         depth_col_dep_exr : str
-            Color depth of the depth map.
+            Color depth of the depth map. Default: '16'
         depth_comp_exr : str
-            Compression of the depth map.
+            Compression of the depth map. Default: 8
         """
         if self.backend == 'blender':
             self.__set_parameters_in_blender()
@@ -892,25 +892,9 @@ class PPM():
         
     def center_mesh(self, reference_point='ear_canal_entrance'):
 
-        """Centers a reference point of the PPM in the origin of the global coordinate system.
-
-        Parameters
-        ----------
-        reference_point : str
-            Reference point to be centered. Can be either 'ear_canal_entrance' or 'center_of_mass'.
-        """
-
         self.__reference_point = reference_point
 
     def __center_mesh_blender(self, reference_point):
-        """Centers a reference point of the PPM in the origin of the global coordinate system.
-
-        Parameters
-        ----------
-        reference_point : str
-            Reference point to be centered. Can be either 'ear_canal_entrance' or 'center_of_mass'.
-        """
-
         # get reference point
         if reference_point == 'ear_canal_entrance':
             reference_point = self.__get_ear_canal_entrance_blender()
@@ -924,13 +908,6 @@ class PPM():
         obj.matrix_world = mathutils.Matrix.Translation(-reference_point) @ obj.matrix_world
         
     def __get_ear_canal_entrance_blender(self):
-        """Returns the location of the ear canal entrance in global coordinates.
-
-        Returns
-        -------
-        ear_canal_entrance : Vector
-            Location of the ear canal entrance in global coordinates.
-        """
         
         vs = [vert for vert in bpy.context.object.data.vertices if bpy.context.object.vertex_groups['Ear_canal_entrance_center'].index in [i.group for i in vert.groups]]
         local_ear_canal_entrance = vs[0].co
@@ -941,13 +918,6 @@ class PPM():
         return ear_canal_entrance
 
     def __get_center_of_mass_blender(self):
-        """Returns the location of the center of mass of the PPM in global coordinates.
-
-        Returns
-        -------
-        center_of_mass : Vector
-            Location of the center of mass in global coordinates.
-        """
 
         # get center of mass of PPM template mesh bounding box
         obj = bpy.data.objects['Mesh']
