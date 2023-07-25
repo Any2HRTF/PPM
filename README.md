@@ -4,13 +4,11 @@ Python module to programmatically interface with the parametric pinna model (PPM
 
 ## Installation
 
-Get the pre-built Python wheel from the [releases](https://github.com/Any2HRTF/PPM/releases) page (vX.x.x) and install it using pip:
+Get the pre-built Python wheel from the [releases](https://github.com/Any2HRTF/PPM/releases/latest) page and install it using pip:
 
 ```bash
 pip install /path/to/wheel.whl
 ```
-
-Alternatively, you could build the module from source.
 
 ## Usage
 
@@ -24,14 +22,6 @@ ppm = PPM()
 ```
 
 Alternatively, the PPM can be instantiated from a 'blend' file, 'csv' file, or a Python dictionary containing the PPM parameters in the same format as the 'csv' file.
-
-### Template mesh
-
-Set the Boolean property 'ear_canal_closed' to load the PPM template mesh with open (False) or closed (True) ear canal.
-
-```python
-ppm.ear_canal_closed = True
-```
 
 ### Centering
 
@@ -341,7 +331,7 @@ Crus_superius_anthelicis:
 
 </details>
 
-To get the currently set parameters, use the `print` function.
+To see the currently set parameters, use the `print` function.
 ```python
 print(ppm)
 print(ppm.parameters['Helix_up']['Start']['Location'])
