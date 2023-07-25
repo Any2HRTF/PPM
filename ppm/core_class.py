@@ -831,8 +831,8 @@ class PPM():
             Location of the reference camera.
         depth_farthest : float
             Farthest depth value.
-        depth_nearest : float
-            Nearest depth value.
+        depth_nearest : str
+            Nearest depth value. Default: 'cam_loc'
         resolution : int
             Resolution of the rendered image. Default: 256
         depth : bool
@@ -877,7 +877,7 @@ class PPM():
                 cam_rot=kwargs['cam_rot'],
                 cam_loc_ref=kwargs['cam_loc_ref'],
                 depth_farthest=kwargs['depth_farthest'],
-                depth_nearest=kwargs['depth_nearest'],
+                depth_nearest=kwargs['depth_nearest'] if 'depth_nearest' in kwargs else 'cam_loc',
                 depth_codec_exr=kwargs['depth_codec_exr'] if 'depth_codec_exr' in kwargs else 'NONE',
                 depth_col_dep_exr=kwargs['depth_col_dep_exr'] if 'depth_col_dep_exr' in kwargs else '16',
                 depth_comp_exr=kwargs['depth_comp_exr'] if 'depth_comp_exr' in kwargs else 8
