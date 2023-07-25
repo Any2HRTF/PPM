@@ -823,16 +823,6 @@ class PPM():
             Path to the rendered image.
         filename : str
             Name of the rendered image.
-        resolution : int
-            Resolution of the rendered image. Default: 256
-        depth : bool
-            Whether to render the depth map. Default: False
-        shade_smooth : bool
-            Whether to render the image with smooth shading. Default: True
-        image_comp : int
-            Compression of the rendered image. Default: 0
-        image_col_dep : str
-            Color depth of the rendered image. Default: '8'
         cam_loc : list
             Location of the camera.
         cam_rot : list
@@ -843,6 +833,16 @@ class PPM():
             Farthest depth value.
         depth_nearest : float
             Nearest depth value.
+        resolution : int
+            Resolution of the rendered image. Default: 256
+        depth : bool
+            Whether to render the depth map. Default: False
+        shade_smooth : bool
+            Whether to render the image with smooth shading. Default: True
+        image_comp : int
+            Compression of the rendered image. Default: 0
+        image_col_dep : str
+            Color depth of the rendered image. Default: '8'
         depth_codec_exr : str
             Codec of the depth map. Default: 'NONE'
         depth_col_dep_exr : str
