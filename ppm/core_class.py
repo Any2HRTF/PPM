@@ -437,7 +437,7 @@ class PPM():
         for parameter_name, parameter in self.__parameters.items():
             # shape keys
             if 'Shape_key' in parameter.keys():
-                bpy.data.shape_keys['Key.001'].key_blocks[parameter_name].value = self.__parameters[parameter_name]['Shape_key']
+                bpy.data.shape_keys['Key'].key_blocks[parameter_name].value = self.__parameters[parameter_name]['Shape_key']
             else:
                 for point_name, point in parameter.items():
                     # scale
@@ -479,7 +479,7 @@ class PPM():
         for parameter_name, parameter in self.__parameters.items():
             # shape keys
             if 'Shape_key' in parameter.keys():
-                self.__parameters[parameter_name]['Shape_key'] = bpy.data.shape_keys['Key.001'].key_blocks[parameter_name].value
+                self.__parameters[parameter_name]['Shape_key'] = bpy.data.shape_keys['Key'].key_blocks[parameter_name].value
             else:
                 for point_name, point in parameter.items():
                     # scale
