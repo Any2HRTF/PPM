@@ -725,7 +725,7 @@ class PPM():
             tree_map.use_clamp = False
 
             # Set map minimum in Blender units
-            tree_map.inputs[1].default_value = float(depth_farthest)
+            tree_map.inputs[1].default_value = float(depth_nearest)
 
             if depth_nearest=='camera_location': # default
                 # Set map maximum to Euclidian distance of camera to origin
@@ -735,7 +735,7 @@ class PPM():
                 tree_map.inputs[2].default_value = distance_l2
             else:
                 # map maximum in Blender units
-                tree_map.inputs[2].default_value = float(depth_nearest)
+                tree_map.inputs[2].default_value = float(depth_farthest)
 
             # Map values between 1 (white) and zero (black) in normalised units (linearly spaced when using OPEN_EXR)
             tree_map.inputs[3].default_value = 1
