@@ -147,14 +147,14 @@ class PPM():
         
         self.__reference_point = None
 
-    def __load_blender_file(self, filepath):
+    def __load_blender_file(self, file_path):
         logfile = tempfile.mktemp()
         open(logfile, 'a').close()
         old = os.dup(sys.stdout.fileno())
         sys.stdout.flush()
         os.close(sys.stdout.fileno())
         fd = os.open(logfile, os.O_WRONLY)
-        bpy.ops.wm.open_mainfile(filepath=filepath)
+        bpy.ops.wm.open_mainfile(filepath=file_path)
         # disable output redirection
         os.close(fd)
         os.dup(old)
@@ -567,7 +567,7 @@ class PPM():
         else:
             raise NotImplementedError
 
-    def __export_ply_blender(self, filepath):
+    def __export_ply_blender(self, file_path):
         
         bpy.ops.object.select_all(action='DESELECT')
         bpy.data.objects['Mesh'].select_set(True)
@@ -575,63 +575,63 @@ class PPM():
 
         with redirect_stdout(io.StringIO()):
             bpy.ops.export_mesh.ply(
-                filepath=filepath,
+                filepath=file_path,
                 use_selection=True
             )
 
-    def export_ply(self, filepath):
+    def export_ply(self, file_path):
         """Exports the PPM as a PLY file.
 
         Parameters
         ----------
-        filepath : str
+        file_path : str
             Path to the PLY file.
         """
-        if filepath[-4:] != '.ply':
-            filepath += '.ply'
+        if file_path[-4:] != '.ply':
+            file_path += '.ply'
         if self.backend == 'blender':
             self.__set_parameters_in_blender()
-            self.__export_ply_blender(filepath)
+            self.__export_ply_blender(file_path)
         else:
             raise NotImplementedError
 
-    def __export_stl_blender(self, filepath):
+    def __export_stl_blender(self, file_path):
 
         bpy.ops.object.select_all(action='DESELECT')
         bpy.data.objects['Mesh'].select_set(True)
 
         with redirect_stdout(io.StringIO()):
             bpy.ops.export_mesh.stl(
-                filepath=filepath,
+                filepath=file_path,
                 use_selection=True
             )
 
-    def export_stl(self, filepath):
+    def export_stl(self, file_path):
         """Exports the PPM as a STL file.
 
         Parameters
         ----------
-        filepath : str
+        file_path : str
             Path to the STL file.
         """
-        if filepath[-4:] != '.stl':
-            filepath += '.stl'
+        if file_path[-4:] != '.stl':
+            file_path += '.stl'
         if self.backend == 'blender':
             self.__set_parameters_in_blender()
-            self.__export_stl_blender(filepath)
+            self.__export_stl_blender(file_path)
         else:
             raise NotImplementedError
        
-    def __export_blend_blender(self, filepath):
+    def __export_blend_blender(self, file_path):
 
-        bpy.ops.wm.save_as_mainfile(filepath=filepath)
+        bpy.ops.wm.save_as_mainfile(filepath=file_path)
 
-    def export_blend(self, filepath:str):
+    def export_blend(self, file_path:str):
         """Exports the PPM as a blend file.
 
         Parameters
         ----------
-        filepath : str
+        file_path : str
             Path to the blend file.(NOTE: has to be an absolute path)
         """
 
@@ -639,88 +639,88 @@ class PPM():
             raise NotImplementedError
 
         self.__set_parameters_in_blender()
-        self.__export_blend_blender(filepath=filepath)
+        self.__export_blend_blender(file_path=file_path)
 
      
-    def export_csv(self, filepath):
+    def export_csv(self, file_path):
         """Exports the PPM as a CSV file.
 
         Parameters
         ----------
-        filepath : str
+        file_path : str
             Path to the CSV file.
         """
 
         export_dict = self.get_parameter_dict()
 
-        with open(filepath, 'w', newline='') as csvfile:
+        with open(file_path, 'w', newline='') as csvfile:
             for key, value in export_dict.items():
                 csvfile.write(f'{key},{value}\n')
 
     def __render_blender(self,
                          file_path,
-                         filename,
+                         file_name,
                          resolution,
                          depth,
-                         shade_smooth,
-                         image_comp,
-                         image_col_dep,
-                         cam_loc,
-                         cam_rot,
-                         cam_loc_ref,
+                         smooth_shading,
+                         image_compression,
+                         image_color_depth,
+                         camera_location,
+                         camera_rotation,
+                         camera_location_reference,
                          depth_farthest,
                          depth_nearest,
                          depth_codec_exr,
-                         depth_col_dep_exr,
-                         depth_comp_exr):
+                         depth_color_depth_exr,
+                         depth_compression_exr):
 
         # Scene-render settings
         bpy.context.scene.render.engine = 'CYCLES' # CYCLES, BLENDER_EEVEE, WORKBENCH
         bpy.context.view_layer.cycles.denoising_store_passes = True
 
-        cam = bpy.data.objects['Camera']
-        cam.rotation_mode = 'XYZ'
-        bpy.context.scene.camera = cam
+        camera = bpy.data.objects['Camera']
+        camera.rotation_mode = 'XYZ'
+        bpy.context.scene.camera = camera
 
         # Optionally smooth mesh faces for more pleasing rendering results
-        if shade_smooth:
+        if smooth_shading:
             mesh = bpy.context.object.data
             for polygon in mesh.polygons:
                 polygon.use_smooth = True
 
-        cam.location = mathutils.Vector((float(cam_loc[0]),
-                                            float(cam_loc[1]),
-                                            float(cam_loc[2])))
+        camera.location = mathutils.Vector((float(camera_location[0]),
+                                            float(camera_location[1]),
+                                            float(camera_location[2])))
         bpy.context.view_layer.update()
 
-        cam.rotation_euler = mathutils.Euler((
-                                    math.radians(float(cam_rot[0])),
-                                    math.radians(float(cam_rot[1])),
-                                    math.radians(float(cam_rot[2]))),
-                                    cam.rotation_mode
+        camera.rotation_euler = mathutils.Euler((
+                                    math.radians(float(camera_rotation[0])),
+                                    math.radians(float(camera_rotation[1])),
+                                    math.radians(float(camera_rotation[2]))),
+                                    camera.rotation_mode
                                 )
 
-        if cam_loc_ref is not None:
+        if camera_location_reference is not None:
 
-            cam_loc_mtx = cam.matrix_world.to_translation()
-            cam_rot = mathutils.Vector((float(cam_loc_ref[0]),
-                                        float(cam_loc_ref[1]),
-                                        float(cam_loc_ref[2]))) - cam_loc_mtx
+            camera_location_matrix = camera.matrix_world.to_translation()
+            camera_rotation = mathutils.Vector((float(camera_location_reference[0]),
+                                        float(camera_location_reference[1]),
+                                        float(camera_location_reference[2]))) - camera_location_matrix
 
-            cam_rot_quat = cam_rot.to_track_quat('-Z','Y')
+            camera_rotation_quaternion = camera_rotation.to_track_quat('-Z','Y')
 
-            cam.rotation_euler = cam_rot_quat.to_euler()
+            camera.rotation_euler = camera_rotation_quaternion.to_euler()
 
         bpy.context.view_layer.update()
 
         # Render image and depth information, and store as png and exr files
         bpy.context.scene.render.use_compositing = True
-        bpy.context.scene.render.filepath = file_path + '/' + filename 
+        bpy.context.scene.render.filepath = file_path + '/' + file_name 
 
         bpy.data.scenes["Scene"].render.resolution_x = resolution
         bpy.data.scenes["Scene"].render.resolution_y = resolution
-        bpy.data.scenes["Scene"].render.image_settings.color_depth = image_col_dep
-        bpy.data.scenes["Scene"].render.image_settings.compression = image_comp
+        bpy.data.scenes["Scene"].render.image_settings.color_depth = image_color_depth
+        bpy.data.scenes["Scene"].render.image_settings.compression = image_compression
         bpy.data.scenes["Scene"].render.image_settings.color_mode = 'BW'
 
         # Enable nodes
@@ -747,12 +747,12 @@ class PPM():
             # Set map minimum in Blender units
             tree_map.inputs[1].default_value = float(depth_farthest)
 
-            if depth_nearest=='cam_loc': # default
+            if depth_nearest=='camera_location': # default
                 # Set map maximum to Euclidian distance of camera to origin
-                cam = bpy.data.objects['Camera']
-                dist_l2 = math.sqrt(cam.location.x**2 + cam.location.y**2 + cam.location.z**2)
+                camera = bpy.data.objects['Camera']
+                distance_l2 = math.sqrt(camera.location.x**2 + camera.location.y**2 + camera.location.z**2)
                 # map maximum in Blender units
-                tree_map.inputs[2].default_value = dist_l2
+                tree_map.inputs[2].default_value = distance_l2
             else:
                 # map maximum in Blender units
                 tree_map.inputs[2].default_value = float(depth_nearest)
@@ -765,17 +765,17 @@ class PPM():
             links.new(render_layer.outputs['Depth'], tree_map.inputs['Value'])
 
             # Create a file-output node, set the path, and file format (exr depth)
-            file_output_exr_depth = tree.nodes.new(type='CompositorNodeOutputFile')
-            file_output_exr_depth.base_path = file_path
-            file_output_exr_depth.format.file_format = "OPEN_EXR"
-            file_output_exr_depth.file_slots[0].path = filename +\
-            file_output_exr_depth.format.file_format # file name with appended frame idx
-            file_output_exr_depth.format.color_depth = depth_col_dep_exr
-            file_output_exr_depth.format.compression = depth_comp_exr
-            file_output_exr_depth.format.exr_codec = depth_codec_exr
+            file_output_exr = tree.nodes.new(type='CompositorNodeOutputFile')
+            file_output_exr.base_path = file_path
+            file_output_exr.format.file_format = "OPEN_EXR"
+            file_output_exr.file_slots[0].path = file_name +\
+            file_output_exr.format.file_format # file name with appended frame idx
+            file_output_exr.format.color_depth = depth_color_depth_exr
+            file_output_exr.format.compression = depth_compression_exr
+            file_output_exr.format.exr_codec = depth_codec_exr
 
             # Link output of map node to input of compositor-output node (exr depth)
-            links.new(tree_map.outputs['Value'], file_output_exr_depth.inputs['Image'])
+            links.new(tree_map.outputs['Value'], file_output_exr.inputs['Image'])
 
         links.new(render_layer.outputs['Image'], denoise.inputs['Image'])
         links.new(render_layer.outputs['Denoising Normal'], denoise.inputs['Normal'])
@@ -785,9 +785,9 @@ class PPM():
         file_output_png = tree.nodes.new(type='CompositorNodeOutputFile')
         file_output_png.base_path = file_path
         file_output_png.format.file_format = "PNG"
-        file_output_png.file_slots[0].path = filename
-        file_output_png.format.color_depth = image_col_dep
-        file_output_png.format.compression = int(image_comp)
+        file_output_png.file_slots[0].path = file_name
+        file_output_png.format.color_depth = image_color_depth
+        file_output_png.format.compression = int(image_compression)
 
         # Link denoise-node output with compositor-output node (png)
         links.new(denoise.outputs['Image'], file_output_png.inputs['Image'])
@@ -798,15 +798,15 @@ class PPM():
 
         if depth:
             for file in os.listdir(file_path):
-                if file.startswith(filename) and file.endswith('.exr'):
+                if file.startswith(file_name) and file.endswith('.exr'):
                     os.rename(file_path + f'/{file}', \
-                        file_path + f'/{filename}.exr')
+                        file_path + f'/{file_name}.exr')
                     break
         
         for file in os.listdir(file_path):
-            if file.startswith(filename) and file.endswith('.png'):
+            if file.startswith(file_name) and file.endswith('.png'):
                 os.rename(file_path + f'/{file}', \
-                    file_path+ f'/{filename}.png')
+                    file_path+ f'/{file_name}.png')
                 break
 
 
@@ -815,35 +815,35 @@ class PPM():
 
         Parameters
         ----------
-        filepath : str
+        file_path : str
             Path to the rendered image.
-        filename : str
+        file_name : str
             Name of the rendered image.
-        cam_loc : list
+        camera_location : list
             Location of the camera.
-        cam_rot : list
+        camera_rotation : list
             Rotation of the camera.
-        cam_loc_ref : list
+        camera_location_reference : list
             Location of the reference camera.
         depth_farthest : float
             Farthest depth value.
         depth_nearest : float or str
-            Nearest depth value. Default: 'cam_loc'
+            Nearest depth value. Default: 'camera_location'
         resolution : int
             Resolution of the rendered image. Default: 256
         depth : bool
             Whether to render the depth map. Default: False
-        shade_smooth : bool
+        smooth_shading : bool
             Whether to render the image with smooth shading. Default: True
-        image_comp : int
+        image_compression : int
             Compression of the rendered image. Default: 0
-        image_col_dep : str
+        image_color_depth : str
             Color depth of the rendered image. Default: '8'
         depth_codec_exr : str
             Codec of the depth map. Default: 'NONE'
-        depth_col_dep_exr : str
+        depth_color_depth_exr : str
             Color depth of the depth map. Default: '16'
-        depth_comp_exr : str
+        depth_compression_exr : str
             Compression of the depth map. Default: 8
         """
         if self.backend == 'blender':
@@ -856,26 +856,26 @@ class PPM():
             os.close(sys.stdout.fileno())
             fd = os.open(logfile, os.O_WRONLY)
 
-            kwargs['cam_loc'] = self.__unit_scale*np.array(kwargs['cam_loc'])
-            kwargs['cam_loc_ref'] = self.__unit_scale*np.array(kwargs['cam_loc_ref'])
+            kwargs['camera_location'] = self.__unit_scale*np.array(kwargs['camera_location'])
+            kwargs['camera_location_reference'] = self.__unit_scale*np.array(kwargs['camera_location_reference'])
             kwargs['depth_farthest'] = self.__unit_scale*kwargs['depth_farthest']
 
             self.__render_blender(
-                file_path=kwargs['filepath'],
-                filename=kwargs['filename'],
-                resolution=kwargs['resolution'] if 'resolution' in kwargs else 256,
-                depth=kwargs['depth'] if 'depth' in kwargs else False,
-                shade_smooth=kwargs['shade_smooth'] if 'shade_smooth' in kwargs else True,
-                image_comp=kwargs['image_comp'] if 'image_comp' in kwargs else 0,
-                image_col_dep=kwargs['image_col_dep'] if 'image_col_dep' in kwargs else '8',
-                cam_loc=kwargs['cam_loc'],
-                cam_rot=kwargs['cam_rot'] if 'cam_rot' in kwargs else [0, 0, 0],
-                cam_loc_ref=kwargs['cam_loc_ref'],
-                depth_farthest=kwargs['depth_farthest'],
-                depth_nearest=kwargs['depth_nearest'] if 'depth_nearest' in kwargs else 'cam_loc',
-                depth_codec_exr=kwargs['depth_codec_exr'] if 'depth_codec_exr' in kwargs else 'NONE',
-                depth_col_dep_exr=kwargs['depth_col_dep_exr'] if 'depth_col_dep_exr' in kwargs else '16',
-                depth_comp_exr=kwargs['depth_comp_exr'] if 'depth_comp_exr' in kwargs else 8
+                file_path = kwargs['file_path'],
+                file_name = kwargs['file_name'],
+                resolution = kwargs['resolution'] if 'resolution' in kwargs else 256,
+                depth = kwargs['depth'] if 'depth' in kwargs else False,
+                smooth_shading = kwargs['smooth_shading'] if 'smooth_shading' in kwargs else True,
+                image_compression = kwargs['image_compression'] if 'image_compression' in kwargs else 0,
+                image_color_depth = kwargs['image_color_depth'] if 'image_color_depth' in kwargs else '8',
+                camera_location = kwargs['camera_location'],
+                camera_rotation = kwargs['camera_rotation'] if 'camera_rotation' in kwargs else [0, 0, 0],
+                camera_location_reference = kwargs['camera_location_reference'],
+                depth_farthest = kwargs['depth_farthest'],
+                depth_nearest = kwargs['depth_nearest'] if 'depth_nearest' in kwargs else 'camera_location',
+                depth_codec_exr = kwargs['depth_codec_exr'] if 'depth_codec_exr' in kwargs else 'NONE',
+                depth_color_depth_exr = kwargs['depth_color_depth_exr'] if 'depth_color_depth_exr' in kwargs else '16',
+                depth_compression_exr = kwargs['depth_compression_exr'] if 'depth_compression_exr' in kwargs else 8
             )
 
             # disable output redirection
@@ -916,9 +916,9 @@ class PPM():
 
         # get center of mass of PPM template mesh bounding box
         obj = bpy.data.objects['Mesh']
-        local_bbox_center = 1/8 * sum((mathutils.Vector(b) for b in obj.bound_box), mathutils.Vector())
+        local_bounding_box_center = 1/8 * sum((mathutils.Vector(b) for b in obj.bound_box), mathutils.Vector())
 
         # convert to world coordinates
-        center_of_mass = obj.matrix_world @ local_bbox_center
+        center_of_mass = obj.matrix_world @ local_bounding_box_center
 
         return center_of_mass
