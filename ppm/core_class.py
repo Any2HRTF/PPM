@@ -717,8 +717,8 @@ class PPM():
         bpy.context.scene.render.use_compositing = True
         bpy.context.scene.render.filepath = file_path + '/' + file_name 
 
-        bpy.data.scenes["Scene"].render.resolution_x = resolution
-        bpy.data.scenes["Scene"].render.resolution_y = resolution
+        bpy.data.scenes["Scene"].render.resolution_x = int(resolution)
+        bpy.data.scenes["Scene"].render.resolution_y = int(resolution)
         bpy.data.scenes["Scene"].render.image_settings.color_depth = image_color_depth
         bpy.data.scenes["Scene"].render.image_settings.compression = int(image_compression)
         bpy.data.scenes["Scene"].render.image_settings.color_mode = 'BW'
@@ -838,7 +838,7 @@ class PPM():
         image_compression : int
             Compression of the rendered image. Default: 0
         image_color_depth : str
-            Color depth of the rendered image. Default: '8'
+            Color depth of the rendered image. Default: '16'
         depth_codec_exr : str
             Codec of the depth map. Default: 'NONE'
         depth_color_depth_exr : str
