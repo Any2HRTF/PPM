@@ -717,10 +717,10 @@ class PPM():
         bpy.context.scene.render.use_compositing = True
         bpy.context.scene.render.filepath = file_path + '/' + file_name 
 
-        bpy.data.scenes["Scene"].render.resolution_x = int(resolution)
-        bpy.data.scenes["Scene"].render.resolution_y = int(resolution)
+        bpy.data.scenes["Scene"].render.resolution_x = resolution
+        bpy.data.scenes["Scene"].render.resolution_y = resolution
         bpy.data.scenes["Scene"].render.image_settings.color_depth = image_color_depth
-        bpy.data.scenes["Scene"].render.image_settings.compression = int(image_compression)
+        bpy.data.scenes["Scene"].render.image_settings.compression = image_compression
         bpy.data.scenes["Scene"].render.image_settings.color_mode = 'BW'
 
         # Enable nodes
@@ -771,7 +771,7 @@ class PPM():
             file_output_exr.file_slots[0].path = file_name +\
             file_output_exr.format.file_format # file name with appended frame idx
             file_output_exr.format.color_depth = depth_color_depth_exr
-            file_output_exr.format.compression = int(depth_compression_exr)
+            file_output_exr.format.compression = depth_compression_exr
             file_output_exr.format.exr_codec = depth_codec_exr
 
             # Link output of map node to input of compositor-output node (exr depth)
@@ -836,7 +836,7 @@ class PPM():
         image_compression : int
             Compression of the rendered image. Default: 0
         image_color_depth : str
-            Color depth of the rendered image. Default: '16'
+            Color depth of the rendered image. Default: '8'
         depth_codec_exr : str
             Codec of the depth map. Default: 'NONE'
         depth_color_depth_exr : str
@@ -865,7 +865,7 @@ class PPM():
                 depth = kwargs['depth'] if 'depth' in kwargs else False,
                 smooth_shading = kwargs['smooth_shading'] if 'smooth_shading' in kwargs else True,
                 image_compression = kwargs['image_compression'] if 'image_compression' in kwargs else 0,
-                image_color_depth = kwargs['image_color_depth'] if 'image_color_depth' in kwargs else '16',
+                image_color_depth = kwargs['image_color_depth'] if 'image_color_depth' in kwargs else '8',
                 camera_location = kwargs['camera_location'],
                 camera_rotation = kwargs['camera_rotation'] if 'camera_rotation' in kwargs else [0, 0, 0],
                 camera_location_reference = kwargs['camera_location_reference'],
