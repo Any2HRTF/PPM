@@ -799,15 +799,13 @@ class PPM():
         if depth:
             for file in os.listdir(file_path):
                 if file.startswith(file_name) and file.endswith('.exr'):
-                    os.rename(file_path + f'/{file}', \
+                    os.replace(file_path + f'/{file}', \
                         file_path + f'/{file_name}.exr')
-                    break
         
         for file in os.listdir(file_path):
             if file.startswith(file_name) and file.endswith('.png'):
-                os.rename(file_path + f'/{file}', \
+                os.replace(file_path + f'/{file}', \
                     file_path+ f'/{file_name}.png')
-                break
 
 
     def render(self, *args, **kwargs):
