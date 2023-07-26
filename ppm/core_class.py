@@ -847,6 +847,7 @@ class PPM():
             if 'depth_nearest' not in kwargs.keys():
                 kwargs['depth_nearest'] = np.sqrt(kwargs['camera_location'][0]**2 + kwargs['camera_location'][1]**2 + kwargs['camera_location'][2]**2)
 
+
             self.__render_blender(
                 file_path = kwargs['file_path'],
                 file_name = kwargs['file_name'],
@@ -856,10 +857,10 @@ class PPM():
                 image_compression = kwargs['image_compression'] if 'image_compression' in kwargs else 0,
                 image_color_depth = kwargs['image_color_depth'] if 'image_color_depth' in kwargs else '8',
                 camera_location = kwargs['camera_location'],
-                camera_rotation = kwargs['camera_rotation'] if 'camera_rotation' in kwargs else [90, 0, 180],
+                camera_rotation = kwargs['camera_rotation'] if 'camera_rotation' in kwargs else [0, 0, 0],
                 camera_location_reference = kwargs['camera_location_reference'],
                 depth_farthest = kwargs['depth_farthest'],
-                depth_nearest = kwargs['depth_nearest'],
+                depth_nearest = kwargs['depth_nearest'] if 'depth_nearest' in kwargs else 'camera_location',
                 depth_codec_exr = kwargs['depth_codec_exr'] if 'depth_codec_exr' in kwargs else 'NONE',
                 depth_color_depth_exr = kwargs['depth_color_depth_exr'] if 'depth_color_depth_exr' in kwargs else '16',
                 depth_compression_exr = kwargs['depth_compression_exr'] if 'depth_compression_exr' in kwargs else 0
@@ -871,7 +872,6 @@ class PPM():
             os.close(old)
         else:
             raise NotImplementedError
-
         
     def center_mesh(self, reference_point='ear_canal_entrance'):
 
