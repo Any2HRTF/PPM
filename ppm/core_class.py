@@ -805,9 +805,9 @@ class PPM():
         camera_location_reference : list or None
             Location of the reference camera.
         depth_farthest : float
-            Farthest depth value. Default 0.
+            Farthest depth value. Default is 1.25 times the radius of the camera.
         depth_nearest : float
-            Farthest depth value. Default the radius of the camera.
+            Farthest depth value. Default 0.
         resolution : int
             Resolution of the rendered image. Default: 256
         depth : bool
@@ -842,11 +842,13 @@ class PPM():
                 kwargs['camera_location_reference'] = None
 
             if 'depth_farthest' not in kwargs.keys():
-                kwargs['depth_farthest'] = 0
+                kwargs['depth_farthest'] = 1.25 * np.sqrt(kwargs['camera_location'][0]**2 + kwargs['camera_location'][1]**2 + kwargs['camera_location'][2]**2)
 
             if 'depth_nearest' not in kwargs.keys():
-                kwargs['depth_nearest'] = np.sqrt(kwargs['camera_location'][0]**2 + kwargs['camera_location'][1]**2 + kwargs['camera_location'][2]**2)
+                kwargs['depth_nearest'] = 0
 
+            if 'camera_rotation' not in kwargs.keys():
+                kwargs['camera_rotation'] = [90, 0, 180]
 
             self.__render_blender(
                 file_path = kwargs['file_path'],
@@ -857,7 +859,7 @@ class PPM():
                 image_compression = kwargs['image_compression'] if 'image_compression' in kwargs else 0,
                 image_color_depth = kwargs['image_color_depth'] if 'image_color_depth' in kwargs else '8',
                 camera_location = kwargs['camera_location'],
-                camera_rotation = kwargs['camera_rotation'] if 'camera_rotation' in kwargs else [0, 0, 0],
+                camera_rotation = kwargs['camera_rotation'],
                 camera_location_reference = kwargs['camera_location_reference'],
                 depth_farthest = kwargs['depth_farthest'],
                 depth_nearest = kwargs['depth_nearest'] if 'depth_nearest' in kwargs else 'camera_location',
