@@ -808,44 +808,40 @@ class PPM():
                     file_path+ f'/{file_name}.png')
 
 
- def render(self, *args, **kwargs):
+    def render(self, *args, **kwargs):
         """Renders the PPM.
 
         Parameters
         ----------
-        file_path : str
+        filepath : str
             Path to the rendered image.
-        file_name : str
+        filename : str
             Name of the rendered image.
-        camera_location : tuple ([int], str or None)
-            Location of the camera. Default: ([-10, 170, 5], 'mm')
-            If str not given the unit will be infered from the unit of the PPM.
-        camera_rotation : list
-            Rotation of the camera. Default: [0, 0, 0]
-        camera_location_reference : tuple ([int], str or None) or None
+        cam_loc : list
+            Location of the camera.
+        cam_rot : list
+            Rotation of the camera.
+        cam_loc_ref : list
             Location of the reference camera.
-            If str not given the unit will be infered from the unit of the PPM.
-        depth_farthest : tuple (float, str or None)
-            Farthest depth value. Default 0.
-            If str not given the unit will be infered from the unit of the PPM.
-        depth_nearest : tuple (float, str or None)
-            Farthest depth value. Default the radius of the camera.
-            If str not given the unit will be infered from the unit of the PPM.
+        depth_farthest : float
+            Farthest depth value.
+        depth_nearest : float or str
+            Nearest depth value. Default: 'cam_loc'
         resolution : int
             Resolution of the rendered image. Default: 256
         depth : bool
             Whether to render the depth map. Default: False
-        smooth_shading : bool
+        shade_smooth : bool
             Whether to render the image with smooth shading. Default: True
-        image_compression : int
+        image_comp : int
             Compression of the rendered image. Default: 0
-        image_color_depth : str
+        image_col_dep : str
             Color depth of the rendered image. Default: '8'
         depth_codec_exr : str
             Codec of the depth map. Default: 'NONE'
-        depth_color_depth_exr : str
+        depth_col_dep_exr : str
             Color depth of the depth map. Default: '16'
-        depth_compression_exr : str
+        depth_comp_exr : str
             Compression of the depth map. Default: 8
         """
         if self.backend == 'blender':
@@ -858,66 +854,9 @@ class PPM():
             os.close(sys.stdout.fileno())
             fd = os.open(logfile, os.O_WRONLY)
 
-            if 'camera_location' in kwargs.keys():
-                if type(kwargs['camera_location']) is not tuple:
-                    kwargs['camera_location'] = self.__unit_scale*np.array(kwargs['camera_location'])
-                else:
-                    if kwargs['camera_location'][1] == 'mm':
-                        kwargs['camera_location'] = np.array(kwargs['camera_location'][0])
-                    elif kwargs['camera_location'][1] == 'm':
-                        kwargs['camera_location'] = 1/1000*np.array(kwargs['camera_location'][0])
-                    elif kwargs['camera_location'][1] == 'cm':
-                        kwargs['camera_location'] = 1/10*self.__unit_scale*np.array(kwargs['camera_location'][0])
-                    else:
-                        raise ValueError("camera_location unit must be either 'mm', 'cm' or 'm'.")
-            else:
-                kwargs['camera_location'] = [-10, 170, 5]
-
-            if 'camera_location_reference' in kwargs.keys():
-                if type(kwargs['camera_location_reference']) is not tuple:
-                    kwargs['camera_location_reference'] = self.__unit_scale*np.array(kwargs['camera_location_reference'])
-                else:
-                    if kwargs['camera_location_reference'][1] == 'mm':
-                        kwargs['camera_location_reference'] = np.array(kwargs['camera_location_reference'][0])
-                    elif kwargs['camera_location_reference'][1] == 'm':
-                        kwargs['camera_location_reference'] = 1/1000*np.array(kwargs['camera_location_reference'][0])
-                    elif kwargs['camera_location_reference'][1] == 'cm':
-                        kwargs['camera_location_reference'] = 1/10*self.__unit_scale*np.array(kwargs['camera_location_reference'][0])
-                    else:
-                        raise ValueError("camera_location_reference unit must be either 'mm', 'cm' or 'm'.")
-            else:
-                kwargs['camera_location_reference'] = None
-
-            if 'depth_farthest' in kwargs.keys():
-                if type(kwargs['depth_farthest']) is not tuple:
-                    kwargs['depth_farthest'] = self.__unit_scale*np.array(kwargs['depth_farthest'])
-                else:
-                    if kwargs['depth_farthest'][1] == 'mm':
-                        kwargs['depth_farthest'] = np.array(kwargs['depth_farthest'][0])
-                    elif kwargs['depth_farthest'][1] == 'm':
-                        kwargs['depth_farthest'] = 1/1000*np.array(kwargs['depth_farthest'][0])
-                    elif kwargs['depth_farthest'][1] == 'cm':
-                        kwargs['depth_farthest'] = 1/10*self.__unit_scale*np.array(kwargs['depth_farthest'][0])
-                    else:
-                        raise ValueError("depth_farthest unit must be either 'mm', 'cm' or 'm'.")
-            else:
-                kwargs['depth_farthest'] = 0
-
-            if 'depth_nearest' in kwargs.keys():
-                if type(kwargs['depth_nearest']) is not tuple:
-                    kwargs['depth_nearest'] = self.__unit_scale*np.array(kwargs['depth_nearest'])
-                else:
-                    if kwargs['depth_nearest'][1] == 'mm':
-                        kwargs['depth_nearest'] = np.array(kwargs['depth_nearest'][0])
-                    elif kwargs['depth_nearest'][1] == 'm':
-                        kwargs['depth_farthest'] = 1/1000*np.array(kwargs['depth_nearest'][0])
-                    elif kwargs['depth_nearest'][1] == 'cm':
-                        kwargs['depth_nearest'] = 1/10*self.__unit_scale*np.array(kwargs['depth_nearest'][0])
-                    else:
-                        raise ValueError("depth_nearest unit must be either 'mm', 'cm' or 'm'.")
-            else:
-                kwargs['depth_nearest'] = np.sqrt(kwargs['camera_location'][0]**2 + kwargs['camera_location'][1]**2 + kwargs['camera_location'][2]**2)
-
+            kwargs['cam_loc'] = self.__unit_scale*np.array(kwargs['cam_loc'])
+            kwargs['cam_loc_ref'] = self.__unit_scale*np.array(kwargs['cam_loc_ref'])
+            kwargs['depth_farthest'] = self.__unit_scale*kwargs['depth_farthest']
             self.__render_blender(
                 file_path = kwargs['file_path'],
                 file_name = kwargs['file_name'],
