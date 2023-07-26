@@ -123,9 +123,6 @@ class PPM():
 
         self.backend = backend
 
-        self.__working_unit = 'mm'
-        self.__unit_scale = 1
-
         # load init parameters
         self.__parameters = self.__load_parameters_from_csv()
 
@@ -170,23 +167,6 @@ class PPM():
 
         self.center_mesh(reference_point=reference_point)
         
-    @property
-    def working_unit(self):
-        return self.__working_unit
-    
-    @working_unit.setter
-    def working_unit(self, unit):
-        if unit == 'm':
-            self.__unit_scale = 1000
-            self.__working_unit = 'm'
-        elif unit == 'cm':
-            self.__unit_scale = 10
-            self.__working_unit = 'cm'
-        elif unit== 'mm':
-            self.__unit_scale = 1
-            self.__working_unit = 'mm'
-        else:
-            raise Exception('unit must be one of m, cm, mm')
 
     @property
     def points(self):
@@ -315,7 +295,7 @@ class PPM():
                     if a not in ['X', 'Y', 'Z']:
                         raise Exception('axis must be X, Y, Z')
                 for i in range(len(value)):
-                    self.__parameters[parameter][point][parameter_type][axis[i]] = self.__unit_scale*value[i]
+                    self.__parameters[parameter][point][parameter_type][axis[i]] = value[i]
             
             elif parameter_type == 'Rotation':
                 # rotation defined in euler angles
@@ -818,15 +798,16 @@ class PPM():
         file_name : str
             Name of the rendered image.
         camera_location : list
-            Location of the camera.
+            Location of the camera. Default: [-10, 170, 5]
+            If str not given the unit will be infered from the unit of the PPM.
         camera_rotation : list
-            Rotation of the camera.
-        camera_location_reference : list
+            Rotation of the camera. Default: [90, 0, 180]
+        camera_location_reference : list or None
             Location of the reference camera.
         depth_farthest : float
-            Farthest depth value.
-        depth_nearest : float or str
-            Nearest depth value. Default: 'camera_location'
+            Farthest depth value. Default 0.
+        depth_nearest : float
+            Farthest depth value. Default the radius of the camera.
         resolution : int
             Resolution of the rendered image. Default: 256
         depth : bool
@@ -854,9 +835,18 @@ class PPM():
             os.close(sys.stdout.fileno())
             fd = os.open(logfile, os.O_WRONLY)
 
-            kwargs['camera_location'] = self.__unit_scale*np.array(kwargs['camera_location'])
-            kwargs['camera_location_reference'] = self.__unit_scale*np.array(kwargs['camera_location_reference'])
-            kwargs['depth_farthest'] = self.__unit_scale*kwargs['depth_farthest']
+            if 'camera_location' not in kwargs.keys():
+                kwargs['camera_location'] = [-10, 170, 5]
+
+            if 'camera_location_reference' not in kwargs.keys():
+                kwargs['camera_location_reference'] = None
+
+            if 'depth_farthest' not in kwargs.keys():
+                kwargs['depth_farthest'] = 0
+
+            if 'depth_nearest' not in kwargs.keys():
+                kwargs['depth_nearest'] = np.sqrt(kwargs['camera_location'][0]**2 + kwargs['camera_location'][1]**2 + kwargs['camera_location'][2]**2)
+
 
             self.__render_blender(
                 file_path = kwargs['file_path'],
