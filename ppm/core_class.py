@@ -720,7 +720,7 @@ class PPM():
         bpy.data.scenes["Scene"].render.resolution_x = resolution
         bpy.data.scenes["Scene"].render.resolution_y = resolution
         bpy.data.scenes["Scene"].render.image_settings.color_depth = image_color_depth
-        bpy.data.scenes["Scene"].render.image_settings.compression = image_compression
+        bpy.data.scenes["Scene"].render.image_settings.compression = int(image_compression)
         bpy.data.scenes["Scene"].render.image_settings.color_mode = 'BW'
 
         # Enable nodes
@@ -771,7 +771,7 @@ class PPM():
             file_output_exr.file_slots[0].path = file_name +\
             file_output_exr.format.file_format # file name with appended frame idx
             file_output_exr.format.color_depth = depth_color_depth_exr
-            file_output_exr.format.compression = depth_compression_exr
+            file_output_exr.format.compression = int(depth_compression_exr)
             file_output_exr.format.exr_codec = depth_codec_exr
 
             # Link output of map node to input of compositor-output node (exr depth)
@@ -843,8 +843,8 @@ class PPM():
             Codec of the depth map. Default: 'NONE'
         depth_color_depth_exr : str
             Color depth of the depth map. Default: '16'
-        depth_compression_exr : str
-            Compression of the depth map. Default: 8
+        depth_compression_exr : int
+            Compression of the depth map. Default: 0
         """
         if self.backend == 'blender':
             self.__set_parameters_in_blender()
@@ -875,7 +875,7 @@ class PPM():
                 depth_nearest = kwargs['depth_nearest'] if 'depth_nearest' in kwargs else 'camera_location',
                 depth_codec_exr = kwargs['depth_codec_exr'] if 'depth_codec_exr' in kwargs else 'NONE',
                 depth_color_depth_exr = kwargs['depth_color_depth_exr'] if 'depth_color_depth_exr' in kwargs else '16',
-                depth_compression_exr = kwargs['depth_compression_exr'] if 'depth_compression_exr' in kwargs else 8
+                depth_compression_exr = kwargs['depth_compression_exr'] if 'depth_compression_exr' in kwargs else 0
             )
 
             # disable output redirection
