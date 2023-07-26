@@ -867,7 +867,7 @@ class PPM():
                 depth = kwargs['depth'] if 'depth' in kwargs else False,
                 smooth_shading = kwargs['smooth_shading'] if 'smooth_shading' in kwargs else True,
                 image_compression = kwargs['image_compression'] if 'image_compression' in kwargs else 0,
-                image_color_depth = kwargs['image_color_depth'] if 'image_color_depth' in kwargs else '8',
+                image_color_depth = kwargs['image_color_depth'] if 'image_color_depth' in kwargs else '16',
                 camera_location = kwargs['camera_location'],
                 camera_rotation = kwargs['camera_rotation'] if 'camera_rotation' in kwargs else [0, 0, 0],
                 camera_location_reference = kwargs['camera_location_reference'],
