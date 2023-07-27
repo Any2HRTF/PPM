@@ -32,13 +32,19 @@ The dice coefficient is strongly related to the jaccard index: <br>
 <center> <p>$DSC = \dfrac{2 \cdot J(A,B)}{J(A,B) + 1}$ </p> </center>
 To obtain a discrete set from the three dimensional point cloud a voxelisation was performed. The spanned space from the two meshes was subdivided into small cubes. Each cube can be seen as a boolean placeholder, which is True when an data point lies within the cube and false outerwise. This is down for each of the two meshes. The obtained binary masks are then treated as a discrete sets (this is possible because both voxelised meshes share the same grid). The intersection operation (logical and) is hence the number of "true assigned cubes" which occur in both sets. The union operation (logical or) is defined as the total number of different "true assigned cubes" in both sets. The Voxelisation can be seen as rounding each of the 3 coordinates to a given grid and if points from both data sets get discretized to the same point, they count as "intersection". <br>
 The "resolution" paramater in the add on specifies the grid resolution for the voxelisation process. The "resolution" itself is half the length of each cube. The "resolution" value can be interpreted as: The minimum distance at which differences between the target mesh and the PPM are detected. <br>
-To gain intuition: If you compute the Jaccard from A to A, or you choose the resolution wider than the boundary box of the data, the result is 1. So the higher the Jaccard/Dice, the more similar the two meshes are.
+To gain intuition: If you compute the Jaccard from A to A, or you choose the resolution wider than the boundary box of the data, the result is 1. So the higher the Jaccard/Dice, the more similar the two meshes are. <br>
+Since the Voxelisation is highly depended on the location of the data point relative to the grid, there is also an averaging performed. This is done by shifting the grid in each direction from - gridlength/2 to + gridlength/2 in 10 steps. For each shift the jaccard similarity is calculated. After doing this for every possible shift the mean is calculated and displayed at "Avg Jaccard".
+
+#### Visualize Grid Cube
+In order to get an visual feedback of what is happening in the background, there is a checkbox "visualize grid cube". Once this checkbox is ticked, the option selected in the "Type" menu gets displayed. The options are: "Visualize the whole grid", "Visualize just intersection/union","Visualize the 2 quantized meshes".
+When "Visualize the whole grid" is chosen, every single voxel is displayed. This can be used to check if the boundary box is ok or the gain intuition about the amount of voxels in the grid. The voxel contributing to the Union get colored red, and those contributing to the intersection get colored green. When "Visualize just intersection/union" is chosen, only active voxels are displayed (The get colored like before). This might be helpful to detect problematic regions, where the fitting is not good yet. The last option "Visualize the 2 quantized meshes" creates two new object where each representes the quantized mesh of one layer. The reference gets colored green and the active object gets colored red. 
 
 ## Tips and Workarounds
 1) The "Calculation" button is only visible in the OBJECT Mode. Furthermore an Object must be selected.
 2) If changes are made to the script, the scripts can be reloaded by clicking on the blender icon (top left) -> System -> Reload scripts.
 3) The colored visualisation for the "Minimal pointwise distance to Ref" can only be seen in the VERTEX Mode.
 4) Go to Window -> Toggle System Console to open a terminal showing Python print commands.
+5) Do not store data on the layers "Grid_visualization", "Grid_object1","Grid_object2", because these layers get created by the plugin itself and might get overwritten!
 
 
 # Code and functions
