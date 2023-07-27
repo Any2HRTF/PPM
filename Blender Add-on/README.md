@@ -48,4 +48,24 @@ When "Visualize the whole grid" is chosen, every single voxel is displayed. This
 
 
 # Code and functions
-The overall add on consists of 3 Python Files, one init file, one for the panel and one for all the calculation.
+The overall add on consists of 3 Python Files, one init file, one for the panel and one for all the calculation. <br>
+In addition to the .py files, there are also compiled executables (.dll and .so) which are used to speed up the min point distance calculation. The .py files try to load the compiled files, if that fails a pyhton implemenation is loaded, which is a little bit slower.
+If this case happens on your machine, please feel free to open an issue in this repository with your operating system and your architecture. In this compiled C file there is also a function called
+```python
+binaryMaskGenerator()
+```
+, which can be used to calculate the Jaccard index for non-regular grids.
+(eg. using a grid with more grid points around more important areas could be used, which results in a sort of "weighting". eg more points near the cavum conchae, less near the lobulus). For further interest, there is a template function 
+```python
+map_points_to_grid"
+```
+in the "PointCloudCompare_PT_op.py".
+For adding more Jaccard resolution, go to the "JaccardResolutionSelector" class and add another element to the items list. <br>
+For implementing another metric, start by adding a new option in the DistanceSelector class and implementing the algorithmn in the execute method of the "VisualizeDistance" class (You will find if-switch cases with all the options). However in order to visualize the results on the panel, open the "PointCloudCompare_PT_pnl.py" file, go to the draw method of the INTERFACE_PT_panel class
+and again you will find "if" cases with the selected option.
+If your new metric stores different statistics, they can be added by creating a new Attribute in the "DistanceProperty" class. A new set of statistics can be created by
+```python
+stats_distance = context.scene.distances.add()
+```
+Afterwards you can access the stored values in "stats_distance" from the "PointCloudCompare_PT_pnl.py" in the draw method and print the values to the addon.
+
