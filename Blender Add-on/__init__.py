@@ -55,15 +55,13 @@ def register():
     bpy.types.Scene.distances = bpy.props.CollectionProperty(type = PointCloudCompare_PT_op.DistanceProperty)
     bpy.types.Scene.distance_selector = bpy.props.PointerProperty(type = PointCloudCompare_PT_op.DistanceSelector)
     bpy.types.Scene.jaccard_resolution = bpy.props.PointerProperty(type = PointCloudCompare_PT_op.JaccardResolutionSelector)
-    
-    
+
 def unregister():
     for c in classes:
         bpy.utils.unregister_class(c)
     del bpy.types.Scene.distances
     del bpy.types.Scene.distance_selector
     del bpy.types.Scene.jaccard_resolution
-    
 
 if __name__ == "__main__":
     register()
