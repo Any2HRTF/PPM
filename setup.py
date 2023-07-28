@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '2.0-beta'
+version = '2.0-rc'
 
 setup(
     name='PyPPM',
