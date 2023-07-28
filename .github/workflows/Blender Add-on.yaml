@@ -40,3 +40,13 @@ jobs:
             asset_path: './ppm/resources/PPM.blend'
             asset_name: 'PPM.blend'
             asset_content_type: 'application/zip'
+            
+        - name: Upload release asset 3
+          uses: actions/upload-release-asset@v1.0.2
+          env:
+            GITHUB_TOKEN: ${{ github.token }}
+          with:
+            upload_url: ${{ steps.get_release.outputs.upload_url }}
+            asset_path: 'manual_registration_guidelines.md'
+            asset_name: 'Manual Registration Guidelines.md'
+            asset_content_type: 'application/zip'
