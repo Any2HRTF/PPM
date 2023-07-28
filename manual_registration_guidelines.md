@@ -51,7 +51,7 @@ Example 1: Anisotropic scaling is only allowed for Parent-Bendy.
 
 Example 2: Axis-dependent manipulations of location and rotation parameter dimensions are only allowed for the start and end points of bendy bones, i.e., the control bones. Translating the bendy bones themselves is not allowed!
 
-5) Iteratively check the visualised geometric errors using the [Blender Add-on](https://github.com/Any2HRTF/PPM/tree/main/Blender%20Add-on), and also account for the calculated error metrics (e.g., the mean/median of point-wise minimum distances, the Hausdorff distance, the Jaccard index, and the Dice similiarity coefficient).
+5) Iteratively check the visualised geometric errors using the [Blender Add-on](https://github.com/Any2HRTF/PPM/tree/main/Blender%20Add-on), and also account for the calculated error metrics (e.g., the mean/median of point-wise minimum distances, the Jaccard index, and the Dice similiarity coefficient).
 
 6) Aim for geometric errors with mean and median pointwise minimum distances below 1 mm, and an error distribution skewed towards 0 (see [Figure 6](https://www.researchgate.net/publication/366977010_Parametric_pinna_model_for_a_realistic_representation_of_listener-specific_pinna_geometry). Try to achieve a particularly low error in the perceptually most relevant pinna regions (i.e., cavum conchae depth, cymba conchae, fossa triangularis), see [Stitt & Katz (2021)](https://asa.scitation.org/doi/full/10.1121/10.0004128).
 
