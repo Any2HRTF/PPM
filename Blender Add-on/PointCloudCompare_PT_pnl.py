@@ -115,9 +115,15 @@ class INTERFACE_PT_panel(bpy.types.Panel):
                     col=row.column()
                     layout.label(text="   Dice                               %.3f" 
                                 % (latest_distance_item.dice_coef))
-                    col=row.column()
-                    layout.label(text="   Avg Jaccard                   %.3f" 
-                                % (latest_distance_item.avg_jaccard_coef))
+                    
+
+                    #BETA
+
+                    #col=row.column()
+                    #layout.label(text="   Avg Jaccard                   %.3f" 
+                    #            % (latest_distance_item.avg_jaccard_coef))
+                    #
+
                     
                     #Visualize Grid
                     if context.scene.jaccard_resolution.vis_grid:

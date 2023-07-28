@@ -7,6 +7,9 @@ import sys
 import platform
 import bmesh
 
+global use_beta
+use_beta = False
+
 class VisualizeDistance(bpy.types.Operator):
     """
     A class used to visualize either the pointwise minimal distance
@@ -149,15 +152,7 @@ class VisualizeDistance(bpy.types.Operator):
         elif dist_type == "jaccard_dice":
             res = float(jaccard_res)
             grid, len_x, len_y, xmin, ymin, zmin = generate_meshgrid(P, Q, res)
-
-            #BETA
-            #shift grid and average to gain robustness
-            jac_avg = shift_grid_average_jaccard(P, Q, res, len_x, len_y, xmin, ymin, zmin, 10)
-            #print(f"Grid resolution: {res}mm")
-            #print(f"Minimum: {np.min(jac_avg)}")
-            #print(f"Maximum: {np.max(jac_avg)}")
-            #print(f"Median: {np.median(jac_avg)}")
-            #print(f"Mean: {np.mean(jac_avg)}")            
+      
                     
             #calculate actual jaccard similarity
             bin_grid_p = bin_mask_idx(P, res, len_x, len_y, xmin, ymin, zmin)
@@ -168,8 +163,19 @@ class VisualizeDistance(bpy.types.Operator):
             #store statistics
             stats_distance = context.scene.distances.add()  
             stats_distance.jaccard_coef = np.round(jaccard_coef, decimals=2)
-            stats_distance.avg_jaccard_coef = np.round(np.mean(jac_avg), decimals=2) #BETA average jaccard
+            
             stats_distance.dice_coef = np.round((2*jaccard_coef)/(jaccard_coef + 1), decimals=2)
+
+            #BETA
+            #shift grid and average to gain robustness
+            if use_beta:
+                jac_avg = shift_grid_average_jaccard(P, Q, res, len_x, len_y, xmin, ymin, zmin, 10)
+                print(f"Grid resolution: {res}mm")
+                print(f"Minimum: {np.min(jac_avg)}")
+                print(f"Maximum: {np.max(jac_avg)}")
+                print(f"Median: {np.median(jac_avg)}")
+                print(f"Mean: {np.mean(jac_avg)}")      
+                stats_distance.avg_jaccard_coef = np.round(np.mean(jac_avg), decimals=2)
 
 
             #Visualize the grid
@@ -272,7 +278,6 @@ class VisualizeDistance(bpy.types.Operator):
         stats_distance.dist_type = dist_type
         return {'FINISHED'}
     
-
     
 class DistanceProperty(bpy.types.PropertyGroup):
     """
@@ -490,6 +495,7 @@ def loadCfile():
     except:
         print("PointCloudCompare: C Libary cannot be loaded on this machine!")
         return None
+
 
 
 
@@ -784,58 +790,18 @@ def shift_grid_average_jaccard(P, Q, res, len_x, len_y, start_x, start_y, start_
 
     """
 
-    shift_array = np.linspace(-0.5 + np.finfo(np.float64).eps, 0.5 - np.finfo(np.float64).eps, num_of_avg)
-    jac_avg = np.zeros([7*num_of_avg, 1])
+    shift_array = np.linspace(-0.5 + np.finfo(np.float64).eps, 0.5 - np.finfo(np.float64).eps, num_of_avg) * res
+    jac_avg = np.zeros([num_of_avg**3, 1])
     counter = 0
-    for shift in shift_array:
-        shift = res*shift
-        bin_grid_p = bin_mask_idx(P, res, len_x, len_y, start_x + shift, start_y, start_z)
-        bin_grid_q = bin_mask_idx(Q, res, len_x, len_y, start_x + shift, start_y, start_z)
-        jaccard_coef = jaccard_dist(bin_grid_p, bin_grid_q)
-        jac_avg[counter] = jaccard_coef
-        counter += 1
-    for shift in shift_array:
-        shift = res*shift
-        bin_grid_p = bin_mask_idx(P, res, len_x, len_y, start_x, start_y + shift, start_z)
-        bin_grid_q = bin_mask_idx(Q, res, len_x, len_y, start_x, start_y + shift, start_z)
-        jaccard_coef = jaccard_dist(bin_grid_p, bin_grid_q)
-        jac_avg[counter] = jaccard_coef
-        counter += 1
-    for shift in shift_array:
-        shift = res*shift
-        bin_grid_p = bin_mask_idx(P, res, len_x, len_y, start_x, start_y, start_z + shift)
-        bin_grid_q = bin_mask_idx(Q, res, len_x, len_y, start_x, start_y, start_z + shift)
-        jaccard_coef = jaccard_dist(bin_grid_p,bin_grid_q)
-        jac_avg[counter] = jaccard_coef
-        counter += 1
-    for shift in shift_array:
-        shift = res*shift
-        bin_grid_p = bin_mask_idx(P, res, len_x, len_y, start_x + shift, start_y + shift, start_z)
-        bin_grid_q = bin_mask_idx(Q, res, len_x, len_y, start_x + shift, start_y + shift, start_z)
-        jaccard_coef = jaccard_dist(bin_grid_p, bin_grid_q)
-        jac_avg[counter] = jaccard_coef
-        counter += 1
-    for shift in shift_array:
-        shift = res*shift
-        bin_grid_p = bin_mask_idx(P, res, len_x, len_y, start_x + shift, start_y, start_z + shift)
-        bin_grid_q = bin_mask_idx(Q, res, len_x, len_y, start_x + shift, start_y, start_z + shift)
-        jaccard_coef = jaccard_dist(bin_grid_p, bin_grid_q)
-        jac_avg[counter] = jaccard_coef
-        counter += 1
-    for shift in shift_array:
-        shift = res*shift
-        bin_grid_p = bin_mask_idx(P, res, len_x, len_y, start_x, start_y + shift, start_z + shift)
-        bin_grid_q = bin_mask_idx(Q, res, len_x, len_y, start_x, start_y + shift, start_z + shift)
-        jaccard_coef = jaccard_dist(bin_grid_p, bin_grid_q)
-        jac_avg[counter] = jaccard_coef
-        counter += 1
-    for shift in shift_array:
-        shift = res*shift
-        bin_grid_p = bin_mask_idx(P, res, len_x, len_y, start_x + shift, start_y + shift, start_z + shift)
-        bin_grid_q = bin_mask_idx(Q, res, len_x, len_y, start_x + shift, start_y + shift, start_z + shift)
-        jaccard_coef = jaccard_dist(bin_grid_p, bin_grid_q)
-        jac_avg[counter] = jaccard_coef
-        counter += 1
+    
+    for shift_x in shift_array:
+        for shift_y in shift_array:
+            for shift_z in shift_array:
+                bin_grid_p = bin_mask_idx(P, res, len_x, len_y, start_x + shift_x, start_y + shift_y, start_z + shift_z)
+                bin_grid_q = bin_mask_idx(Q, res, len_x, len_y, start_x + shift_x, start_y + shift_y, start_z + shift_z)
+                jaccard_coef = jaccard_dist(bin_grid_p, bin_grid_q)
+                jac_avg[counter] = jaccard_coef
+                counter += 1
     return jac_avg
 
 
