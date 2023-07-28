@@ -472,7 +472,7 @@ class PPM():
                                     0 if axis == 'X' else
                                     1 if axis == 'Y' else
                                     2 if axis == 'Z' else
-                                    None] = axis_value
+                                    None] = 1000*axis_value
 
     def __get_parameters_from_blender(self):
 
@@ -510,7 +510,7 @@ class PPM():
                     if 'Location' in point.keys():
                         for axis, axis_value in point['Location'].items():
                             self.__parameters[parameter_name][point_name]['Location'][axis] = \
-                                obj.pose.bones[parameter_name + "-" + point_name].location[
+                                1/1000 * obj.pose.bones[parameter_name + "-" + point_name].location[
                                     0 if axis == 'X' else
                                     1 if axis == 'Y' else
                                     2 if axis == 'Z' else
@@ -637,7 +637,7 @@ class PPM():
 
         with open(file_path, 'w', newline='') as csvfile:
             for key, value in export_dict.items():
-                csvfile.write(f'{key},{value}\n')
+                csvfile.write(f'{key},{value:e}\n')
 
 
     def render(self, *args, **kwargs):
@@ -688,7 +688,7 @@ class PPM():
             fd = os.open(logfile, os.O_WRONLY)
 
             if 'camera_location' not in kwargs.keys():
-                kwargs['camera_location'] = [-10, 170, 5]
+                kwargs['camera_location'] = [-0.010, 0.170, 0.005]
 
             if 'camera_location_reference' not in kwargs.keys():
                 kwargs['camera_location_reference'] = None

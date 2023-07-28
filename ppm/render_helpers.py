@@ -11,14 +11,21 @@ def render(file_path,
             smooth_shading=True,
             image_compression=0,
             image_color_depth='8',
-            camera_location=[-10, 170, 5],
+            camera_location=[-0.01, 0.17, 0.005],
             camera_rotation=[90, 0, 180],
             camera_location_reference=None,
-            depth_farthest=212,
+            depth_farthest=0.212,
             depth_nearest=0,
             depth_codec_exr='NONE',
             depth_color_depth_exr='16',
             depth_compression_exr=0):
+        
+        # transform to mm for use in Blender
+        camera_location = [float(i)*1000 for i in camera_location]
+        depth_farthest = float(depth_farthest)*1000
+        depth_nearest = float(depth_nearest)*1000
+        if camera_location_reference is not None:
+            camera_location_reference = [float(i)*1000 for i in camera_location_reference]
 
         # Scene-render settings
         bpy.context.scene.render.engine = 'CYCLES' # CYCLES, BLENDER_EEVEE, WORKBENCH
