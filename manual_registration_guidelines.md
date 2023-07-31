@@ -16,14 +16,14 @@
 
 4) Save the PH mesh adapted in this way as `blend` file (*_ph_ini.blend).
 
-5) Remove all unneeded parts from the PH mesh, e.g., head and shoulders. Only preserve the left and right pinna-only (PO) meshes. Double-check if all unwanted edges, vertices and faces have been deleted.
+5) Save another `blend` file for the registration process (*_left_ear_aligned_ppm_v2). Note that "v2" corresponds to the PPM armature definitions as used in version v2.x.x of the [PPM interface](https://github.com/Any2HRTF/PPM/tree/main).
+
+6) Remove all unneeded parts from the PH mesh, e.g., head and shoulders. Only preserve the left and right pinna-only (PO) meshes. Double-check if all unwanted edges, vertices and faces have been deleted.
 * *Convention 2*:
 	* Preserve the global rotations and the global offsets in y-direction of the PO meshes.
 	* Remove mesh regions of the PO meshes that are not contained in the PPM, e.g., more extended parts at the transition to the removed head mesh. Such mesh parts cannot be properly registered anyway and will likely increase the geometric error when registering the PPM to the PO mesh.
 	* Remove the right PO mesh and save the `blend` file (*_left_ear_ini.blend).
  	* Undo the last removal step, remove the left PO mesh instead, and save the `blend` file (*_right_ear_ini.blend). This file is saved for the sake of completeness only as the PPM is currently only implemented for registering left PO meshes.
-
-6) Save another `blend` file for the registration process (*_left_ear_aligned_ppm_v2). Note that "v2" corresponds to the PPM armature definitions as used in version v2.x.x of the [PPM interface](https://github.com/Any2HRTF/PPM/tree/main).
 
 ## Blender add-on to visualise the geometric errors
 
