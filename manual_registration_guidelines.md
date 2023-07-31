@@ -18,7 +18,7 @@
 
 5) Remove all unneeded parts from the PH mesh, e.g., head and shoulders. Only preserve the left and right pinna-only (PO) meshes. Double-check if all unwanted edges, vertices and faces have been deleted.
 * *Convention 2*:
-	* Preserve the global positions and rotations of the PO meshes (e.g., their offsets in y-direction).
+	* Preserve the global rotations and the global offsets in y-direction of the PO meshes.
 	* Remove mesh regions of the PO meshes that are not contained in the PPM, e.g., more extended parts at the transition to the removed head mesh. Such mesh parts cannot be properly registered anyway and will likely increase the geometric error when registering the PPM to the PO mesh.
 	* Remove the right PO mesh and save the `blend` file (*_left_ear_ini.blend).
  	* Undo the last removal step, remove the left PO mesh instead, and save the `blend` file (*_right_ear_ini.blend). This file is saved for the sake of completeness only as the PPM is currently only implemented for registering left PO meshes.
