@@ -8,8 +8,8 @@
 
 3) Center the PH mesh as per the instructions given below:
 * *Convention 1*: Rotate and translate the PH mesh so that
-	* the center of the head corresponds to the world origin
- 	* the horizontal plane corresponds to the Frankfurt plane (setting the pitch angle), but with an additional vertical shift applied along the z-axis so that the plane runs through the ear-canal centres,
+	* the center of the interaural axis corresponds to the origin of the world coordinate system
+ 	* the horizontal plane corresponds to the Frankfurt plane (setting the pitch angle of the head), but with an additional vertical shift applied along the z-axis so that the plane runs through the ear-canal centres,
 	* the view vector corresponds to the global positive x-axis (default viewing direction), 
 	* the up vector (orthogonal to the view vector) corresponds to the global positive z-axis, and
 	* the interaural axis corresponds to the y-axis (increasing positively from the right to the left ear)
