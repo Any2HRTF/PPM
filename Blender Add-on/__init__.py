@@ -14,7 +14,7 @@
 
 bl_info = {
     "name" : "Compare two point clouds",
-    "author" : "Yasen, Jonathan",
+    "author" : "Jonathan Wögerbauer; Yasen Velchev",
     "description" : "",
     "blender" : (2, 80, 0),
     "version" : (0, 0, 1),
@@ -52,6 +52,7 @@ def register():
     for c in classes:
         bpy.utils.register_class(c)
     bpy.types.Scene.Reference = bpy.props.StringProperty()
+    bpy.types.Scene.fix_obj1 = bpy.props.StringProperty(name = "Object")
     bpy.types.Scene.distances = bpy.props.CollectionProperty(type = PointCloudCompare_PT_op.DistanceProperty)
     bpy.types.Scene.distance_selector = bpy.props.PointerProperty(type = PointCloudCompare_PT_op.DistanceSelector)
     bpy.types.Scene.jaccard_resolution = bpy.props.PointerProperty(type = PointCloudCompare_PT_op.JaccardResolutionSelector)

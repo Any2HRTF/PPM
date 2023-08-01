@@ -79,7 +79,18 @@ class VisualizeDistance(bpy.types.Operator):
         
         
         #Object 1
-        obj1 = context.view_layer.objects.active
+        if context.scene.distance_selector.fix_obj1:
+            try:
+                obj1 = context.scene.objects[context.scene.fix_obj1]
+            except:
+                self.report({'WARNING'},"PointCloudCompare: Please select object1!")
+                stats_distance = context.scene.distances.add()
+                stats_distance.ERROR = "Please select object1!"
+                return {'CANCELLED'}
+        else:
+            obj1 = context.view_layer.objects.active
+
+        
         stats_distance = context.scene.distances.add()
         if not self.validate_active_layer(obj1,stats_distance):
             print(f"PointCloudCompare: {stats_distance.ERROR}")
@@ -95,6 +106,11 @@ class VisualizeDistance(bpy.types.Operator):
             self.report({'WARNING'},"PointCloudCompare: Please select a reference object!")
             stats_distance = context.scene.distances.add()
             stats_distance.ERROR = "Please select a reference object!"
+            return {'CANCELLED'}
+        if obj1 == obj2:
+            self.report({'WARNING'},"PointCloudCompare: You selected the same object twice!")
+            stats_distance = context.scene.distances.add()
+            stats_distance.ERROR = "You selected the same object twice!"
             return {'CANCELLED'}
         Q = fetch_data_array(obj2)
 
@@ -130,6 +146,8 @@ class VisualizeDistance(bpy.types.Operator):
             stats_distance.median_pmin = np.round(np.median(distance_values), decimals=2)
             stats_distance.max_pmin = np.round(np.max(distance_values), decimals=2)
             stats_distance.min_pmin = np.round(np.min(distance_values), decimals=2)
+            stats_distance.obj1 = obj1.name
+            stats_distance.obj2 = obj2.name
     
 
         #minimal pontwise distance from Ref 
@@ -147,7 +165,8 @@ class VisualizeDistance(bpy.types.Operator):
             stats_distance.median_pmin = np.round(np.median(distance_values), decimals=2)
             stats_distance.max_pmin = np.round(np.max(distance_values), decimals=2)
             stats_distance.min_pmin = np.round(np.min(distance_values), decimals=2)
-
+            stats_distance.obj1 = obj2.name
+            stats_distance.obj2 = obj1.name
 
         elif dist_type == "jaccard_dice":
             res = float(jaccard_res)
@@ -163,7 +182,10 @@ class VisualizeDistance(bpy.types.Operator):
             #store statistics
             stats_distance = context.scene.distances.add()  
             stats_distance.jaccard_coef = np.round(jaccard_coef, decimals=2)
-            
+            stats_distance.obj1 = obj1.name
+            stats_distance.obj2 = obj2.name
+            stats_distance.jaccard_res = res
+
             stats_distance.dice_coef = np.round((2*jaccard_coef)/(jaccard_coef + 1), decimals=2)
 
             #BETA
@@ -180,6 +202,7 @@ class VisualizeDistance(bpy.types.Operator):
 
             #Visualize the grid
             if context.scene.jaccard_resolution.vis_grid:
+                """
                 #clear the old visualization layers
                 if 'Grid_visualization' in bpy.context.scene.objects.keys():
                     bpy.data.objects.remove(context.scene.objects['Grid_visualization'], do_unlink=True)
@@ -187,7 +210,7 @@ class VisualizeDistance(bpy.types.Operator):
                     bpy.data.objects.remove(context.scene.objects['Grid_object1'], do_unlink=True)
                 if 'Grid_object2' in bpy.context.scene.objects.keys():
                     bpy.data.objects.remove(context.scene.objects['Grid_object2'], do_unlink=True)
-                
+                """
                 #visualize the whole grid
                 if context.scene.jaccard_resolution.vis_grid_type == "whole_grid":
                     new_mesh = bpy.data.meshes.new('Grid_visualization')
@@ -303,7 +326,12 @@ class DistanceProperty(bpy.types.PropertyGroup):
     ERROR: string
         an string object to display potential errors
     """ 
+    #Type of measurement
     dist_type: bpy.props.StringProperty(name="Dist_type")
+    
+    #object names
+    obj1: bpy.props.StringProperty(name="object1", default="")
+    obj2: bpy.props.StringProperty(name="object2", default="")
     
     #to ref
     mean_pmin: bpy.props.FloatProperty(name="Mean_PQ", default =0.0)
@@ -313,6 +341,7 @@ class DistanceProperty(bpy.types.PropertyGroup):
     
     #jaccard
     jaccard_coef: bpy.props.FloatProperty(name="jaccard_coef", default =0.0)
+    jaccard_res: bpy.props.FloatProperty(name="jaccard_res", default =0.0)
     avg_jaccard_coef: bpy.props.FloatProperty(name="jaccard_coef", default =0.0)
 
     #dice
@@ -330,10 +359,17 @@ class DistanceSelector(bpy.types.PropertyGroup):
 
     Attributes
     -------
+    fix_obj1: bpy.props.BoolProperty
+        whether object1 is chosen by a dropdown menu or by the active layer
     selector: bpy.props.EnumProperty
         stores all the distacne choices
     
     """
+    fix_obj1: bpy.props.BoolProperty(
+        name="Select fixed Object",
+        description="Select fixed Object",
+        default = False) 
+
     selector: bpy.props.EnumProperty(
         name = "Metric",
         description = "",
