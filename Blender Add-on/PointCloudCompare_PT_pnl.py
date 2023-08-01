@@ -61,10 +61,10 @@ class INTERFACE_PT_panel(bpy.types.Panel):
                         bpy.data.objects.remove(context.scene.objects['Grid_object2'], do_unlink=True)
                 else:
                     col.alert = True
-                    col.label(text = "Select an Object and Object Mode!")
+                    col.label(text = "Select Object Mode!")
             else:
                 col.alert = True
-                col.label(text = "Select an Object and Object Mode!")
+                col.label(text = "Select an Object!")
 
 
             # Get the latest property item
@@ -205,6 +205,18 @@ class INTERFACE_PT_panel(bpy.types.Panel):
 
 
 def get_previous_items(distance_items):
+    """
+    A function to check all stored measurements and looks for similar settings to make a comparison
+    ...
+
+    Parameters
+    -------
+    distance_items: np.array
+        an array with all measurements stored
+    Return: np.array/None
+        if a match is founded the corresponding array/measurement is returned, otherwise None
+    
+    """
     latest_item = distance_items[-1]
 
     #loop through all stored values

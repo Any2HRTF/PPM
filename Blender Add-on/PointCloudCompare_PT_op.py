@@ -79,6 +79,7 @@ class VisualizeDistance(bpy.types.Operator):
         
         
         #Object 1
+        #look if user wants to select fixed object or active layer
         if context.scene.distance_selector.fix_obj1:
             try:
                 obj1 = context.scene.objects[context.scene.fix_obj1]
@@ -311,6 +312,10 @@ class DistanceProperty(bpy.types.PropertyGroup):
     -------
     dist_type : string
         specifies the used dist_type
+    obj1: bpy.props.StringProperty
+        Stores the object 1 of the calculation
+    obj2: bpy.props.StringProperty
+        Stores the object 2 of the calculation
     mean_pmin   : bpy.props.FloatProperty
         the mean distance to Reference
     median_pmin : bpy.props.FloatProperty
@@ -321,6 +326,8 @@ class DistanceProperty(bpy.types.PropertyGroup):
         the min distance to Reference
     jaccard_coef: bpy.props.FloatProperty
         jaccard distance
+    jaccard_res: bpy.props.FloatProperty
+        the selected grid resolution
     avg_jaccard_coef: bpy.props.FloatProperty
         average jaccard coef
     ERROR: string

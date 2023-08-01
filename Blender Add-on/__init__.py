@@ -26,15 +26,13 @@ bl_info = {
 #With this section it is possible to reload all scripts:
 # "blender icon" -> System -> reload scripts
 if "bpy" in locals():
-    print("\n---------------RELOADD---------------\n")
+    #Reload Scripts
     import importlib
-
     importlib.reload(PointCloudCompare_PT_op)
     importlib.reload(PointCloudCompare_PT_pnl)
-    print("Succesfully reloaded")
 
 else:        
-    print("\n---------------INITIAL---------------\n")
+    #Init Scripts
     from . import PointCloudCompare_PT_op
     from . import PointCloudCompare_PT_pnl
 
@@ -60,6 +58,8 @@ def register():
 def unregister():
     for c in classes:
         bpy.utils.unregister_class(c)
+    del bpy.types.Scene.Reference
+    del bpy.types.Scene.fix_obj1
     del bpy.types.Scene.distances
     del bpy.types.Scene.distance_selector
     del bpy.types.Scene.jaccard_resolution
