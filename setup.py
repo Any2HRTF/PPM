@@ -1,18 +1,18 @@
 from setuptools import setup, find_packages
 
-version = '2.0-rc'
+version = '2.0-rc1'
 
 setup(
-    name='PyPPM',
+    name='PyBezierPPM',
     version=version,
     description='Python PPM module.',
     url='https://github.com/Any2HRTF/PPM',
-    author='The PPM authors',
+    author='The BezierPPM authors',
     license='EUPL-1.2',
     license_files = ('LICENSE',),
     packages=find_packages(),
     package_data={
-        'ppm': ['resources/*.csv', 'resources/*.blend'],
+        'BezierPPM': ['resources/*.csv', 'resources/*.blend'],
     },
     include_package_data=True,
     python_requires='==3.10.*',

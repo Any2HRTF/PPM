@@ -19,7 +19,7 @@ jobs:
 
         - name: Make zip
           run: |
-            zip -r 'PointCloudCompare.zip' 'Blender Add-on'
+            zip -r 'PointCloudCompare.zip' 'PointCloudCompare'
 
         - name: Upload release asset
           uses: actions/upload-release-asset@v1.0.2
@@ -37,7 +37,7 @@ jobs:
             GITHUB_TOKEN: ${{ github.token }}
           with:
             upload_url: ${{ steps.get_release.outputs.upload_url }}
-            asset_path: './ppm/resources/PPM.blend'
+            asset_path: './BezierPPM/resources/PPM.blend'
             asset_name: 'PPM.blend'
             asset_content_type: 'application/zip'
             
@@ -47,6 +47,6 @@ jobs:
             GITHUB_TOKEN: ${{ github.token }}
           with:
             upload_url: ${{ steps.get_release.outputs.upload_url }}
-            asset_path: 'manual_registration_guidelines.md'
-            asset_name: 'Manual Registration Guidelines.md'
+            asset_path: 'Manual\ Registration\ Guidelines.md'
+            asset_name: 'Manual\ Registration\ Guidelines.md'
             asset_content_type: 'application/zip'

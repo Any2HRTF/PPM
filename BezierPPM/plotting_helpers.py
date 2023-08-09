@@ -16,7 +16,7 @@ def plot_distances(P, Q):
         Q: PPM
             PPM object
     """
-    if P.__class__.__name__ == 'PPM':
+    if P.__class__.__name__ == 'BezierPPM':
         P_points = P.get_point_cloud()
     elif P.__class__.__name__ == 'ndarray':
         P_points = P

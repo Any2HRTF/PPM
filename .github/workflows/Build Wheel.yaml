@@ -8,7 +8,7 @@ on:
 
 jobs:
   deploy:
-    if: startsWith(github.ref, 'refs/tags/pyppm')
+    if: startsWith(github.ref, 'refs/tags/pybezierppm')
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1

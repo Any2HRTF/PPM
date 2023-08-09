@@ -102,7 +102,7 @@ def euler_to_quaternion(euler_matrix:np.array, sequence:str='ZYX') -> np.array:
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
-class PPM():
+class BezierPPM():
     """PPM class
 
     Parameters:

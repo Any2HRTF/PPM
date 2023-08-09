@@ -14,7 +14,7 @@ def _get_point_cloud(P) -> np.ndarray:
         Point cloud of P.
     """
 
-    if P.__class__.__name__ == 'PPM':
+    if P.__class__.__name__ == 'BezierPPM':
         return np.array(P.points, dtype=np.float32)
     elif P.__class__.__name__ == 'ndarray':
         return np.array(P, dtype=np.float32)
