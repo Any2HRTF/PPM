@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 version = '2.0-rc1'
 
@@ -10,7 +10,7 @@ setup(
     author='The BezierPPM authors',
     license='EUPL-1.2',
     license_files = ('LICENSE',),
-    packages=find_packages(),
+    packages=['BezierPPM'],
     package_data={
         'BezierPPM': ['resources/*.csv', 'resources/*.blend'],
     },
@@ -20,7 +20,6 @@ setup(
     install_requires=[
         "numpy",
         "bpy",
-        "numba",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
