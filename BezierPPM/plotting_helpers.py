@@ -21,14 +21,14 @@ def plot_distances(P, Q):
     elif P.__class__.__name__ == 'ndarray':
         P_points = P
     else:
-        raise TypeError('P must be of type PPM or np.ndarray')
+        raise TypeError('P must be of type BezierPPM or np.ndarray')
     
-    if Q.__class__.__name__ == 'PPM':
+    if Q.__class__.__name__ == 'BezierPPM':
         Q_points = Q.get_point_cloud()
     elif Q.__class__.__name__ == 'ndarray':
         Q_points = Q
     else:
-        raise TypeError('Q must be of type PPM or np.ndarray')
+        raise TypeError('Q must be of type BezierPPM or np.ndarray')
     
     hs_dist = minimal_distances(P_points, Q_points)
     hs_normalized = (hs_dist - np.min(hs_dist)) / (np.max(hs_dist) - np.min(hs_dist))
