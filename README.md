@@ -1,4 +1,4 @@
-# PyPPM
+# PyBezierPPM
 
 Python module to programmatically interface with the parametric pinna model (PPM) [1]. 
 
@@ -12,13 +12,13 @@ pip install /path/to/wheel.whl
 
 ## Usage
 
-The module provides a single class `PPM`.
-The constructor will generate a PPM instance with default PPM-parameter values.
+The module provides a single class `BezierPPM`.
+The constructor will generate a BezierPPM instance with default PPM-parameter values.
    
 ```python
-from ppm import PPM
+from BezierPPM import BezierPPM
 
-ppm = PPM()
+ppm = BezierPPM()
 ```
 
 Alternatively, the PPM can be instantiated from a 'blend' file, 'csv' file, or a Python dictionary containing the PPM parameters in the same format as the 'csv' file.
@@ -28,13 +28,13 @@ Alternatively, the PPM can be instantiated from a 'blend' file, 'csv' file, or a
 Use the method `center_mesh` to either move the PPM's center of mass, i.e. the center of the bounding box surrounding the PPM, or the center of the ear-canal entrance to the origin of the global coordinate system. 
 
 ```python
-ppm.center_mesh(reference_point='ear_canal_entrance') # default
+ppm.center_mesh(reference_point='ear_canal_entrance')
 ppm.center_mesh(reference_point='center_of_mass')
 ```
 
 ### Parameters
 
-The PPM parameters and their default values are listed below:
+The BezierPPM parameters and their default values are listed below:
 
 <details>
 <summary>
@@ -337,7 +337,7 @@ print(ppm)
 print(ppm.parameters['Helix_up']['Start']['Location'])
 ```
 
-Set the PPM parameters using the method `set_parameter`.
+Set the BezierPPM parameters using the method `set_parameter`.
 
 
 
@@ -375,11 +375,11 @@ ppm.render(filepath='path/to/file', filename='filename', resolution=257)
 The module `math_helpers` provides two helper functions to calculate the minimum pointwise distance and the Hausdorff distance between two PPM instances.
 
 ```python
-from ppm import PPM
-from ppm.math_helpers import minimal_distances, hausdorff_distance
+from BezierPPM import BezierPPM
+from BezierPPM.math_helpers import minimal_distances, hausdorff_distance
 
-p1 = PPM()
-p2 = PPM(from_csv='path/to/file.csv')
+p1 = BezierPPM()
+p2 = BezierPPM(from_csv='path/to/file.csv')
 
 # returns an array of the minimal distances between the points of p1 and p2
 distances = minimal_distances(p1, p2)
@@ -393,11 +393,11 @@ hausdorff = hausdorff_distance(p1, p2)
 Packaged in the module, a helper function is available to visualize the PPM and the minimum pointwise distances between two PPM instances as a 3D plot and a histogram, respectively. `plot_distances` either accepts PPM instances or point clouds.
 
 ```python
-from ppm import PPM
-from ppm.plotting_helpers import plot_distances
+from BezierPPM import BezierPPM
+from BezierPPM.plotting_helpers import plot_distances
 
-p1 = PPM()
-p2 = PPM(from_csv='path/to/file.csv')
+p1 = BezierPPM()
+p2 = BezierPPM(from_csv='path/to/file.csv')
 
 plot_distances(p1, p2)
 ```
@@ -428,7 +428,7 @@ Please cite the following paper if you use this code in your work:
 ```
 
 ## References
-The PPM was developed at the Acoustics Research Institute (ARI) of the 
+The BezierPPM was developed at the Acoustics Research Institute (ARI) of the 
 Austrian Academy of Sciences, Vienna, Austria [1-4].
 
 1.  Pollack K.; Pausch F.; Majdak P. (2022) [Parametric pinna model for a 
