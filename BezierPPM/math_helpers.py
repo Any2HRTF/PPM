@@ -2,11 +2,11 @@ import numpy as np
 
 def _get_point_cloud(P) -> np.ndarray:
     """ Returns the point cloud of P.
-    
+
     Parameters
     ----------
     P : PPM or np.ndarray
-    
+
     Returns
     -------
     np.ndarray
@@ -45,6 +45,13 @@ def minimal_distances(P, Q) -> np.ndarray:
     return np.sqrt(min_distances)
 
 
+def distances(P, Q) -> np.float32:
+
+    P_points = _get_point_cloud(P)
+    Q_points = _get_point_cloud(Q)
+
+    return np.sqrt(np.sum((P_points-Q_points)**2, axis=1))
+
 def hausdorff_distance(P, Q) -> np.float32:
     """ Computes the Hausdorff distance between two point clouds P and Q.
     P and Q can be of type PPM or np.ndarray.
@@ -63,3 +70,11 @@ def hausdorff_distance(P, Q) -> np.float32:
     minmal_distance = minimal_distances(P, Q)
 
     return np.max(minmal_distance)
+
+def rmse_distance(P, Q, threshold=None) -> np.float32:
+
+    dists = distances(P, Q)
+    if threshold is not None:
+        dists = dists[dists <= threshold]
+
+    return np.mean(dists)
