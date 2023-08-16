@@ -44,14 +44,6 @@ def minimal_distances(P, Q) -> np.ndarray:
 
     return np.sqrt(min_distances)
 
-
-def distances(P, Q) -> np.float32:
-
-    P_points = _get_point_cloud(P)
-    Q_points = _get_point_cloud(Q)
-
-    return np.sqrt(np.sum((P_points-Q_points)**2, axis=1))
-
 def hausdorff_distance(P, Q) -> np.float32:
     """ Computes the Hausdorff distance between two point clouds P and Q.
     P and Q can be of type PPM or np.ndarray.
@@ -71,9 +63,44 @@ def hausdorff_distance(P, Q) -> np.float32:
 
     return np.max(minmal_distance)
 
-def rmse_distance(P, Q, threshold=None) -> np.float32:
 
-    dists = distances(P, Q)
+def point_wise_distances(P, Q) -> np.float32:
+    """ Computes the pointwise distance for two point clouds P and Q.
+
+     Parameters
+    ----------
+    P: BezierPPM or np.ndarray
+    Q: BezierPPM or np.ndarray
+
+    Returns
+    -------
+    np.ndarray
+        point wide distances
+    """
+
+    P_points = _get_point_cloud(P)
+    Q_points = _get_point_cloud(Q)
+
+    if P_points.shape[0] != Q_points.shape[0]:
+        raise Exception("The number of points needs to be the same")
+
+    return np.sqrt(np.sum((P_points-Q_points)**2, axis=1))
+
+def rmse_distance(P, Q, threshold=None) -> np.float32:
+    """ Computes the pointwise distance for two point clouds P and Q.
+
+    Parameters
+    ----------
+    P: BezierPPM or np.ndarray
+    Q: BezierPPM or np.ndarray
+
+    Returns
+    -------
+    np.ndarray
+        point wide distances
+    """
+
+    dists = point_wise_distances(P, Q)
     if threshold is not None:
         dists = dists[dists <= threshold]
 
