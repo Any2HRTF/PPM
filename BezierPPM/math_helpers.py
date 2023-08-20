@@ -20,7 +20,7 @@ def _get_point_cloud(P) -> np.ndarray:
     else:
         raise TypeError('P must be of type PPM or np.ndarray')
 
-def minimal_distances(P, Q) -> np.ndarray:
+def minimal_distances(P, Q, y_toleranz=0, max_distance=None) -> np.ndarray:
     """ Computes the minimal distances between two point clouds P and Q.
     P and Q can be of type PPM or np.ndarray.
 
@@ -38,11 +38,21 @@ def minimal_distances(P, Q) -> np.ndarray:
     P_points = _get_point_cloud(P)
     Q_points = _get_point_cloud(Q)
 
+    if y_toleranz > 0:
+        min_y = np.min(P_points,axis=0)[1] + y_toleranz
+
     min_distances = np.zeros(P_points.shape[0], dtype=np.float32)
     for idx_pred in range(min_distances.shape[0]):
-        min_distances[idx_pred] = np.min(np.sum((P_points[idx_pred, :] - Q_points)**2, axis=1))
+        min_distances[idx_pred] = np.sqrt(np.min(np.sum((P_points[idx_pred, :] - Q_points)**2, axis=1)))
 
-    return np.sqrt(min_distances)
+        if y_toleranz > 0:
+            if P_points[idx_pred, :][1] <= min_y:
+                min_distances[idx_pred] = np.nan
+        elif max_distance is not None:
+            if min_distances[idx_pred]  >= max_distance:
+                min_distances[idx_pred]  = np.nan
+
+    return min_distances
 
 def hausdorff_distance(P, Q) -> np.float32:
     """ Computes the Hausdorff distance between two point clouds P and Q.
@@ -63,7 +73,6 @@ def hausdorff_distance(P, Q) -> np.float32:
 
     return np.max(minmal_distance)
 
-
 def point_wise_distances(P, Q) -> np.float32:
     """ Computes the pointwise distance for two point clouds P and Q.
 
@@ -77,7 +86,6 @@ def point_wise_distances(P, Q) -> np.float32:
     np.ndarray
         point wide distances
     """
-
     P_points = _get_point_cloud(P)
     Q_points = _get_point_cloud(Q)
 

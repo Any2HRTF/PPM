@@ -1,6 +1,6 @@
 from setuptools import setup
 
-version = '2.0-rc2'
+version = '2.0'
 
 setup(
     name='PyBezierPPM',
@@ -10,9 +10,9 @@ setup(
     author='The BezierPPM authors',
     license='EUPL-1.2',
     license_files = ('LICENSE',),
-    packages=['BezierPPM'],
+    packages=['bezierppm'],
     package_data={
-        'BezierPPM': ['resources/*.csv', 'resources/*.blend'],
+        'bezierppm': ['resources/*.csv', 'resources/*.blend'],
     },
     include_package_data=True,
     python_requires='==3.10.*',
