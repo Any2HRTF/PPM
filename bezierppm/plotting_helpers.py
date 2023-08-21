@@ -13,7 +13,7 @@ def normalize_pc(points):
 
 	return points
 
-def plot_distances(P, Q, y_toleranz=0, max_distance=None, filename=None):
+def plot_distances(P, Q, filename=None):
     """Plot the hausdorff distance between two point clouds
 
     Parameters:
@@ -37,8 +37,7 @@ def plot_distances(P, Q, y_toleranz=0, max_distance=None, filename=None):
     else:
         raise TypeError('Q must be of type BezierPPM or np.ndarray')
 
-    hs_dist_with_nans = minimal_distances(P_points, Q_points, y_toleranz, max_distance)
-    hs_dist = hs_dist_with_nans[~np.isnan(hs_dist_with_nans)]
+    hs_dist = minimal_distances(P_points, Q_points)
     hs_normalized = (hs_dist - np.min(hs_dist)) / (np.max(hs_dist) - np.min(hs_dist))
 
     ax1 = plt.subplot(121)
@@ -59,13 +58,7 @@ def plot_distances(P, Q, y_toleranz=0, max_distance=None, filename=None):
     Q_plot = mplot3d.art3d.Poly3DCollection([Q_points], facecolor='black', alpha=0.1)
     ax2.add_collection3d(Q_plot)
 
-    # P_plot = mplot3d.art3d.Poly3DCollection([P_points], facecolor='red', alpha=0.1)
-    # ax2.add_collection3d(P_plot)
-
-    hs_dist_with_nans[~np.isnan(hs_dist_with_nans)] = hs_normalized
-    hs_dist_with_nans[np.isnan(hs_dist_with_nans)] = 1000
-
-    ax2.scatter(P_points[:,0], P_points[:,1], P_points[:,2], c=hs_dist_with_nans, cmap='jet', s=1, alpha=0.5)
+    ax2.scatter(P_points[:,0], P_points[:,1], P_points[:,2], c=hs_normalized, cmap='jet', s=1, alpha=0.5)
 
     scale = P_points.flatten()
     ax2.auto_scale_xyz(scale, scale, scale)
