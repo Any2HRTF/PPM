@@ -20,6 +20,7 @@ setup(
     install_requires=[
         "numpy",
         "bpy",
+        "matplotlib",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
