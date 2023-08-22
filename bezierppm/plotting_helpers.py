@@ -69,7 +69,7 @@ def plot_distances(P, Q, vmin=None, vmax=None, filename=None):
     scale = P_points.flatten()
     ax2.auto_scale_xyz(scale, scale, scale)
     ax2.axis('off')
-    ax2.view_init(elev=0., azim=0., roll=0.)
+    ax2.view_init(elev=0., azim=90., roll=0.)
 
     if filename is not None:
         plt.savefig(filename)
