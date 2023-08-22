@@ -46,8 +46,9 @@ def plot_distances(P, Q, vmin=None, vmax=None, filename=None):
         hs_dist = minimal_distances(P_points, Q_points)
     vmin = 0 if vmin == None else vmin
     vmax = np.max(hs_dist) if vmax == None else vmax
-    
+
     fig, (ax1, ax2) = plt.subplots(1,2,width_ratios=[1, 3.5])
+    plt.subplots_adjust(wspace=0., hspace=0.)
     ax1.hist(hs_dist,  bins=100, orientation="horizontal", color = "gray", lw=0, histtype='stepfilled', range=(vmin, vmax))
     ax1.set_ylabel('Distances (mm)')
     ax1.set_ylim(vmin, vmax)
