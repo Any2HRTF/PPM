@@ -5,12 +5,16 @@ import matplotlib.cm as cm
 from mpl_toolkits import mplot3d
 from matplotlib.colors import Normalize
 import numpy as np
-from .math_helpers import minimal_distances
+from .math_helpers import minimal_distances, point_wise_distances
 
-def normalize_pc(points):
-	points -= np.mean(points, axis=0)
-	points /= np.max(np.sqrt(np.sum(abs(points)**2,axis=-1)))
-	return points
+def normalize_pc(points1, points2):
+    point_mean = np.mean(points1, axis=0)
+    max_point_distance = np.max(np.sqrt(np.sum(abs(points1)**2,axis=-1)))
+    points1 -= point_mean
+    points2 -= point_mean
+    points1 /= max_point_distance
+    points2 /= max_point_distance
+    return points1, points2
 
 def plot_distances(P, Q, vmin=None, vmax=None, filename=None):
     """Plot the hausdorff distance between two point clouds
@@ -36,7 +40,10 @@ def plot_distances(P, Q, vmin=None, vmax=None, filename=None):
     else:
         raise TypeError('Q must be of type BezierPPM or np.ndarray')
 
-    hs_dist = minimal_distances(P_points, Q_points)
+    if P_points.shape[0] == Q_points.shape[0]:
+        hs_dist = point_wise_distances(P_points, Q_points)
+    else:
+        hs_dist = minimal_distances(P_points, Q_points)
     vmin = 0 if vmin == None else vmin
     vmax = np.max(hs_dist) if vmax == None else vmax
     
@@ -51,8 +58,7 @@ def plot_distances(P, Q, vmin=None, vmax=None, filename=None):
     ax1.spines['bottom'].set_visible(False)
     ax1.set_yticks([vmin,1,max(hs_dist), vmax])
 
-    Q_points = normalize_pc(Q_points)
-    P_points = normalize_pc(P_points)
+    P_points, Q_points = normalize_pc(P_points, Q_points)
 
     ax2 = plt.subplot(122, projection='3d')
     Q_plot = mplot3d.art3d.Poly3DCollection([Q_points], facecolor='black', alpha=0.1)
