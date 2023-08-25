@@ -106,3 +106,29 @@ def rmse_distance(P, Q) -> np.float32:
         rmse = np.max([np.mean(minimal_distances(P_points, Q_points)), np.mean(minimal_distances(Q_points, P_points))])
 
     return rmse
+    
+def completeness(P, Q, threshhold=1.) -> np.float32:
+    """ Computes the completeness for two point clouds P and Q.
+
+    Parameters
+    ----------
+    P: BezierPPM or np.ndarray
+    Q: BezierPPM or np.ndarray
+    threshhold: threshhold in mm
+
+    Returns
+    -------
+    np.ndarray
+        completeness in percent
+    """
+
+    P_points = _get_point_cloud(P)
+    Q_points = _get_point_cloud(Q)
+    
+    if P_points.shape[0] == Q_points.shape[0]:
+        distances = point_wise_distances(P_points, Q_points)
+    else:
+        distances = minimal_distances(P_points, Q_points)
+        
+    return 1 - distances[distances > threshhold].shape[0] / distances.shape[0]
+        
