@@ -103,7 +103,7 @@ def rmse_distance(P, Q) -> np.float32:
     if P_points.shape[0] == Q_points.shape[0]:
         rmse = np.mean(point_wise_distances(P_points, Q_points))
     else:
-        rmse = np.max([np.mean(minimal_distances(P_points, Q_points)), np.mean(minimal_distances(Q_points, P_points))])
+        rmse = np.mean(minimal_distances(P_points,Q_points))
 
     return rmse
     
