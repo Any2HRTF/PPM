@@ -101,9 +101,9 @@ def rmse_distance(P, Q) -> np.float32:
     Q_points = _get_point_cloud(Q)
     
     if P_points.shape[0] == Q_points.shape[0]:
-        rmse = np.mean(point_wise_distances(P_points, Q_points))
+        rmse = np.sqrt(np.mean(point_wise_distances(P_points, Q_points)**2))
     else:
-        rmse = np.mean(minimal_distances(P_points,Q_points))
+        rmse = np.sqrt(np.mean(minimal_distances(P_points, Q_points)**2))
 
     return rmse
     
