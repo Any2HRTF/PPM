@@ -656,6 +656,19 @@ class BezierPPM():
             Rotation of the camera. Default: [90, 0, 180]
         camera_location_reference : list or None
             Location of the reference camera.
+        light_location : list
+            Location of the light source in global coordinates. Default: [-0.01, 0.15, 0.1]
+        light_rotation : list
+            Rotation of the light source in Euler angles ('XYZ'). Default: [0, 0, 0]
+        light_power : float
+            Power of the light source in Watts. Default: 200000
+        light_type : str
+            Type of the light source. Default: 'AREA'. 
+            Currently, only 'AREA' is supported.
+        light_shape : str
+            Shape of the light source. Can be one of 'SQUARE', 'RECTANGLE', 'DISC' or 'ELLIPSE'. Default: 'SQUARE'
+        light_size : list
+            Dimensions for the SQUARE or RECTANGLE. Default: [0.1, 0.1]
         depth_farthest : float
             Farthest depth value. Default is 1.25 times the radius of the camera.
         depth_nearest : float
@@ -702,6 +715,26 @@ class BezierPPM():
             if 'camera_rotation' not in kwargs.keys():
                 kwargs['camera_rotation'] = [90, 0, 180]
 
+            if 'light_type' not in kwargs.keys():
+                kwargs['light_type'] = 'AREA'
+
+            if kwargs['light_type'] != 'AREA':
+                raise NotImplementedError
+            
+            if 'light_shape' not in kwargs.keys():
+                kwargs['light_shape'] = 'SQUARE'
+
+            if 'light_location' not in kwargs.keys():
+                kwargs['light_location'] = np.array([-0.01, 0.15, 0.1]) * 1000
+            else:
+                kwargs['light_location'] = np.array(kwargs['light_location']) * 1000
+
+            if 'light_rotation' not in kwargs.keys():
+                kwargs['light_rotation'] = [0, 0, 0]
+
+            if 'light_power' not in kwargs.keys():
+                kwargs['light_power'] = 200000
+
             render(
                 file_path = kwargs['file_path'],
                 file_name = kwargs['file_name'],
@@ -713,6 +746,11 @@ class BezierPPM():
                 camera_location = kwargs['camera_location'],
                 camera_rotation = kwargs['camera_rotation'],
                 camera_location_reference = kwargs['camera_location_reference'],
+                light_location = kwargs['light_location'],
+                light_rotation = kwargs['light_rotation'],
+                light_power = kwargs['light_power'],
+                light_type = kwargs['light_type'],
+                light_shape = kwargs['light_shape'],
                 depth_farthest = kwargs['depth_farthest'],
                 depth_nearest = kwargs['depth_nearest'] if 'depth_nearest' in kwargs else 'camera_location',
                 depth_codec_exr = kwargs['depth_codec_exr'] if 'depth_codec_exr' in kwargs else 'NONE',
