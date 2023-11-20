@@ -10,3 +10,4 @@ __pycache__
 ./Blender Add-on/.ipynb_checkpoints
 
 *.vscode
+test_render.py

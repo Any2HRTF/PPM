@@ -3,6 +3,7 @@ import math
 
 import bpy
 import mathutils
+import numpy as np
 
 def render(file_path,
             file_name,
@@ -18,7 +19,12 @@ def render(file_path,
             depth_nearest=0,
             depth_codec_exr='NONE',
             depth_color_depth_exr='16',
-            depth_compression_exr=0):
+            depth_compression_exr=0,
+            light_type='Area',
+            light_shape='Square',
+            light_location=np.array([-0.01, 0.15, 0.1]) * 1000,
+            light_rotation=[0, 0, 0],
+            light_power=200000):
         
         # transform to mm for use in Blender
         camera_location = [float(i)*1000 for i in camera_location]
@@ -34,6 +40,12 @@ def render(file_path,
         camera = bpy.data.objects['Camera']
         camera.rotation_mode = 'XYZ'
         bpy.context.scene.camera = camera
+
+        light = bpy.data.objects[light_type.capitalize()]
+        light.data.shape = light_shape
+        light.location = light_location
+        light.rotation_euler = light_rotation
+        light.data.energy = light_power
 
         # Optionally smooth mesh faces for more pleasing rendering results
         if smooth_shading:
