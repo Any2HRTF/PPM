@@ -454,19 +454,24 @@ class BezierPPM():
                     if 'Scale' in point.keys():
                         if 'Parent' in parameter_name:
                             for axis, axis_value in point['Scale'].items():
-                                axis_constraint = np.array(tuple(1 if axis == axis_name else 0 for axis_name in ['X', 'Y', 'Z']))
                                 axis_constraint_bool = tuple(True if axis == axis_name else False for axis_name in ['X', 'Y', 'Z'])                          
+                                tuple_axis_value = tuple((axis_value,1.0,1.0) if axis == 'X' else 
+                                                         (1.0,axis_value,1.0) if axis == 'Y' else 
+                                                         (1.0,1.0,axis_value))
 
                                 bpy.ops.transform.resize(
-                                    value=tuple(axis_constraint * axis_value), 
+                                    value=tuple_axis_value, 
                                     orient_type='GLOBAL', 
                                     orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), 
                                     orient_matrix_type='GLOBAL', 
-                                    constraint_axis=axis_constraint_bool, 
+                                    constraint_axis=axis_constraint_bool
                                 )
+
                         else:                             
                             bpy.ops.transform.resize(
-                                value=(axis_value, axis_value, axis_value), 
+                                value=(self.__parameters[parameter_name][point_name]['Scale'], 
+                                       self.__parameters[parameter_name][point_name]['Scale'], 
+                                       self.__parameters[parameter_name][point_name]['Scale']), 
                                 orient_type='GLOBAL', 
                                 orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), 
                                 orient_matrix_type='GLOBAL'
