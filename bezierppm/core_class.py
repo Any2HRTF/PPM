@@ -435,6 +435,7 @@ class BezierPPM():
             self.__center_mesh_blender(reference_point=self.__reference_point)
 
         obj = bpy.data.objects["Armature"]
+        obj.select_set(True)
 
         for parameter_name, parameter in self.__parameters.items():
             # shape keys
@@ -446,16 +447,24 @@ class BezierPPM():
                     if 'Scale' in point.keys():
                         if 'Parent' in parameter_name:
                             for axis, axis_value in point['Scale'].items():
-                                obj.pose.bones[parameter_name + "-" + point_name].scale[
-                                        0 if axis == 'X' else 
-                                        1 if axis == 'Y' else 
-                                        2 if axis == 'Z' else 
-                                        None] = axis_value
-                                    
-                        else:
-                            obj.pose.bones[parameter_name + "-" + point_name].scale[0] = self.__parameters[parameter_name][point_name]['Scale']
-                            obj.pose.bones[parameter_name + "-" + point_name].scale[1] = self.__parameters[parameter_name][point_name]['Scale']
-                            obj.pose.bones[parameter_name + "-" + point_name].scale[2] = self.__parameters[parameter_name][point_name]['Scale']
+                                axis_constraint = np.array(tuple(1 if axis == axis_name else 0 for axis_name in ['X', 'Y', 'Z']))
+                                axis_constraint_bool = tuple(True if axis == axis_name else False for axis_name in ['X', 'Y', 'Z'])                          
+
+                                bpy.ops.transform.resize(
+                                    value=tuple(axis_constraint * axis_value), 
+                                    orient_type='GLOBAL', 
+                                    orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), 
+                                    orient_matrix_type='GLOBAL', 
+                                    constraint_axis=axis_constraint_bool, 
+                                )
+                        else:                             
+                            bpy.ops.transform.resize(
+                                value=(axis_value, axis_value, axis_value), 
+                                orient_type='GLOBAL', 
+                                orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), 
+                                orient_matrix_type='GLOBAL'
+                            )
+
                     # rotation
                     if 'Rotation' in point.keys():
                         for axis, axis_value in point['Rotation'].items():
@@ -465,14 +474,32 @@ class BezierPPM():
                                     2 if axis == 'Y' else
                                     3 if axis == 'Z' else
                                     None] = axis_value
+                            
+                            if axis=='Z':
+                                rotation_matrix = obj.pose.bones[parameter_name + "-" + point_name].rotation_quaternion.to_matrix().to_3x3()
+
+                                bpy.ops.transform.rotate(
+                                    orient_matrix=rotation_matrix, 
+                                    orient_matrix_type='GLOBAL'
+                                )
+                            
                     # location
                     if 'Location' in point.keys():
                         for axis, axis_value in point['Location'].items():
-                            obj.pose.bones[parameter_name + "-" + point_name].location[
-                                    0 if axis == 'X' else
-                                    1 if axis == 'Y' else
-                                    2 if axis == 'Z' else
-                                    None] = 1000*axis_value
+                            
+                            axis_constraint = np.array(tuple(1 if axis == axis_name else 0 for axis_name in ['X', 'Y', 'Z']))
+                            axis_constraint_bool = tuple(True if axis == axis_name else False for axis_name in ['X', 'Y', 'Z'])                          
+
+                            bpy.ops.transform.translate(
+                                value=tuple(axis_constraint * axis_value * 1000), 
+                                orient_type='GLOBAL', 
+                                orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), 
+                                orient_matrix_type='GLOBAL', 
+                                constraint_axis=axis_constraint_bool
+                            )
+        
+        obj.select_set(False)
+
 
     def __get_parameters_from_blender(self):
 
