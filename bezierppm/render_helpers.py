@@ -158,7 +158,7 @@ def render(file_path,
         links.new(denoise.outputs['Image'], file_output_png.inputs['Image'])
 
         # Render!
-        bpy.ops.render.render()
+        bpy.ops.render.render(write_still=True)
 
 
         if depth:
