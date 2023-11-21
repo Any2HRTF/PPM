@@ -320,6 +320,13 @@ class BezierPPM():
                     for i in range(len(value)):
                         self.__parameters[parameter][point][parameter_type][axis[i]] = value[i]
 
+            elif parameter_type == 'Scale':
+                for a in axis:
+                    if a not in ['X', 'Y', 'Z']:
+                        raise Exception('axis must be X, Y, Z')
+                for i in range(len(value)):
+                    self.__parameters[parameter][point][parameter_type][axis[i]] = value[i]
+
     def __load_parameters_from_dict(self, parameter_dict:dict) -> dict:
         parameters = {}
         for key, value in parameter_dict.items():
