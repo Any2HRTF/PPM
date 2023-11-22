@@ -9,7 +9,7 @@ from contextlib import redirect_stdout
 
 import bpy
 import bmesh
-import mathutils
+import mathutils 
 
 from .render_helpers import render
 
@@ -485,15 +485,7 @@ class BezierPPM():
                                     1 if axis == 'X' else
                                     2 if axis == 'Y' else
                                     3 if axis == 'Z' else
-                                    None] = axis_value
-                            
-                            if axis=='Z':
-                                rotation_matrix = obj.pose.bones[parameter_name + "-" + point_name].rotation_quaternion.to_matrix().to_3x3()
-
-                                bpy.ops.transform.rotate(
-                                    orient_matrix=rotation_matrix, 
-                                    orient_matrix_type='GLOBAL'
-                                )
+                                    None] = axis_value                    
                             
                     # location
                     if 'Location' in point.keys():
