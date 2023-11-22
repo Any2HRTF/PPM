@@ -441,10 +441,19 @@ class BezierPPM():
         if self.__reference_point is not None:
             self.__center_mesh_blender(reference_point=self.__reference_point)
 
-        obj = bpy.data.objects["Armature"]
-        obj.select_set(True)
-
         for parameter_name, parameter in self.__parameters.items():
+
+            obj = bpy.data.objects["Armature"]
+            if 'Parent' in parameter_name:
+                obj.select_set(True)
+            else:
+                obj.select_set(False)
+                # case when Shape_key and Bendy not in parameter.keys():
+                if 'Shape_key' not in parameter.keys():
+                    pb = obj.pose.bones[parameter_name + "-" + point_name].bone
+                    bpy.context.object.data.bones.active = pb
+                    pb.select = True
+
             # shape keys
             if 'Shape_key' in parameter.keys():
                 bpy.data.shape_keys['Key'].key_blocks[parameter_name].value = self.__parameters[parameter_name]['Shape_key']
@@ -467,7 +476,8 @@ class BezierPPM():
                                     constraint_axis=axis_constraint_bool
                                 )
 
-                        else:                             
+                        else:      
+
                             bpy.ops.transform.resize(
                                 value=(self.__parameters[parameter_name][point_name]['Scale'], 
                                        self.__parameters[parameter_name][point_name]['Scale'], 
