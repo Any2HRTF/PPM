@@ -448,9 +448,10 @@ class BezierPPM():
                 obj.select_set(True)
             else:
                 obj.select_set(False)
-                # case when Shape_key and Bendy not in parameter.keys():
                 if 'Shape_key' not in parameter.keys():
-                    pb = obj.pose.bones[parameter_name + "-" + point_name].bone
+                    bpy.context.view_layer.objects.active = obj
+                    bpy.ops.object.posemode_toggle()
+                    pb = bpy.data.objects['Armature'].pose.bones[parameter_name + "-" + point_name].bone
                     bpy.context.object.data.bones.active = pb
                     pb.select = True
 
@@ -513,6 +514,7 @@ class BezierPPM():
                             )
         
         obj.select_set(False)
+        pb.select = False
 
 
     def __get_parameters_from_blender(self):
