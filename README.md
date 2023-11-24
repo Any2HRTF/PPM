@@ -70,7 +70,7 @@ points = ppm.points
 The method `render` can be used to render the PPM instance as 'png' or 'exr' (OpenEXR) file in Blender.
 
 ```python
-ppm.render(filepath='path/to/file', filename='filename', resolution=257)
+ppm.render(file_path='path/to/file', filename='file_name', resolution=512)
 ```
 
 ### Math Helpers
