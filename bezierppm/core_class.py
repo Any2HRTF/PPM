@@ -444,16 +444,14 @@ class BezierPPM():
         for parameter_name, parameter in self.__parameters.items():
 
             obj = bpy.data.objects["Armature"]
-            if 'Parent' in parameter_name:
-                obj.select_set(True)
-            else:
-                obj.select_set(False)
-                if 'Shape_key' not in parameter.keys():
-                    bpy.context.view_layer.objects.active = obj
-                    bpy.ops.object.posemode_toggle()
-                    pb = bpy.data.objects['Armature'].pose.bones[parameter_name + "-" + point_name].bone
-                    bpy.context.object.data.bones.active = pb
-                    pb.select = True
+            obj.select_set(True)
+
+            if 'Parent' not in parameter_name and 'Shape_key' not in parameter.keys():
+                bpy.context.view_layer.objects.active = obj
+                bpy.ops.object.posemode_toggle()
+
+                pb = obj.pose.bones[parameter_name + "-" + point_name].bone
+                pb.select = True
 
             # shape keys
             if 'Shape_key' in parameter.keys():
@@ -465,26 +463,23 @@ class BezierPPM():
                         if 'Parent' in parameter_name:
                             for axis, axis_value in point['Scale'].items():
                                 axis_constraint_bool = tuple(True if axis == axis_name else False for axis_name in ['X', 'Y', 'Z'])                          
-                                tuple_axis_value = tuple((axis_value,1.0,1.0) if axis == 'X' else 
-                                                         (1.0,axis_value,1.0) if axis == 'Y' else 
+                                tuple_axis_value = tuple((axis_value,1.0,1.0) if axis == 'X' else
+                                                         (1.0,axis_value,1.0) if axis == 'Y' else
                                                          (1.0,1.0,axis_value))
 
                                 bpy.ops.transform.resize(
-                                    value=tuple_axis_value, 
-                                    orient_type='GLOBAL', 
-                                    orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), 
+                                    value=tuple_axis_value,
+                                    orient_type='GLOBAL',
+                                    orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)),
                                     orient_matrix_type='GLOBAL', 
                                     constraint_axis=axis_constraint_bool
                                 )
 
-                        else:      
-
+                        else:
                             bpy.ops.transform.resize(
-                                value=(self.__parameters[parameter_name][point_name]['Scale'], 
-                                       self.__parameters[parameter_name][point_name]['Scale'], 
-                                       self.__parameters[parameter_name][point_name]['Scale']), 
-                                orient_type='GLOBAL', 
-                                orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), 
+                                value=np.array((point['Scale'], point['Scale'], point['Scale'])),
+                                orient_type='GLOBAL',
+                                orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)),
                                 orient_matrix_type='GLOBAL'
                             )
 
@@ -515,6 +510,7 @@ class BezierPPM():
         
         obj.select_set(False)
         pb.select = False
+        bpy.ops.object.mode_set(mode='OBJECT')
 
 
     def __get_parameters_from_blender(self):

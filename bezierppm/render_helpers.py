@@ -48,7 +48,7 @@ def render(file_path,
         light.data.energy = light_power
 
         # Optionally smooth mesh faces for more pleasing rendering results
-        if smooth_shading:
+        if smooth_shading and bpy.context.object.data.name_full != "Left_ear":
             mesh = bpy.context.object.data
             for polygon in mesh.polygons:
                 polygon.use_smooth = True
