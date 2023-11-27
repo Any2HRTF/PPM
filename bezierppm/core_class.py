@@ -129,17 +129,17 @@ class BezierPPM():
         self.__parameters = self.__load_parameters_from_csv()
 
         if self.backend == 'blender':
-            if from_blender_file != None:
+            if from_blender_file is not None:
                 self.__load_blender_file(from_blender_file)
             else:
                 self.__load_blender_file(f'{CURRENT_DIR}/resources/PPM.blend')
             self.__get_parameters_from_blender()
         
         # rerun fct to load parameters from csv file
-        if from_csv_file != None:
+        if from_csv_file is not None:
             self.__parameters = self.__load_parameters_from_csv(from_csv_file)
         
-        if from_dict != None:
+        if from_dict is not None:
             self.__parameters = self.__load_parameters_from_dict(from_dict)
         
         bpy.ops.object.mode_set(mode='OBJECT')
@@ -168,7 +168,6 @@ class BezierPPM():
     def mesh_reference_point(self, reference_point):
 
         self.center_mesh(reference_point=reference_point)
-        
 
     @property
     def points(self):
@@ -273,41 +272,40 @@ class BezierPPM():
         point = point.lower().capitalize() if point != None else None
 
         if parameter_type not in ['Shape_key', 'Scale', 'Rotation', 'Location']:
-            raise Exception('parameter_type must be one of Shape_key, Scale, Rotation, Location')
+            raise ValueError('parameter_type must be one of Shape_key, Scale, Rotation, Location')
         
         if point == 'Shape_key':
             if len(value) > 1:
-                raise Exception('value must be a single float value')
+                raise ValueError('value must be a single float value')
             self.__parameters[parameter][parameter_type] = value
+        if point != 'Bendy':
+                raise ValueError('point must be Bendy')
         elif parameter_type == 'Scale' and parameter != 'Parent':
             if len(value) > 1:
-                raise Exception('value must be a single float value')
+                raise ValueError('value must be a single float value')
             self.__parameters[parameter]['Bendy'][parameter_type] = value
         else:
             if point not in ['Start', 'End'] and parameter != 'Parent':
-                raise Exception('point must be one of Start, End')
-            elif parameter == 'Parent':
+                raise ValueError('point must be one of Start, End')
+            if parameter == 'Parent':
                 point = 'Bendy'
-            
+
             if len(value) != len(axis):
-                raise Exception('value and axis must have the same number of elements')
+                raise ValueError('value and axis must have the same number of elements')
 
             if parameter_type == 'Location':
-                for a in axis:
-                    if a not in ['X', 'Y', 'Z']:
-                        raise Exception('axis must be X, Y, Z')
-                for i in range(len(value)):
-                    self.__parameters[parameter][point][parameter_type][axis[i]] = value[i]
+                for i, val in enumerate(value):
+                    self.__parameters[parameter][point][parameter_type][axis[i]] = val
             
             elif parameter_type == 'Rotation':
                 # rotation defined in euler angles
                 if len(axis) == 3:
                     for a in axis:
                         if a not in ['X', 'Y', 'Z']:
-                            raise Exception('axis must be X, Y, Z')
-                    
+                            raise ValueError('axis must be X, Y, or Z')
+
                     quaternion = euler_to_quaternion(value, sequence=axis)
-                    
+
                     self.__parameters[parameter][point][parameter_type]['W'] = quaternion[0]
                     self.__parameters[parameter][point][parameter_type]['X'] = quaternion[1]
                     self.__parameters[parameter][point][parameter_type]['Y'] = quaternion[2]
@@ -315,17 +313,16 @@ class BezierPPM():
 
                 elif len(axis) == 4:
                     if not all(elem in axis for elem in ['W', 'X', 'Y', 'Z']):
-                        raise Exception('axis must contain W, X, Y, Z')
+                        raise ValueError('axis must contain W, X, Y, Z')
 
-                    for i in range(len(value)):
-                        self.__parameters[parameter][point][parameter_type][axis[i]] = value[i]
+                    for i, a in enumerate(axis):
+                        self.__parameters[parameter][point][parameter_type][a] = value[i]
 
             elif parameter_type == 'Scale':
-                for a in axis:
+                for i, a in enumerate(axis):
                     if a not in ['X', 'Y', 'Z']:
-                        raise Exception('axis must be X, Y, Z')
-                for i in range(len(value)):
-                    self.__parameters[parameter][point][parameter_type][axis[i]] = value[i]
+                        raise ValueError('axis must be X, Y, Z')
+                    self.__parameters[parameter][point][parameter_type][a] = value[i]
 
     def __load_parameters_from_dict(self, parameter_dict:dict) -> dict:
         parameters = {}
@@ -499,16 +496,16 @@ class BezierPPM():
                         for axis, axis_value in point['Location'].items():
                             
                             axis_constraint = np.array(tuple(1 if axis == axis_name else 0 for axis_name in ['X', 'Y', 'Z']))
-                            axis_constraint_bool = tuple(True if axis == axis_name else False for axis_name in ['X', 'Y', 'Z'])                          
+                            axis_constraint_bool = tuple(True if axis == axis_name else False for axis_name in ['X', 'Y', 'Z'])
 
                             bpy.ops.transform.translate(
-                                value=tuple(axis_constraint * axis_value * 1000), 
-                                orient_type='GLOBAL', 
-                                orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), 
-                                orient_matrix_type='GLOBAL', 
-                                constraint_axis=axis_constraint_bool
+                                value=tuple(axis_constraint * axis_value * 1000),
+                                orient_type='GLOBAL',
+                                orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)),
+                                orient_matrix_type='GLOBAL',
+                                # constraint_axis=axis_constraint_bool,
                             )
-        
+
         obj.select_set(False)
         pb.select = False
         bpy.ops.object.mode_set(mode='OBJECT')
