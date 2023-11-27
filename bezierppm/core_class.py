@@ -279,7 +279,7 @@ class BezierPPM():
                 raise ValueError('value must be a single float value')
             self.__parameters[parameter][parameter_type] = value
         if point != 'Bendy':
-                raise ValueError('point must be Bendy')
+            raise ValueError('point must be Bendy')
         elif parameter_type == 'Scale' and parameter != 'Parent':
             if len(value) > 1:
                 raise ValueError('value must be a single float value')
