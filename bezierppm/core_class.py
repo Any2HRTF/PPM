@@ -448,7 +448,8 @@ class BezierPPM():
 
             if 'Parent' not in parameter_name and 'Shape_key' not in parameter.keys():
                 bpy.context.view_layer.objects.active = obj
-                bpy.ops.object.posemode_toggle()
+                if bpy.context.active_object.mode != 'POSE':
+                    bpy.ops.object.posemode_toggle()
 
                 pb = obj.pose.bones[parameter_name + "-" + point_name].bone
                 pb.select = True
