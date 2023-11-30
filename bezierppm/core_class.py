@@ -117,10 +117,10 @@ class BezierPPM():
                  from_dict=None,
                  backend='blender'):
 
-        if from_blender_file != None and from_csv_file != None:
+        if from_blender_file is not None and from_csv_file is not None:
             raise Exception('Either load from blender file or from csv file.')
         
-        if backend != 'blender' and from_blender_file != None:
+        if backend != 'blender' and from_blender_file is not None:
             raise Exception('Blender backend not selected.')
 
         self.backend = backend
@@ -278,9 +278,7 @@ class BezierPPM():
             if len(value) > 1:
                 raise ValueError('value must be a single float value')
             self.__parameters[parameter][parameter_type] = value
-        if point != 'Bendy':
-            raise ValueError('point must be Bendy')
-        elif parameter_type == 'Scale' and parameter != 'Parent':
+        if parameter_type == 'Scale' and parameter != 'Parent':
             if len(value) > 1:
                 raise ValueError('value must be a single float value')
             self.__parameters[parameter]['Bendy'][parameter_type] = value
@@ -470,7 +468,8 @@ class BezierPPM():
                                     orient_type='GLOBAL',
                                     orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)),
                                     orient_matrix_type='GLOBAL', 
-                                    constraint_axis=axis_constraint_bool
+                                    constraint_axis=axis_constraint_bool,
+                                    use_accurate=True
                                 )
 
                         else:
@@ -478,19 +477,29 @@ class BezierPPM():
                                 value=np.array((point['Scale'], point['Scale'], point['Scale'])),
                                 orient_type='GLOBAL',
                                 orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)),
-                                orient_matrix_type='GLOBAL'
+                                orient_matrix_type='GLOBAL',
+                                use_accurate=True
                             )
 
                     # rotation
                     if 'Rotation' in point.keys():
                         for axis, axis_value in point['Rotation'].items():
-                            obj.pose.bones[parameter_name + "-" + point_name].rotation_quaternion[
-                                    0 if axis == 'W' else
-                                    1 if axis == 'X' else
-                                    2 if axis == 'Y' else
-                                    3 if axis == 'Z' else
-                                    None] = axis_value                    
+
+                            self.__parameters[parameter_name][point_name]['Rotation'][axis] = axis_value
                             
+                            if axis=='Z':
+                                rotation_current = self.__parameters[parameter_name][point_name]['Rotation']
+                                rotation_current_quaternion = mathutils.Quaternion(
+                                    np.array(
+                                        [rotation_current['W'],
+                                         rotation_current['X'],
+                                         rotation_current['Y'],
+                                         rotation_current['Z']]
+                                    )
+                                )
+                                
+                                obj.pose.bones[parameter_name + "-" + point_name].rotation_quaternion = rotation_current_quaternion @ \
+                                    obj.pose.bones[parameter_name + "-" + point_name].rotation_quaternion
                     # location
                     if 'Location' in point.keys():
                         for axis, axis_value in point['Location'].items():
@@ -503,7 +512,8 @@ class BezierPPM():
                                 orient_type='GLOBAL',
                                 orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)),
                                 orient_matrix_type='GLOBAL',
-                                # constraint_axis=axis_constraint_bool,
+                                constraint_axis=axis_constraint_bool,
+                                use_accurate=True
                             )
 
         obj.select_set(False)
@@ -643,7 +653,7 @@ class BezierPPM():
        
     def __export_blend_blender(self, file_path):
 
-        bpy.ops.wm.save_as_mainfile(filepath=file_path)
+        bpy.ops.wm.save_as_mainfile(filepath=file_path+'.blend')
 
     def export_blend(self, file_path:str):
         """Exports the PPM as a blend file.
@@ -651,7 +661,7 @@ class BezierPPM():
         Parameters
         ----------
         file_path : str
-            Path to the blend file.(NOTE: has to be an absolute path)
+            Path to the blend file. (NOTE: has to be an absolute path)
         """
 
         if self.backend != 'blender':
@@ -727,6 +737,7 @@ class BezierPPM():
         depth_compression_exr : int
             Compression of the depth map. Default: 0
         """
+
         if self.backend == 'blender':
             self.__set_parameters_in_blender()
             # redirect output to temporary file
