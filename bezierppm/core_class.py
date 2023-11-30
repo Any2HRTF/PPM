@@ -112,28 +112,14 @@ class BezierPPM():
         from_dict (dict): Dictionary containing the PPM parameters; if None, the standard PPM is loaded
     """
     def __init__(self, 
-                 from_blender_file=None,
                  from_csv_file=None,
                  from_dict=None,
                  backend='blender'):
-
-        if from_blender_file is not None and from_csv_file is not None:
-            raise Exception('Either load from blender file or from csv file.')
-        
-        if backend != 'blender' and from_blender_file is not None:
-            raise Exception('Blender backend not selected.')
 
         self.backend = backend
 
         # load init parameters
         self.__parameters = self.__load_parameters_from_csv()
-
-        if self.backend == 'blender':
-            if from_blender_file is not None:
-                self.__load_blender_file(from_blender_file)
-            else:
-                self.__load_blender_file(f'{CURRENT_DIR}/resources/PPM.blend')
-            self.__get_parameters_from_blender()
         
         # rerun fct to load parameters from csv file
         if from_csv_file is not None:
@@ -141,8 +127,6 @@ class BezierPPM():
         
         if from_dict is not None:
             self.__parameters = self.__load_parameters_from_dict(from_dict)
-        
-        bpy.ops.object.mode_set(mode='OBJECT')
         
         self.__reference_point = None
 
@@ -278,7 +262,7 @@ class BezierPPM():
             if len(value) > 1:
                 raise ValueError('value must be a single float value')
             self.__parameters[parameter][parameter_type] = value
-        if parameter_type == 'Scale' and parameter != 'Parent':
+        elif parameter_type == 'Scale' and parameter != 'Parent':
             if len(value) > 1:
                 raise ValueError('value must be a single float value')
             self.__parameters[parameter]['Bendy'][parameter_type] = value
@@ -433,6 +417,8 @@ class BezierPPM():
         self.__parameters = self.__load_parameters_from_csv()
 
     def __set_parameters_in_blender(self):
+        self.__load_blender_file(f'{CURRENT_DIR}/resources/PPM.blend')
+
         if self.__reference_point is not None:
             self.__center_mesh_blender(reference_point=self.__reference_point)
 
@@ -519,49 +505,6 @@ class BezierPPM():
         obj.select_set(False)
         pb.select = False
         bpy.ops.object.mode_set(mode='OBJECT')
-
-
-    def __get_parameters_from_blender(self):
-
-        obj = bpy.data.objects["Armature"]
-
-        for parameter_name, parameter in self.__parameters.items():
-            # shape keys
-            if 'Shape_key' in parameter.keys():
-                self.__parameters[parameter_name]['Shape_key'] = bpy.data.shape_keys['Key'].key_blocks[parameter_name].value
-            else:
-                for point_name, point in parameter.items():
-                    # scale
-                    if 'Scale' in point.keys():
-                        if 'Parent' in parameter_name:
-                            for axis, axis_value in point['Scale'].items():
-                                self.__parameters[parameter_name][point_name]['Scale'][axis] = \
-                                    obj.pose.bones[parameter_name + "-" + point_name].scale[
-                                        0 if axis == 'X' else 
-                                        1 if axis == 'Y' else 
-                                        2 if axis == 'Z' else 
-                                        None]
-                        else:
-                            self.__parameters[parameter_name][point_name]['Scale'] = obj.pose.bones[parameter_name + "-" + point_name].scale[0]
-                    # rotation
-                    if 'Rotation' in point.keys():
-                        for axis, axis_value in point['Rotation'].items():
-                            self.__parameters[parameter_name][point_name]['Rotation'][axis] = \
-                                obj.pose.bones[parameter_name + "-" + point_name].rotation_quaternion[
-                                    0 if axis == 'W' else
-                                    1 if axis == 'X' else
-                                    2 if axis == 'Y' else
-                                    3 if axis == 'Z' else
-                                    None]
-                    # location
-                    if 'Location' in point.keys():
-                        for axis, axis_value in point['Location'].items():
-                            self.__parameters[parameter_name][point_name]['Location'][axis] = \
-                                1/1000 * obj.pose.bones[parameter_name + "-" + point_name].location[
-                                    0 if axis == 'X' else
-                                    1 if axis == 'Y' else
-                                    2 if axis == 'Z' else
-                                    None]
 
     def __get_point_cloud_blender(self):
 
@@ -653,23 +596,7 @@ class BezierPPM():
        
     def __export_blend_blender(self, file_path):
 
-        bpy.ops.wm.save_as_mainfile(filepath=file_path+'.blend')
-
-    def export_blend(self, file_path:str):
-        """Exports the PPM as a blend file.
-
-        Parameters
-        ----------
-        file_path : str
-            Path to the blend file. (NOTE: has to be an absolute path)
-        """
-
-        if self.backend != 'blender':
-            raise NotImplementedError
-
-        self.__set_parameters_in_blender()
-        self.__export_blend_blender(file_path=file_path)
-
+        bpy.ops.wm.save_as_mainfile(filepath=file_path)
      
     def export_csv(self, file_path):
         """Exports the PPM as a CSV file.
