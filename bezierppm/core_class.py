@@ -427,19 +427,20 @@ class BezierPPM():
             obj = bpy.data.objects["Armature"]
             obj.select_set(True)
 
-            if 'Parent' not in parameter_name and 'Shape_key' not in parameter.keys():
-                bpy.context.view_layer.objects.active = obj
-                if bpy.context.active_object.mode != 'POSE':
-                    bpy.ops.object.posemode_toggle()
-
-                pb = obj.pose.bones[parameter_name + "-" + point_name].bone
-                pb.select = True
-
             # shape keys
             if 'Shape_key' in parameter.keys():
                 bpy.data.shape_keys['Key'].key_blocks[parameter_name].value = self.__parameters[parameter_name]['Shape_key']
-            else:
+            else:                
                 for point_name, point in parameter.items():
+
+                    if 'Parent' not in parameter_name:
+                        bpy.context.view_layer.objects.active = obj
+                        if bpy.context.active_object.mode != 'POSE':
+                            bpy.ops.object.posemode_toggle()
+
+                        pb = obj.pose.bones[parameter_name + "-" + point_name].bone
+                        pb.select = True
+
                     # scale
                     if 'Scale' in point.keys():
                         if 'Parent' in parameter_name:
@@ -486,12 +487,18 @@ class BezierPPM():
                                 
                                 obj.pose.bones[parameter_name + "-" + point_name].rotation_quaternion = rotation_current_quaternion @ \
                                     obj.pose.bones[parameter_name + "-" + point_name].rotation_quaternion
+                                
                     # location
                     if 'Location' in point.keys():
                         for axis, axis_value in point['Location'].items():
                             
                             axis_constraint = np.array(tuple(1 if axis == axis_name else 0 for axis_name in ['X', 'Y', 'Z']))
                             axis_constraint_bool = tuple(True if axis == axis_name else False for axis_name in ['X', 'Y', 'Z'])
+
+                            if 'Parent' not in parameter_name:
+                            # print selected active pose bone
+                                print(pb)
+                                print(obj.pose.bones[parameter_name + "-" + point_name])                           
 
                             bpy.ops.transform.translate(
                                 value=tuple(axis_constraint * axis_value * 1000),
