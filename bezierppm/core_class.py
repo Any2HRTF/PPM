@@ -258,7 +258,7 @@ class BezierPPM():
         if parameter_type not in ['Shape_key', 'Scale', 'Rotation', 'Location']:
             raise ValueError('parameter_type must be one of Shape_key, Scale, Rotation, Location')
         
-        if point == 'Shape_key':
+        if parameter_type == 'Shape_key':
             if len(value) > 1:
                 raise ValueError('value must be a single float value')
             self.__parameters[parameter][parameter_type] = value
@@ -296,7 +296,6 @@ class BezierPPM():
                 elif len(axis) == 4:
                     if not all(elem in axis for elem in ['W', 'X', 'Y', 'Z']):
                         raise ValueError('axis must contain W, X, Y, Z')
-
                     for i, a in enumerate(axis):
                         self.__parameters[parameter][point][parameter_type][a] = value[i]
 
@@ -428,8 +427,8 @@ class BezierPPM():
             obj.select_set(True)
 
             # shape keys
-            if 'Shape_key' in parameter.keys():
-                bpy.data.shape_keys['Key'].key_blocks[parameter_name].value = self.__parameters[parameter_name]['Shape_key']
+            if 'Shape_key' in parameter.keys():              
+                bpy.data.shape_keys['Key'].key_blocks[parameter_name].value = np.float32(self.__parameters[parameter_name]['Shape_key'])
             else:                
                 for point_name, point in parameter.items():
 
@@ -438,8 +437,8 @@ class BezierPPM():
                         if bpy.context.active_object.mode != 'POSE':
                             bpy.ops.object.posemode_toggle()
 
-                        pb = obj.pose.bones[parameter_name + "-" + point_name].bone
-                        pb.select = True
+                        pb = obj.pose.bones[parameter_name + "-" + point_name]
+                        pb.bone.select = True
 
                     # scale
                     if 'Scale' in point.keys():
@@ -484,9 +483,37 @@ class BezierPPM():
                                          rotation_current['Z']]
                                     )
                                 )
-                                
-                                obj.pose.bones[parameter_name + "-" + point_name].rotation_quaternion = rotation_current_quaternion @ \
-                                    obj.pose.bones[parameter_name + "-" + point_name].rotation_quaternion
+                  
+                                if 'Parent' not in parameter_name:
+
+                                    print("Warning: Rotation of local BezierPPM parameters not yet implemented.")
+
+                                #     pb_world_matrix = obj.convert_space(
+                                #         pose_bone=pb,
+                                #         matrix=pb.matrix,
+                                #         from_space='POSE',
+                                #         to_space='WORLD',
+                                #         )
+                                                                       
+                                #     # if parameter_name=='Lobulus' and point_name=='Start':
+                                #     pb_world_matrix = mathutils.Matrix.Translation(pb_world_matrix.translation) @ \
+                                #                         obj.pose.bones[parameter_name + "-" + point_name].rotation_quaternion.to_matrix().to_4x4() @ \
+                                #                         rotation_current_quaternion.to_matrix().to_4x4() @ \
+                                #                         mathutils.Matrix.Translation(-pb_world_matrix.translation)
+                                    
+                                #     pb.matrix = obj.convert_space(
+                                #         pose_bone=pb,
+                                #         matrix=pb_world_matrix,
+                                #         from_space='WORLD',
+                                #         to_space='POSE',
+                                #         )
+                                    
+                                #     print(pb.rotation_quaternion)
+                                    
+                                else:
+                                    obj.matrix_world = rotation_current_quaternion.to_matrix().to_4x4() @ \
+                                                        obj.pose.bones[parameter_name + "-" + point_name].rotation_quaternion.to_matrix().to_4x4() @ \
+                                                        obj.matrix_world
                                 
                     # location
                     if 'Location' in point.keys():
@@ -505,7 +532,7 @@ class BezierPPM():
                             )
                     
                     if 'Parent' not in parameter_name:
-                        pb.select = False
+                        pb.bone.select = False
                         bpy.ops.object.mode_set(mode='OBJECT')
 
         obj.select_set(False)
