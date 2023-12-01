@@ -495,11 +495,6 @@ class BezierPPM():
                             axis_constraint = np.array(tuple(1 if axis == axis_name else 0 for axis_name in ['X', 'Y', 'Z']))
                             axis_constraint_bool = tuple(True if axis == axis_name else False for axis_name in ['X', 'Y', 'Z'])
 
-                            if 'Parent' not in parameter_name:
-                            # print selected active pose bone
-                                print(pb)
-                                print(obj.pose.bones[parameter_name + "-" + point_name])                           
-
                             bpy.ops.transform.translate(
                                 value=tuple(axis_constraint * axis_value * 1000),
                                 orient_type='GLOBAL',
