@@ -493,7 +493,7 @@ class BezierPPM():
                         for axis, axis_value in point['Location'].items():
                             
                             axis_constraint = np.array(tuple(1 if axis == axis_name else 0 for axis_name in ['X', 'Y', 'Z']))
-                            axis_constraint_bool = tuple(True if axis == axis_name else False for axis_name in ['X', 'Y', 'Z'])
+                            axis_constraint_bool = tuple(True if axis == axis_name else False for axis_name in ['X', 'Y', 'Z'])                    
 
                             bpy.ops.transform.translate(
                                 value=tuple(axis_constraint * axis_value * 1000),
@@ -503,10 +503,12 @@ class BezierPPM():
                                 constraint_axis=axis_constraint_bool,
                                 use_accurate=True
                             )
+                    
+                    if 'Parent' not in parameter_name:
+                        pb.select = False
+                        bpy.ops.object.mode_set(mode='OBJECT')
 
         obj.select_set(False)
-        pb.select = False
-        bpy.ops.object.mode_set(mode='OBJECT')
 
     def __get_point_cloud_blender(self):
 
