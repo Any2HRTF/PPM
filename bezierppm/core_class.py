@@ -2,8 +2,8 @@ import os
 import io
 import sys
 import csv
-import math
 import tempfile
+import warnings
 import numpy as np
 from contextlib import redirect_stdout
 
@@ -114,6 +114,7 @@ class BezierPPM():
     def __init__(self, 
                  from_csv_file=None,
                  from_dict=None,
+                 from_blender_file=None,
                  backend='blender'):
 
         self.backend = backend
@@ -127,6 +128,9 @@ class BezierPPM():
         
         if from_dict is not None:
             self.__parameters = self.__load_parameters_from_dict(from_dict)
+
+        if from_blender_file is not None:
+            self.__get_parameters_from_blender(from_blender_file)
         
         self.__reference_point = None
 
@@ -414,6 +418,50 @@ class BezierPPM():
         """Resets the PPM parameters to the default parameters.
         """
         self.__parameters = self.__load_parameters_from_csv()
+    
+    def __get_parameters_from_blender(self, from_blender_file):
+        self.__load_blender_file(from_blender_file)
+        warnings.warn("Location parameters are not read properly.", UserWarning)
+
+        obj = bpy.data.objects["Armature"]
+
+        for parameter_name, parameter in self.__parameters.items():
+            # shape keys
+            if 'Shape_key' in parameter.keys():
+                self.__parameters[parameter_name]['Shape_key'] = bpy.data.shape_keys['Key'].key_blocks[parameter_name].value
+            else:
+                for point_name, point in parameter.items():
+                    # scale
+                    if 'Scale' in point.keys():
+                        if 'Parent' in parameter_name:
+                            for axis, axis_value in point['Scale'].items():
+                                self.__parameters[parameter_name][point_name]['Scale'][axis] = \
+                                    obj.pose.bones[parameter_name + "-" + point_name].scale[
+                                        0 if axis == 'X' else 
+                                        1 if axis == 'Y' else 
+                                        2 if axis == 'Z' else 
+                                        None]
+                        else:
+                            self.__parameters[parameter_name][point_name]['Scale'] = obj.pose.bones[parameter_name + "-" + point_name].scale[0]
+                    # rotation
+                    if 'Rotation' in point.keys():
+                        for axis, axis_value in point['Rotation'].items():
+                            self.__parameters[parameter_name][point_name]['Rotation'][axis] = \
+                                obj.pose.bones[parameter_name + "-" + point_name].rotation_quaternion[
+                                    0 if axis == 'W' else
+                                    1 if axis == 'X' else
+                                    2 if axis == 'Y' else
+                                    3 if axis == 'Z' else
+                                    None]
+                    # location
+                    if 'Location' in point.keys():
+                        for axis, axis_value in point['Location'].items():
+                            self.__parameters[parameter_name][point_name]['Location'][axis] = \
+                                1/1000 * obj.pose.bones[parameter_name + "-" + point_name].location[
+                                    0 if axis == 'X' else
+                                    1 if axis == 'Y' else
+                                    2 if axis == 'Z' else
+                                    None]
 
     def __set_parameters_in_blender(self):
         self.__load_blender_file(f'{CURRENT_DIR}/resources/PPM.blend')
@@ -625,8 +673,12 @@ class BezierPPM():
         else:
             raise NotImplementedError
        
-    def __export_blend_blender(self, file_path):
+    def export_blend(self, file_path):
+        warnings.warn("Location parameters are not properly exported.", UserWarning)
 
+        if self.backend != 'blender':
+            raise NotImplementedError
+        self.__set_parameters_in_blender()
         bpy.ops.wm.save_as_mainfile(filepath=file_path)
      
     def export_csv(self, file_path):
