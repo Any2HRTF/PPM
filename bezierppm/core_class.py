@@ -533,36 +533,28 @@ class BezierPPM():
                                 )
                   
                                 if 'Parent' not in parameter_name:
+                                    pb_matrix_global = obj.convert_space(
+                                        pose_bone=pb,
+                                        matrix=pb.matrix,
+                                        from_space='POSE',
+                                        to_space='WORLD',
+                                        )
+                                    
+                                    matrix_global_converted = pb.rotation_quaternion.to_matrix().to_4x4() @ \
+                                                                rotation_current_quaternion.to_matrix().to_4x4() @ \
+                                                                pb_matrix_global
 
-                                    print("Warning: Rotation of local BezierPPM parameters not yet implemented.")
-
-                                #     pb_world_matrix = obj.convert_space(
-                                #         pose_bone=pb,
-                                #         matrix=pb.matrix,
-                                #         from_space='POSE',
-                                #         to_space='WORLD',
-                                #         )
-                                                                       
-                                #     # if parameter_name=='Lobulus' and point_name=='Start':
-                                #     pb_world_matrix = mathutils.Matrix.Translation(pb_world_matrix.translation) @ \
-                                #                         obj.pose.bones[parameter_name + "-" + point_name].rotation_quaternion.to_matrix().to_4x4() @ \
-                                #                         rotation_current_quaternion.to_matrix().to_4x4() @ \
-                                #                         mathutils.Matrix.Translation(-pb_world_matrix.translation)
-                                    
-                                #     pb.matrix = obj.convert_space(
-                                #         pose_bone=pb,
-                                #         matrix=pb_world_matrix,
-                                #         from_space='WORLD',
-                                #         to_space='POSE',
-                                #         )
-                                    
-                                #     print(pb.rotation_quaternion)
-                                    
+                                    pb.matrix = obj.convert_space(
+                                        pose_bone=pb,
+                                        matrix=matrix_global_converted,
+                                        from_space='WORLD',
+                                        to_space='POSE',
+                                        )
                                 else:
                                     obj.matrix_world = rotation_current_quaternion.to_matrix().to_4x4() @ \
                                                         obj.pose.bones[parameter_name + "-" + point_name].rotation_quaternion.to_matrix().to_4x4() @ \
                                                         obj.matrix_world
-                                
+                                                                    
                     # location
                     if 'Location' in point.keys():
                         for axis, axis_value in point['Location'].items():
