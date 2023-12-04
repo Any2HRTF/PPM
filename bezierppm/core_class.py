@@ -540,13 +540,15 @@ class BezierPPM():
                                         to_space='WORLD',
                                         )
                                     
-                                    matrix_global_converted = pb.rotation_quaternion.to_matrix().to_4x4() @ \
+                                    pb_matrix_global_rotated = mathutils.Matrix.Translation(pb_matrix_global.translation) @ \
+                                                                pb.rotation_quaternion.to_matrix().to_4x4() @ \
                                                                 rotation_current_quaternion.to_matrix().to_4x4() @ \
+                                                                mathutils.Matrix.Translation(-pb_matrix_global.translation) @ \
                                                                 pb_matrix_global
 
                                     pb.matrix = obj.convert_space(
                                         pose_bone=pb,
-                                        matrix=matrix_global_converted,
+                                        matrix=pb_matrix_global_rotated,
                                         from_space='WORLD',
                                         to_space='POSE',
                                         )
