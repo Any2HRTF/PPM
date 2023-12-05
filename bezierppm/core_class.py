@@ -154,7 +154,6 @@ class BezierPPM():
 
     @mesh_reference_point.setter
     def mesh_reference_point(self, reference_point):
-
         self.center_mesh(reference_point=reference_point)
 
     @property
@@ -443,6 +442,7 @@ class BezierPPM():
                                         None]
                         else:
                             self.__parameters[parameter_name][point_name]['Scale'] = obj.pose.bones[parameter_name + "-" + point_name].scale[0]
+
                     # rotation
                     if 'Rotation' in point.keys():
                         for axis, axis_value in point['Rotation'].items():
@@ -453,6 +453,7 @@ class BezierPPM():
                                     2 if axis == 'Y' else
                                     3 if axis == 'Z' else
                                     None]
+                            
                     # location
                     if 'Location' in point.keys():
                         for axis, axis_value in point['Location'].items():
@@ -488,33 +489,36 @@ class BezierPPM():
                         pb = obj.pose.bones[parameter_name + "-" + point_name]
                         pb.bone.select = True
 
-                    # scale
-                    if 'Scale' in point.keys():
-                        if 'Parent' in parameter_name:
-                            for axis, axis_value in point['Scale'].items():
-                                axis_constraint_bool = tuple(True if axis == axis_name else False for axis_name in ['X', 'Y', 'Z'])                          
-                                tuple_axis_value = tuple((axis_value,1.0,1.0) if axis == 'X' else
-                                                         (1.0,axis_value,1.0) if axis == 'Y' else
-                                                         (1.0,1.0,axis_value))
+                    # location
+                    if 'Location' in point.keys():
+                        for axis, axis_value in point['Location'].items():
 
-                                bpy.ops.transform.resize(
-                                    value=tuple_axis_value,
-                                    orient_type='GLOBAL',
-                                    orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)),
-                                    orient_matrix_type='GLOBAL', 
-                                    constraint_axis=axis_constraint_bool,
-                                    use_accurate=True
+                            axis_constraint = np.array(tuple(1 if axis == axis_name else 0 for axis_name in ['X', 'Y', 'Z']))
+
+                            if 'Parent' not in parameter_name:
+                                pb_matrix_global = obj.convert_space(
+                                    pose_bone=pb,
+                                    matrix=pb.matrix,
+                                    from_space='POSE',
+                                    to_space='WORLD',
+                                )
+                                
+                                pb_matrix_global_translated = mathutils.Matrix.Translation(axis_constraint * axis_value * 1000) @ \
+                                                                pb_matrix_global
+                                
+                                pb.matrix = obj.convert_space(
+                                    pose_bone=pb,
+                                    matrix=pb_matrix_global_translated,
+                                    from_space='WORLD',
+                                    to_space='POSE',
                                 )
 
-                        else:
-                            bpy.ops.transform.resize(
-                                value=np.array((point['Scale'], point['Scale'], point['Scale'])),
-                                orient_type='GLOBAL',
-                                orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)),
-                                orient_matrix_type='GLOBAL',
-                                use_accurate=True
-                            )
+                                bpy.context.view_layer.update()
 
+                            else:
+                                obj.matrix_world = mathutils.Matrix.Translation(axis_constraint * axis_value * 1000) @ \
+                                                    obj.matrix_world
+                                
                     # rotation
                     if 'Rotation' in point.keys():
                         for axis, axis_value in point['Rotation'].items():
@@ -533,12 +537,13 @@ class BezierPPM():
                                 )
                   
                                 if 'Parent' not in parameter_name:
+
                                     pb_matrix_global = obj.convert_space(
                                         pose_bone=pb,
                                         matrix=pb.matrix,
                                         from_space='POSE',
                                         to_space='WORLD',
-                                        )
+                                    )
                                     
                                     pb_matrix_global_rotated = mathutils.Matrix.Translation(pb_matrix_global.translation) @ \
                                                                 pb.rotation_quaternion.to_matrix().to_4x4() @ \
@@ -551,28 +556,56 @@ class BezierPPM():
                                         matrix=pb_matrix_global_rotated,
                                         from_space='WORLD',
                                         to_space='POSE',
-                                        )
-                                else:
-                                    obj.matrix_world = rotation_current_quaternion.to_matrix().to_4x4() @ \
-                                                        obj.pose.bones[parameter_name + "-" + point_name].rotation_quaternion.to_matrix().to_4x4() @ \
-                                                        obj.matrix_world
-                                                                    
-                    # location
-                    if 'Location' in point.keys():
-                        for axis, axis_value in point['Location'].items():
-                            
-                            axis_constraint = np.array(tuple(1 if axis == axis_name else 0 for axis_name in ['X', 'Y', 'Z']))
-                            axis_constraint_bool = tuple(True if axis == axis_name else False for axis_name in ['X', 'Y', 'Z'])                    
+                                    )
 
-                            bpy.ops.transform.translate(
-                                value=tuple(axis_constraint * axis_value * 1000),
-                                orient_type='GLOBAL',
-                                orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)),
-                                orient_matrix_type='GLOBAL',
-                                constraint_axis=axis_constraint_bool,
-                                use_accurate=True
+                                else:
+                                    obj.matrix_world = mathutils.Matrix.Translation(obj.matrix_world.translation) @ \
+                                                        rotation_current_quaternion.to_matrix().to_4x4() @ \
+                                                        obj.pose.bones[parameter_name + "-" + point_name].rotation_quaternion.to_matrix().to_4x4() @ \
+                                                        mathutils.Matrix.Translation(-obj.matrix_world.translation) @ \
+                                                        obj.matrix_world
+
+                    # scale
+                    if 'Scale' in point.keys():
+                        if 'Parent' in parameter_name:
+                            for axis, axis_value in point['Scale'].items():
+                                axis_constraint = np.array(tuple(1 if axis == axis_name else 0 for axis_name in ['X', 'Y', 'Z']))
+
+                                # decompose obj.matrix_world into translation, rotation and scale
+                                scale, rotation, translation = obj.matrix_world.decompose()
+
+                                # # apply scale matrix on scale
+                                # scale = scale.to_scale() * np.float32(point['Scale'])
+
+                                # # recompose obj.matrix_world
+                                # obj.matrix_world = mathutils.Matrix.Translation(translation) @ \
+                                #                     rotation.to_matrix().to_4x4() @ \
+                                #                     mathutils.Matrix.Scale(scale[0], 4, (1, 0, 0)) @ \
+                                #                     mathutils.Matrix.Scale(scale[1], 4, (0, 1, 0)) @ \
+                                #                     mathutils.Matrix.Scale(scale[2], 4, (0, 0, 1))                            
+
+                        else:
+                            pb_matrix_global = obj.convert_space(
+                                pose_bone=pb,
+                                matrix=pb.matrix,
+                                from_space='POSE',
+                                to_space='WORLD',
                             )
-                    
+
+                            pb_matrix_global_scaled = mathutils.Matrix.Translation(pb_matrix_global.translation) @ \
+                                                        mathutils.Matrix.Scale(np.float32(point['Scale']), 4) @ \
+                                                        mathutils.Matrix.Translation(-pb_matrix_global.translation) @ \
+                                                        pb_matrix_global
+
+                            pb.matrix = obj.convert_space(
+                                pose_bone=pb,
+                                matrix=pb_matrix_global_scaled,
+                                from_space='WORLD',
+                                to_space='POSE',
+                            )
+
+                            bpy.context.view_layer.update()
+
                     if 'Parent' not in parameter_name:
                         pb.bone.select = False
                         bpy.ops.object.mode_set(mode='OBJECT')
