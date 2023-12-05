@@ -571,19 +571,9 @@ class BezierPPM():
                             for axis, axis_value in point['Scale'].items():
                                 axis_constraint = np.array(tuple(1 if axis == axis_name else 0 for axis_name in ['X', 'Y', 'Z']))
 
-                                # decompose obj.matrix_world into translation, rotation and scale
-                                scale, rotation, translation = obj.matrix_world.decompose()
-
-                                # # apply scale matrix on scale
-                                # scale = scale.to_scale() * np.float32(point['Scale'])
-
-                                # # recompose obj.matrix_world
-                                # obj.matrix_world = mathutils.Matrix.Translation(translation) @ \
-                                #                     rotation.to_matrix().to_4x4() @ \
-                                #                     mathutils.Matrix.Scale(scale[0], 4, (1, 0, 0)) @ \
-                                #                     mathutils.Matrix.Scale(scale[1], 4, (0, 1, 0)) @ \
-                                #                     mathutils.Matrix.Scale(scale[2], 4, (0, 0, 1))                            
-
+                                obj.matrix_world = mathutils.Matrix.Scale(np.float32(axis_value), 4, axis_constraint) @ \
+                                                    obj.matrix_world
+                               
                         else:
                             pb_matrix_global = obj.convert_space(
                                 pose_bone=pb,
