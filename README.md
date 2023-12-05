@@ -1,6 +1,6 @@
 # PyBezierPPM
 
-Python module to programmatically interface with the parametric pinna model (PPM) [1]. 
+Python interface to the parametric pinna model based on Bézier curves (BezierPPM) [1]. 
 
 ## Installation
 
@@ -40,16 +40,32 @@ print(ppm)
 print(ppm.parameters['Helix_up']['Start']['Location'])
 ```
 
-Set the BezierPPM parameters using the method `set_parameter`.
+Set the BezierPPM parameters using the method `set_parameter` with respect to the world coordinate system, i.e., the global x-, y- and z-axes as shown in Blender. Modifications of shape keys are not dependent on any modification order. The remaining BezierPPM parameters are modified in the following order:
+1. Parent-Bendy: Location
+2. Parent-Bendy: Rotation
+3. Parent-Bendy: Scale
+4. Local BezierPPM parameters: Location
+5. Local BezierPPM parameters: Rotation
+6. Local BezierPPM parameters: Scale
 
-
+Example: Scaling Parent-Bendy by a factor of 2 in global x-axis will lead to a different result compared to when scaling Parent-Bendy by a factor of 2 in global x-axis after having rotated Parent-Bendy by 90 deg around the global y-axis. In the first scenario, the BezierPPM instance will represent a wide ear, whereas in the second scenario, the BezierPPM instance will represent a rotated but tall ear.
 
 ```python
-# change the location of the 'Helix_up' 
+# Scale 'Parent' (bendy bone, anisotropic scaling possible) 
+ppm.set_parameter(parameter='Parent', point='Bendy', parameter_type='Scale', value=(0.75, 1.5, 0.0), axis='ZXY')
+
+# Translate 'Helix_up' (start point) 
 ppm.set_parameter(parameter='Helix_up', point='Start', parameter_type='Location', value=(1,0.6), axis='ZX')
+
+# Rotate 'Parent' by 90 degrees around the X-axis via a quaternion
+q = (np.sqrt(2)/2, np.sqrt(2)/2, 0, 0)
+ppm.set_parameter(parameter='Parent', point='Bendy', parameter_type='Rotation', value=q, axis='WXYZ')
+
+# Modify the shape key 'Ear_canal-Diameter'
+pmod.set_parameter(parameter='Ear_canal-Diameter', parameter_type='Shape_key', value=(-1))
 ```
 
-### Export options
+### Export Options
 
 The module offers the possibility to export the PPM mesh in 'ply' and 'stl' format using the methods `export_ply` and `export_stl`, respectively.
 The currently set PPM parameters can be exported to a 'csv' file using the method `export_csv`.
@@ -70,7 +86,7 @@ points = ppm.points
 The method `render` can be used to render the PPM instance as 'png' or 'exr' (OpenEXR) file in Blender.
 
 ```python
-ppm.render(filepath='path/to/file', filename='filename', resolution=257)
+ppm.render(file_path='path/to/file', filename='file_name', resolution=512)
 ```
 
 ### Math Helpers
@@ -105,7 +121,7 @@ p2 = BezierPPM(from_csv='path/to/file.csv')
 plot_distances(p1, p2)
 ```
 
-## Matlab implementation
+## Matlab Implementation
 
 For a Matlab implementation please refer to the [matlab](https://github.com/Any2HRTF/PPM/tree/matlab) branch.
 
