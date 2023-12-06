@@ -128,11 +128,8 @@ class BezierPPM():
         # load init parameters
         self.__parameters = self.__load_parameters_from_csv()
 
-        if self.backend == 'blender':
-            if from_blender_file != None:
-                self.__load_blender_file(from_blender_file)
-            else:
-                self.__load_blender_file(f'{CURRENT_DIR}/resources/PPM.blend')
+        if from_blender_file != None:
+            self.__load_blender_file(from_blender_file)
             self.__get_parameters_from_blender()
         
         # rerun fct to load parameters from csv file
@@ -141,8 +138,6 @@ class BezierPPM():
         
         if from_dict != None:
             self.__parameters = self.__load_parameters_from_dict(from_dict)
-        
-        bpy.ops.object.mode_set(mode='OBJECT')
         
         self.__reference_point = None
 
@@ -280,6 +275,8 @@ class BezierPPM():
                 raise Exception('value must be a single float value')
             self.__parameters[parameter][parameter_type] = value
         elif parameter_type == 'Scale':
+            if point in ['Start', 'End']:
+                raise Exception('Cannot scale points of bone.')
             if parameter.lower() == 'parent':
                 for a in axis:
                     if a not in ['X', 'Y', 'Z']:
@@ -438,6 +435,8 @@ class BezierPPM():
         self.__parameters = self.__load_parameters_from_csv()
 
     def __set_parameters_in_blender(self):
+        self.__load_blender_file(f'{CURRENT_DIR}/resources/PPM.blend')
+
         if self.__reference_point is not None:
             self.__center_mesh_blender(reference_point=self.__reference_point)
 
