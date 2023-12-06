@@ -17,7 +17,7 @@ authors:
 - family-names: "Majdak"
   given-names: "Piotr"
   orcid: "https://orcid.org/0000-0003-1511-6164"
-title: "PyPPM"
+title: "PyBezierPPM - Python interface to a parametric pinna model based on cubic Bézier curves"
 version: 2.0.0
 date-released: 2023
 url: "https://github.com/Any2HRTF/PPM"
