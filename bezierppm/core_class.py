@@ -279,10 +279,17 @@ class BezierPPM():
             if len(value) > 1:
                 raise Exception('value must be a single float value')
             self.__parameters[parameter][parameter_type] = value
-        elif parameter_type == 'Scale' and parameter != 'Parent':
-            if len(value) > 1:
-                raise Exception('value must be a single float value')
-            self.__parameters[parameter]['Bendy'][parameter_type] = value
+        elif parameter_type == 'Scale':
+            if parameter.lower() == 'parent':
+                for a in axis:
+                    if a not in ['X', 'Y', 'Z']:
+                        raise Exception('axis must be X, Y, Z')
+                for i in range(len(value)):
+                    self.__parameters[parameter]['Bendy'][parameter_type][axis[i]] = value[i]
+            else:
+                if len(value) > 1:
+                    raise Exception('value must be a single float value')
+                self.__parameters[parameter]['Bendy'][parameter_type] = value[0]
         else:
             if point not in ['Start', 'End'] and parameter != 'Parent':
                 raise Exception('point must be one of Start, End')
@@ -319,13 +326,6 @@ class BezierPPM():
 
                     for i in range(len(value)):
                         self.__parameters[parameter][point][parameter_type][axis[i]] = value[i]
-
-            elif parameter_type == 'Scale':
-                for a in axis:
-                    if a not in ['X', 'Y', 'Z']:
-                        raise Exception('axis must be X, Y, Z')
-                for i in range(len(value)):
-                    self.__parameters[parameter][point][parameter_type][axis[i]] = value[i]
 
     def __load_parameters_from_dict(self, parameter_dict:dict) -> dict:
         parameters = {}
