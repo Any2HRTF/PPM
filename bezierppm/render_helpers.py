@@ -22,7 +22,7 @@ def render(file_path,
             depth_compression_exr=0,
             light_type='Area',
             light_shape='Square',
-            light_location=np.array([-0.01, 0.15, 0.1]) * 1000,
+            light_location=[-0.01, 0.15, 0.1],
             light_rotation=[0, 0, 0],
             light_power=200000):
         
