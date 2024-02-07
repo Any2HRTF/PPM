@@ -19,7 +19,7 @@ setup(
     zip_safe=False,
     install_requires=[
         "numpy",
-        "bpy==3.6",
+        "bpy==3.4",
         "matplotlib",
     ],
     classifiers=[
