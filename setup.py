@@ -1,6 +1,6 @@
 from setuptools import setup
 
-version = '2.0-rc3'
+version = '2.0-rc4'
 
 setup(
     name='PyBezierPPM',
