@@ -5,9 +5,8 @@ import sys
 import tempfile
 from contextlib import redirect_stdout
 
-import bmesh
-
 import bpy
+import bmesh
 import mathutils
 import numpy as np
 
