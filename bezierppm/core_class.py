@@ -313,6 +313,8 @@ class BezierPPM:
             if point in ["Start", "End"]:
                 raise Exception("Cannot scale points of bone.")
             if name.lower() == "parent":
+                if axis is None:
+                    axis = "XYZ"
                 for a in axis:
                     if a not in ["X", "Y", "Z"]:
                         raise Exception("axis must be X, Y, Z")
