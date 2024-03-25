@@ -46,17 +46,17 @@ Set the BezierPPM parameters using the method `set_parameter`.
 
 ```python
 # Scale 'Parent' (bendy bone, anisotropic scaling possible) 
-ppm.set_parameter(parameter='Parent', point='Bendy', parameter_type='Scale', value=(0.75, 1.5, 0.0), axis='ZXY')
+ppm.set_parameter(name='Parent', type='Scale', value=(0.75, 1.5, 0.0), axis='ZXY')
 
 # Translate 'Helix_up' (start point) 
-ppm.set_parameter(parameter='Helix_up', point='Start', parameter_type='Location', value=(1,0.6), axis='ZX')
+ppm.set_parameter(name='Helix_up', point='Start', type='Location', value=(1,0.6), axis='ZX')
 
 # Rotate 'Parent' by 90 degrees around the X-axis via a quaternion
 q = (np.sqrt(2)/2, np.sqrt(2)/2, 0, 0)
-ppm.set_parameter(parameter='Parent', point='Bendy', parameter_type='Rotation', value=q, axis='WXYZ')
+ppm.set_parameter(name='Parent', point='Bendy', type='Rotation', value=q, axis='WXYZ')
 
 # Modify the shape key 'Ear_canal-Diameter'
-pmod.set_parameter(parameter='Ear_canal-Diameter', parameter_type='Shape_key', value=(-1))
+pmod.set_parameter(name='Ear_canal-Diameter', type='Shape_key', value=(-1))
 ```
 
 ### Export Options
@@ -77,10 +77,10 @@ points = ppm.get_point_cloud()
 points = ppm.points
 ```
 
-The method `render` can be used to render the PPM instance as 'png' or 'exr' (OpenEXR) file in Blender.
+The method `render` can be used to render the PPM instance as 'png' and optionally 'exr' (OpenEXR) file in Blender.
 
 ```python
-ppm.render(file_path='path/to/file', filename='file_name', resolution=512)
+ppm.render(file='/path/to/render/file/location', resolution=512)
 ```
 
 ### Math Helpers

@@ -5,8 +5,8 @@ import bpy
 import mathutils
 import numpy as np
 
-def render(file_path,
-            file_name,
+def render(dirpath,
+            filename,
             resolution=256,
             depth=False,
             smooth_shading=True,
@@ -80,7 +80,7 @@ def render(file_path,
 
         # Render image and depth information, and store as png and exr files
         bpy.context.scene.render.use_compositing = True
-        bpy.context.scene.render.filepath = file_path + '/' + file_name 
+        bpy.context.scene.render.filepath = dirpath + '/' + filename 
 
         bpy.data.scenes["Scene"].render.resolution_x = resolution
         bpy.data.scenes["Scene"].render.resolution_y = resolution
@@ -131,9 +131,9 @@ def render(file_path,
 
             # Create a file-output node, set the path, and file format (exr depth)
             file_output_exr = tree.nodes.new(type='CompositorNodeOutputFile')
-            file_output_exr.base_path = file_path
+            file_output_exr.base_path = dirpath
             file_output_exr.format.file_format = "OPEN_EXR"
-            file_output_exr.file_slots[0].path = file_name +\
+            file_output_exr.file_slots[0].path = filename +\
             file_output_exr.format.file_format # file name with appended frame idx
             file_output_exr.format.color_depth = depth_color_depth_exr
             file_output_exr.format.compression = depth_compression_exr
@@ -148,9 +148,9 @@ def render(file_path,
 
         # Create a file-output node, set the path, and file format (png)
         file_output_png = tree.nodes.new(type='CompositorNodeOutputFile')
-        file_output_png.base_path = file_path
+        file_output_png.base_path = dirpath
         file_output_png.format.file_format = "PNG"
-        file_output_png.file_slots[0].path = file_name
+        file_output_png.file_slots[0].path = filename
         file_output_png.format.color_depth = image_color_depth
         file_output_png.format.compression = int(image_compression)
 
@@ -162,12 +162,12 @@ def render(file_path,
 
 
         if depth:
-            for file in os.listdir(file_path):
-                if file.startswith(file_name) and file.endswith('.exr'):
-                    os.replace(file_path + f'/{file}', \
-                        file_path + f'/{file_name}.exr')
+            for file in os.listdir(dirpath):
+                if file.startswith(filename) and file.endswith('.exr'):
+                    os.replace(dirpath + f'/{file}', \
+                        dirpath + f'/{filename}.exr')
         
-        for file in os.listdir(file_path):
-            if file.startswith(file_name) and file.endswith('.png'):
-                os.replace(file_path + f'/{file}', \
-                    file_path+ f'/{file_name}.png')
+        for file in os.listdir(dirpath):
+            if file.startswith(filename) and file.endswith('.png'):
+                os.replace(dirpath + f'/{file}', \
+                    dirpath+ f'/{filename}.png')

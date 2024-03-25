@@ -10,8 +10,7 @@ import bmesh
 import mathutils
 import numpy as np
 
-from .render_helpers import render
-
+from render_helpers import render
 
 def euler_to_quaternion(euler_matrix: np.array, sequence: str = "ZYX") -> np.array:
     """Transforms a rotation matrix into a quaternion.
@@ -144,6 +143,10 @@ class BezierPPM:
             self.__parameters = self.__load_parameters_from_dict(from_dict)
 
         self.__reference_point = None
+        
+        # ugly but if set_parameter arg should be named type needs to be done
+        self.type_ = type
+
 
     def __load_blender_file(self, file_path):
         logfile = tempfile.mktemp()
@@ -276,70 +279,70 @@ class BezierPPM:
         return string
 
     def set_parameter(
-        self, parameter: str, parameter_type: str, value: tuple, point=None, axis=None
+        self, name: str, type: str, value: tuple, point=None, axis=None
     ):
         """Set a parameter of the PPM
 
         Parameters:
         -----------
-            parameter (str): The parameter to set
-            parameter_type (str): The type of the parameter to set (Shape_key, Scale, Rotation, Location)
+            name (str): Name of the parameter to set
+            type (str): The type of the parameter to set (Shape_key, Scale, Rotation, Location)
             point (str): The point to set the parameter to (Start, End, Shape_key or None)
             axis (str): The axis to set the parameter to (e.g. X, Y, Z, XY, XYZ, WXYZ, ... or None)
             value (tuple): The value to set the parameter to
         """
-        if type(value) is list:
+        if self.type_(value) is list:
             value = tuple(value)
-        elif type(value) is not tuple:
+        elif self.type_(value) is not tuple:
             value = (value,)
 
-        parameter_type = parameter_type.lower().capitalize()
+        type = type.lower().capitalize()
         axis = axis.upper() if axis != None else None
         point = point.lower().capitalize() if point != None else None
 
-        if parameter_type not in ["Shape_key", "Scale", "Rotation", "Location"]:
+        if type not in ["Shape_key", "Scale", "Rotation", "Location"]:
             raise Exception(
-                "parameter_type must be one of Shape_key, Scale, Rotation, Location"
+                "type must be one of Shape_key, Scale, Rotation, Location"
             )
 
         if point == "Shape_key":
             if len(value) > 1:
                 raise Exception("value must be a single float value")
-            self.__parameters[parameter][parameter_type] = value
-        elif parameter_type == "Scale":
+            self.__parameters[name][type] = value
+        elif type == "Scale":
             if point in ["Start", "End"]:
                 raise Exception("Cannot scale points of bone.")
-            if parameter.lower() == "parent":
+            if name.lower() == "parent":
                 for a in axis:
                     if a not in ["X", "Y", "Z"]:
                         raise Exception("axis must be X, Y, Z")
                 for i in range(len(value)):
-                    self.__parameters[parameter]["Bendy"][parameter_type][axis[i]] = (
+                    self.__parameters[name]["Bendy"][type][axis[i]] = (
                         value[i]
                     )
             else:
                 if len(value) > 1:
                     raise Exception("value must be a single float value")
-                self.__parameters[parameter]["Bendy"][parameter_type] = value[0]
+                self.__parameters[name]["Bendy"][type] = value[0]
         else:
-            if point not in ["Start", "End"] and parameter != "Parent":
+            if point not in ["Start", "End"] and name != "Parent":
                 raise Exception("point must be one of Start, End")
-            elif parameter == "Parent":
+            elif name == "Parent":
                 point = "Bendy"
 
             if len(value) != len(axis):
                 raise Exception("value and axis must have the same number of elements")
 
-            if parameter_type == "Location":
+            if type == "Location":
                 for a in axis:
                     if a not in ["X", "Y", "Z"]:
                         raise Exception("axis must be X, Y, Z")
                 for i in range(len(value)):
-                    self.__parameters[parameter][point][parameter_type][axis[i]] = (
+                    self.__parameters[name][point][type][axis[i]] = (
                         value[i]
                     )
 
-            elif parameter_type == "Rotation":
+            elif type == "Rotation":
                 # rotation defined in euler angles
                 if len(axis) == 3:
                     for a in axis:
@@ -348,16 +351,16 @@ class BezierPPM:
 
                     quaternion = euler_to_quaternion(value, sequence=axis)
 
-                    self.__parameters[parameter][point][parameter_type]["W"] = (
+                    self.__parameters[name][point][type]["W"] = (
                         quaternion[0]
                     )
-                    self.__parameters[parameter][point][parameter_type]["X"] = (
+                    self.__parameters[name][point][type]["X"] = (
                         quaternion[1]
                     )
-                    self.__parameters[parameter][point][parameter_type]["Y"] = (
+                    self.__parameters[name][point][type]["Y"] = (
                         quaternion[2]
                     )
-                    self.__parameters[parameter][point][parameter_type]["Z"] = (
+                    self.__parameters[name][point][type]["Z"] = (
                         quaternion[3]
                     )
 
@@ -366,7 +369,7 @@ class BezierPPM:
                         raise Exception("axis must contain W, X, Y, Z")
 
                     for i in range(len(value)):
-                        self.__parameters[parameter][point][parameter_type][axis[i]] = (
+                        self.__parameters[name][point][type][axis[i]] = (
                             value[i]
                         )
 
@@ -672,65 +675,65 @@ class BezierPPM:
         else:
             raise NotImplementedError
 
-    def __export_ply_blender(self, file_path):
+    def __export_ply_blender(self, file):
 
         bpy.ops.object.select_all(action="DESELECT")
         bpy.data.objects["Mesh"].select_set(True)
         # bpy.context.view_layer.objects.active = bpy.data.objects['Mesh']
 
         with redirect_stdout(io.StringIO()):
-            bpy.ops.export_mesh.ply(filepath=file_path, use_selection=True)
+            bpy.ops.export_mesh.ply(filepath=file, use_selection=True)
 
-    def export_ply(self, file_path):
+    def export_ply(self, file):
         """Exports the PPM as a PLY file.
 
         Parameters
         ----------
-        file_path : str
+        file : str
             Path to the PLY file.
         """
-        if file_path[-4:] != ".ply":
-            file_path += ".ply"
+        if file[-4:] != ".ply":
+            file += ".ply"
         if self.backend == "blender":
             self.__set_parameters_in_blender()
-            self.__export_ply_blender(file_path)
+            self.__export_ply_blender(file)
         else:
             raise NotImplementedError
 
-    def __export_stl_blender(self, file_path):
+    def __export_stl_blender(self, file):
 
         bpy.ops.object.select_all(action="DESELECT")
         bpy.data.objects["Mesh"].select_set(True)
 
         with redirect_stdout(io.StringIO()):
-            bpy.ops.export_mesh.stl(filepath=file_path, use_selection=True)
+            bpy.ops.export_mesh.stl(filepath=file, use_selection=True)
 
-    def export_stl(self, file_path):
+    def export_stl(self, file):
         """Exports the PPM as a STL file.
 
         Parameters
         ----------
-        file_path : str
+        file : str
             Path to the STL file.
         """
-        if file_path[-4:] != ".stl":
-            file_path += ".stl"
+        if file[-4:] != ".stl":
+            file += ".stl"
         if self.backend == "blender":
             self.__set_parameters_in_blender()
-            self.__export_stl_blender(file_path)
+            self.__export_stl_blender(file)
         else:
             raise NotImplementedError
 
-    def __export_blend_blender(self, file_path):
+    def __export_blend_blender(self, file):
 
-        bpy.ops.wm.save_as_mainfile(filepath=file_path)
+        bpy.ops.wm.save_as_mainfile(filepath=file)
 
-    def export_blend(self, file_path: str):
+    def export_blend(self, file: str):
         """Exports the PPM as a blend file.
 
         Parameters
         ----------
-        file_path : str
+        file : str
             Path to the blend file.(NOTE: has to be an absolute path)
         """
 
@@ -738,20 +741,20 @@ class BezierPPM:
             raise NotImplementedError
 
         self.__set_parameters_in_blender()
-        self.__export_blend_blender(file_path=file_path)
+        self.__export_blend_blender(file=file)
 
-    def export_csv(self, file_path):
+    def export_csv(self, file):
         """Exports the PPM as a CSV file.
 
         Parameters
         ----------
-        file_path : str
+        file : str
             Path to the CSV file.
         """
 
         export_dict = self.get_parameter_dict()
 
-        with open(file_path, "w", newline="") as csvfile:
+        with open(file, "w", newline="") as csvfile:
             for key, value in export_dict.items():
                 csvfile.write(f"{key},{value:e}\n")
 
@@ -760,10 +763,8 @@ class BezierPPM:
 
         Parameters
         ----------
-        file_path : str
+        file : str
             Path to the rendered image.
-        file_name : str
-            Name of the rendered image.
         camera_location : list
             Location of the camera. Default: [-10, 170, 5]
             If str not given the unit will be infered from the unit of the PPM.
@@ -853,10 +854,11 @@ class BezierPPM:
 
             if "light_power" not in kwargs.keys():
                 kwargs["light_power"] = 200000
-
+            
+#             breakpoint()
             render(
-                file_path=kwargs["file_path"],
-                file_name=kwargs["file_name"],
+                dirpath=kwargs["dirpath"],
+                filename=kwargs["filename"],
                 resolution=kwargs["resolution"] if "resolution" in kwargs else 256,
                 depth=kwargs["depth"] if "depth" in kwargs else False,
                 smooth_shading=(
@@ -956,3 +958,19 @@ class BezierPPM:
         center_of_mass = obj.matrix_world @ local_bounding_box_center
 
         return center_of_mass
+
+
+if __name__ == "__main__":
+
+    p = BezierPPM()
+    import os
+    filedir = os.getcwd()
+    p.set_parameter(name='Parent', type='Scale', value=(0.75, 1.5, 0.9), axis='ZXY')
+    p.export_stl(filedir+"/test")
+    p.set_parameter(name='Helix_up', point='Start', type='Location', value=(0.01,0.006), axis='ZX')
+    p.export_stl(filedir+"/test2")
+    q = (np.sqrt(2)/2, np.sqrt(2)/2, 0, 0)
+    p.set_parameter(name='Parent', point='Bendy', type='Rotation', value=q, axis='WXYZ')    
+    p.export_stl(filedir+"/test3")
+    
+    p.render(filename="test4", dirpath=filedir, depth=True)
