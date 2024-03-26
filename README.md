@@ -2,6 +2,10 @@
 
 Python interface to a parametric pinna model based on cubic Bézier curves (BezierPPM) [1]. 
 
+## Requirement
+
+Python 3.10 is required to use the software. It is recommended to setup a environment using e.g. conda.
+
 ## Installation
 
 Get the pre-built Python wheel from the [releases](https://github.com/Any2HRTF/PPM/releases/latest) page and install it using pip:
