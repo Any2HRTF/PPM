@@ -10,7 +10,7 @@ import bmesh
 import mathutils
 import numpy as np
 
-from render_helpers import render
+from .render_helpers import render
 
 def euler_to_quaternion(euler_matrix: np.array, sequence: str = "ZYX") -> np.array:
     """Transforms a rotation matrix into a quaternion.
