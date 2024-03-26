@@ -43,5 +43,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ github.token }}
       with:
-        files: |
-          ${{ github.workspace }}/dist/${{ steps.get_version.outputs.WHEEL }}
+        upload_url: ${{ steps.get_release.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}/dist/${{ steps.get_version.outputs.WHEEL }}
+        asset_name: ${{ steps.get_version.outputs.WHEEL }}
+        asset_content_type: application/zip
