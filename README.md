@@ -121,6 +121,7 @@ plot_distances(p1, p2)
 
 ## Matlab Implementation
 
+For the CloudCompare Blender Plugin helping to perform manual registrations please refer to the [PointCloudCompare](https://github.com/Any2HRTF/PPM/tree/PointCloudCompare) branch.
 For a Matlab implementation please refer to the [matlab](https://github.com/Any2HRTF/PPM/tree/matlab) branch.
 
 ## License
