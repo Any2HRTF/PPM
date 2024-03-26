@@ -37,7 +37,7 @@ jobs:
       id: get_version
       run: |
         cd dist
-        echo name=WHEEL$(ls *.whl) >> $GITHUB_OUTPUT
+        echo ::set-output name=WHEEL::$(ls *.whl)
     - name: Upload release binary
       uses: actions/upload-release-asset@v1.0.2
       env:
