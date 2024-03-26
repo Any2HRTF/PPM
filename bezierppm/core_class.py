@@ -858,8 +858,8 @@ class BezierPPM:
                 kwargs["light_power"] = 200000
             
             render(
-                dirpath=kwargs["dirpath"],
-                filename=kwargs["filename"],
+                dirpath="/".join(kwargs["file"].split("/")[:-1]),
+                filename=kwargs["file"].split("/")[-1],
                 resolution=kwargs["resolution"] if "resolution" in kwargs else 256,
                 depth=kwargs["depth"] if "depth" in kwargs else False,
                 smooth_shading=(
@@ -966,12 +966,13 @@ if __name__ == "__main__":
     p = BezierPPM()
     import os
     filedir = os.getcwd()
+    
     p.set_parameter(name='Parent', type='Scale', value=(0.75, 1.5, 0.9), axis='ZXY')
-    p.export_ply(filedir+"/test")
+    p.export_ply(file=filedir+"/test")
     p.set_parameter(name='Helix up', point='Start', type='Location', value=(0.01,0.006), axis='ZX')
-    p.export_ply(filedir+"/test2")
+    p.export_stl(file=filedir+"/test2")
     q = (np.sqrt(2)/2, np.sqrt(2)/2, 0, 0)
     p.set_parameter(name='Parent', point='Bendy', type='Rotation', value=q, axis='WXYZ')    
-    p.export_ply(filedir+"/test3")
+    p.export_stl(file=filedir+"/test3")
     
-#     p.render(filename="test4", dirpath=filedir, depth=True)
+    p.render(file=filedir+"/test4", depth=True)
