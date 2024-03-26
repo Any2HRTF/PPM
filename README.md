@@ -1,160 +1,59 @@
-# PyBezierPPM
+# Guidelines to manually register the PPM to a pinna-only mesh
 
-Python interface to a parametric pinna model based on cubic Bézier curves (BezierPPM) [1]. 
+## Pre-processing steps
 
-## Requirement
+1) Open `PPM.blend`, containing the PPM with default parameter values and armature definitions.
 
-Python 3.10 is required to use the software. It is recommended to setup a environment using e.g. conda.
+2) Import the mesh (e.g., in `stl` or `ply` formats) the PPM needs to be registered to into this file, and hide the PPM. Since the imported mesh likely contains the head and parts of the upper body, we refer to it as pinna-plus-head (PH) mesh below.
 
-## Installation
+3) Center the PH mesh as per the instructions given below:
+* *Convention 1*: Rotate and translate the PH mesh so that
+	* the center of the interaural axis corresponds to the origin of the world coordinate system
+ 	* the horizontal plane corresponds to the Frankfurt plane (setting the pitch angle of the head), but with an additional vertical shift applied along the z-axis so that the plane runs through the ear-canal centres,
+	* the view vector corresponds to the global positive x-axis (default viewing direction), 
+	* the up vector (orthogonal to the view vector) corresponds to the global positive z-axis, and
+	* the interaural axis corresponds to the y-axis (increasing positively from the right to the left ear)
 
-Get the pre-built Python wheel from the [releases](https://github.com/Any2HRTF/PPM/releases/latest) page and install it using pip:
+4) Save the PH mesh adapted in this way as `blend` file (*_ph_ini.blend).
 
-```bash
-pip install /path/to/wheel.whl
-```
+5) Remove all unneeded parts from the PH mesh, e.g., head and shoulders. Only preserve the left and right pinna-only (PO) meshes. Double-check if all unwanted edges, vertices and faces have been deleted.
+* *Convention 2*:
+	* Preserve the global rotations and the global offsets in y-direction of the PO meshes.
+	* Remove mesh regions of the PO meshes that are not contained in the PPM, e.g., more extended parts at the transition to the removed head mesh. Such mesh parts cannot be properly registered anyway and will likely increase the geometric error when registering the PPM to the PO mesh.
+	* Remove the right PO mesh and save the `blend` file (*_left_ear_ini.blend).
+ 	* Undo the last removal step, remove the left PO mesh instead, and save the `blend` file (*_right_ear_ini.blend). This file is saved for the sake of completeness only as the PPM is currently only implemented for registering left PO meshes.
 
-## Usage
+6) Save another `blend` file for the registration process (*_left_ear_aligned_ppm_v2). Note that "v2" corresponds to the PPM armature definitions as used in version v2.x.x of the [PPM interface](https://github.com/Any2HRTF/PPM/tree/main).
 
-The module provides a single class `BezierPPM`.
-The constructor will generate a BezierPPM instance with default PPM-parameter values.
-   
-```python
-from bezierppm import BezierPPM
+## Blender add-on to visualise the geometric errors
 
-ppm = BezierPPM()
-```
+Install the [Blender Add-on](https://github.com/Any2HRTF/PPM/tree/main/Blender%20Add-on) following the installation instructions, and use it as part of the manual registration process described below.
 
-Alternatively, the PPM can be instantiated from a 'blend' file, 'csv' file, or a Python dictionary containing the PPM parameters in the same format as the 'csv' file.
+## Manual PPM registration
 
-### Centering
+1) The aim of the manual PPM registration is to modify the global PPM parameters, i.e., the axis-dependent location, rotation and scale, and the local PPM parameters, e.g, the axis-dependent location of Helix_up-Start, so that the resulting PPM instance approximates the target PO mesh with a minimal geometric error (e.g., in terms of a minimum pointwise distance between the modeled and the target point cloud). Note that, apart from the pre-processing steps described in the section above, the target PO mesh is not subjected to any further modifications, i.e., changes of location, rotation and scale. 
 
-Use the method `center_mesh` to either move the PPM's center of mass, i.e. the center of the bounding box surrounding the PPM, or the center of the ear-canal entrance to the origin of the global coordinate system. 
+2) Since the registration procedure is largely a visual one, it is useful to contrast the color of the PPM against the PO mesh. This can be achieved by selecting the template mesh of the PPM in Blender Object Mode, clicking on the tab “Material Properties” (lower right corner), clicking on “New”, and adding a color under “Viewport Display”.
 
-```python
-ppm.center_mesh(reference_point='ear_canal_entrance')
-ppm.center_mesh(reference_point='center_of_mass')
-```
+3) Once the desired part of the armature (green skeleton attached to the PPM) has been selected in Blender Pose Mode, the most important keyboard shortcuts are:
+   * “G” to modify the location/translation of start/end points,
+   * “R” to rotate start/end points, and
+   * “S” to scale the bendy bones.
 
-### Parameters
+4) To modify the shape keys, select “Mesh” (under “Armature”), and click on the tab “Object Data Properties”. Under “Shape Keys”, you can change the corresponding value for each shape key within the pre-defined limits.
 
-To see the currently set parameters, use the `print` function.
-```python
-print(ppm)
-print(ppm.parameters['Helix_up']['Start']['Location'])
-```
+5) Start the manual alignment process:
+	* Start by modifying the global parameter dimensions (i.e., Parent-Bendy: location, rotation, anisotropic scaling),
+	* continue with local parameter dimensions (location, rotation, isotropic scaling), and
+ 	* modify the shape keys for fine-tuning.
 
-Set the BezierPPM parameters using the method `set_parameter`.
+*Attention*: Stick to the conventions regarding the available degrees of freedom of PPM parameters as presented by [Pollack et al. (2022)](https://www.researchgate.net/publication/366977010_Parametric_pinna_model_for_a_realistic_representation_of_listener-specific_pinna_geometry).
 
+Example 1: Anisotropic scaling is only allowed for Parent-Bendy.
 
+Example 2: Axis-dependent manipulations of location and rotation parameter dimensions are only allowed for the start and end points of bendy bones, i.e., the control bones. Translating the bendy bones themselves is not allowed!
 
-```python
-# Scale 'Parent' (bendy bone, anisotropic scaling possible) 
-ppm.set_parameter(name='Parent', type='Scale', value=(0.75, 1.5, 0.0), axis='ZXY')
+6) Iteratively check the visualised geometric errors using the [Blender Add-on](https://github.com/Any2HRTF/PPM/tree/main/Blender%20Add-on), and also account for the calculated error metrics (e.g., the mean/median of point-wise minimum distances, the Jaccard index, and the Dice similiarity coefficient).
 
-# Translate 'Helix_up' (start point) 
-ppm.set_parameter(name='Helix_up', point='Start', type='Location', value=(1,0.6), axis='ZX')
+7) Aim for geometric errors with mean and median pointwise minimum distances below 1 mm, and an error distribution skewed towards 0 (see [Figure 6](https://www.researchgate.net/publication/366977010_Parametric_pinna_model_for_a_realistic_representation_of_listener-specific_pinna_geometry). Try to achieve a particularly low error in the perceptually most relevant pinna regions (i.e., cavum conchae depth, cymba conchae, fossa triangularis), see [Stitt & Katz (2021)](https://asa.scitation.org/doi/full/10.1121/10.0004128).
 
-# Rotate 'Parent' by 90 degrees around the X-axis via a quaternion
-q = (np.sqrt(2)/2, np.sqrt(2)/2, 0, 0)
-ppm.set_parameter(name='Parent', point='Bendy', type='Rotation', value=q, axis='WXYZ')
-
-# Modify the shape key 'Ear_canal-Diameter'
-pmod.set_parameter(name='Ear_canal-Diameter', type='Shape_key', value=(-1))
-```
-
-### Export Options
-
-The module offers the possibility to export the PPM mesh in 'ply' and 'stl' format using the methods `export_ply` and `export_stl`, respectively.
-The currently set PPM parameters can be exported to a 'csv' file using the method `export_csv`.
-
-```python
-ppm.export_ply('ppm.ply')
-ppm.export_stl('ppm.stl')
-ppm.export_csv('ppm.csv')
-```
-
-To get the points of the current PPM instance, use the method `get_point_cloud` or access the property 'points'.
-
-```python
-points = ppm.get_point_cloud()
-points = ppm.points
-```
-
-The method `render` can be used to render the PPM instance as 'png' and optionally 'exr' (OpenEXR) file in Blender.
-
-```python
-ppm.render(dirpath="/path/to/render/file/location", filename="filename", resolution=512)
-```
-
-### Math Helpers
-
-The module `math_helpers` provides two helper functions to calculate the minimum pointwise distance and the Hausdorff distance between two PPM instances.
-
-```python
-from bezierppm import BezierPPM
-from bezierppm.math_helpers import minimal_distances, hausdorff_distance
-
-p1 = BezierPPM()
-p2 = BezierPPM(from_csv='path/to/file.csv')
-
-# returns an array of the minimal distances between the points of p1 and p2
-distances = minimal_distances(p1, p2)
-
-# returns the hausdorff distance between the points of p1 and p2
-hausdorff = hausdorff_distance(p1, p2)
-```
-
-### Plotting Helpers
-
-Packaged in the module, a helper function is available to visualize the PPM and the minimum pointwise distances between two PPM instances as a 3D plot and a histogram, respectively. `plot_distances` either accepts PPM instances or point clouds.
-
-```python
-from bezierppm import BezierPPM
-from bezierppm.plotting_helpers import plot_distances
-
-p1 = BezierPPM()
-p2 = BezierPPM(from_csv='path/to/file.csv')
-
-plot_distances(p1, p2)
-```
-
-## Matlab Implementation
-
-For a Matlab implementation please refer to the [matlab](https://github.com/Any2HRTF/PPM/tree/matlab) branch.
-
-## License
-
-This software is licensed under the EUPL-1.2 License. See the [LICENSE](LICENSE.txt) file for details.
-
-## Cite
-
-Please cite the following paper if you use this code in your work:
-
-```bibtex
-@inproceedings{,
-  title={},
-  author={},
-  booktitle={},
-  year={},
-  url={}
-}
-```
-
-## References
-The BezierPPM was developed at the Acoustics Research Institute (ARI) of the 
-Austrian Academy of Sciences, Vienna, Austria [1-4].
-
-1.  Pollack K.; Pausch F.; Majdak P. (2022) [Parametric pinna model for a 
-    realistic representation of listener-specific pinna geometry](https://www.researchgate.net/profile/Florian-Pausch/publication/366977010_Parametric_pinna_model_for_a_realistic_representation_of_listener-specific_pinna_geometry/links/63bc77a1097c7832caa1ffd2/Parametric-pinna-model-for-a-realistic-representation-of-listener-specific-pinna-geometry.pdf?origin=publicationDetail&_sg%5B0%5D=CFr20BsHvQ3k0OmR_gN-XEXvU_IUp2yohXbvrqEzLIKyydtYST3pOQd_ec4Hj_7Dla8Ma5PNwHlp8t0OFyNlXw.vRk-HUSZsPec5Y3v5TJ0n8X0UTQrsWDRO85zyvQJrrni5DtuPXpOFj5yNTsWR3OUDbtwXTIp2qGWwbMbu2O6-w&_sg%5B1%5D=FAr7AoGW3im4MzlZvfT29nywMswK_uXAxcn-6CSJoTZF5IvSbVCKGgdSYxp7jwb1phk1ZGDndKDpqXh0qo_V0F-m2QqukrE0L_4AwshB1m5k.vRk-HUSZsPec5Y3v5TJ0n8X0UTQrsWDRO85zyvQJrrni5DtuPXpOFj5yNTsWR3OUDbtwXTIp2qGWwbMbu2O6-w&_iepl=&_rtd=eyJjb250ZW50SW50ZW50IjoibWFpbkl0ZW0ifQ%3D%3D), 
-    Proceedings: A21, Virtual Acoustics, ICA 2022 (International Congress 
-    on Acoustics); Gyeongju, S. 168-178. 
- 2. Pollack K.; Majdak P.; Brinkmann F.; Kreuzer W. (2021) [Von Fotos zu 
-    personalisierter räumlicher Audiowiedergabe](https://link.springer.com/article/10.1007/s00502-021-00891-4). e & i Elektrotechnik und 
-    Informationstechnik, S. 250-255.
- 3. Pollack K.; Majdak P. (2021) [Evaluation of a Parametric Pinna Model 
-    for the Calculation of Head-Related Transfer Functions](https://ieeexplore.ieee.org/abstract/document/9610885). Immersive and 
-    3D Audio (I3DA) conference.
- 4. Pollack K.; Majdak P.; Furtado H. (2020) [A Parametric Pinna Model for 
-    the Calculations of Head-Related Transfer Functions](https://hal.science/hal-03235345/document). Proceedings of 
-    Forum Acusticum 2020, Lyon. S. 1357-1360.
