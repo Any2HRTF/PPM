@@ -185,7 +185,7 @@ class BezierPPM:
     def parameters(self, parameters):
         for parameter_name, parameter in parameters.items():
             for point_name, point in parameter.items():
-                if point_name == "Shape_key":
+                if point_name == "Shape key":
                     self.__parameters[parameter_name][point_name] = point
                 else:
                     for type_name, type in point.items():
@@ -211,10 +211,10 @@ class BezierPPM:
 
         for parameter_name, parameter in self.__parameters.items():
             # shape keys
-            if "Shape_key" in parameter.keys():
-                export_dict[f"Shape_key_{parameter_name}"] = self.__parameters[
+            if "Shape key" in parameter.keys():
+                export_dict[f"Shape key {parameter_name}"] = self.__parameters[
                     parameter_name
-                ]["Shape_key"]
+                ]["Shape key"]
             else:
                 for point_name, point in parameter.items():
                     # scale
@@ -222,21 +222,21 @@ class BezierPPM:
                         if "Parent" in parameter_name:
                             for axis, axis_value in point["Scale"].items():
                                 export_dict[
-                                    f"Scale_{parameter_name}-{point_name}_{axis}"
+                                    f"Scale {parameter_name}-{point_name} {axis}"
                                 ] = self.__parameters[parameter_name][point_name][
                                     "Scale"
                                 ][
                                     axis
                                 ]
                         else:
-                            export_dict[f"Scale_{parameter_name}-{point_name}"] = (
+                            export_dict[f"Scale {parameter_name}-{point_name}"] = (
                                 self.__parameters[parameter_name][point_name]["Scale"]
                             )
                     # rotation
                     if "Rotation" in point.keys():
                         for axis, axis_value in point["Rotation"].items():
                             export_dict[
-                                f"Rotation_{parameter_name}-{point_name}_{axis}"
+                                f"Rotation {parameter_name}-{point_name} {axis}"
                             ] = self.__parameters[parameter_name][point_name][
                                 "Rotation"
                             ][
@@ -246,7 +246,7 @@ class BezierPPM:
                     if "Location" in point.keys():
                         for axis, axis_value in point["Location"].items():
                             export_dict[
-                                f"Location_{parameter_name}-{point_name}_{axis}"
+                                f"Location {parameter_name}-{point_name} {axis}"
                             ] = self.__parameters[parameter_name][point_name][
                                 "Location"
                             ][
@@ -262,7 +262,7 @@ class BezierPPM:
             string += f"{parameter_name}:\n"
             for point_name, point in parameter.items():
                 string += f"  ∟{point_name}:\n"
-                if point_name == "Shape_key":
+                if point_name == "Shape key":
                     string += f"    ∟{point}\n"
                 else:
                     for type_name, type in point.items():
@@ -286,8 +286,8 @@ class BezierPPM:
         Parameters:
         -----------
             name (str): Name of the parameter to set
-            type (str): The type of the parameter to set (Shape_key, Scale, Rotation, Location)
-            point (str): The point to set the parameter to (Start, End, Shape_key or None)
+            type (str): The type of the parameter to set (Shape key, Scale, Rotation, Location)
+            point (str): The point to set the parameter to (Start, End, Shape key or None)
             axis (str): The axis to set the parameter to (e.g. X, Y, Z, XY, XYZ, WXYZ, ... or None)
             value (tuple): The value to set the parameter to
         """
@@ -300,12 +300,12 @@ class BezierPPM:
         axis = axis.upper() if axis != None else None
         point = point.lower().capitalize() if point != None else None
 
-        if type not in ["Shape_key", "Scale", "Rotation", "Location"]:
+        if type not in ["Shape key", "Scale", "Rotation", "Location"]:
             raise Exception(
-                "type must be one of Shape_key, Scale, Rotation, Location"
+                "type must be one of Shape key, Scale, Rotation, Location"
             )
 
-        if point == "Shape_key":
+        if point == "Shape key":
             if len(value) > 1:
                 raise Exception("value must be a single float value")
             self.__parameters[name][type] = value
@@ -378,9 +378,9 @@ class BezierPPM:
     def __load_parameters_from_dict(self, parameter_dict: dict) -> dict:
         parameters = {}
         for key, value in parameter_dict.items():
-            if "Shape_key" in key:
-                type = "Shape_key"
-                name = key.replace("Shape_key_", "")
+            if "Shape key" in key:
+                type = "Shape key"
+                name = key.replace("Shape key ", "")
                 point = None
                 axis = None
             elif "Scale" in key:
@@ -436,9 +436,9 @@ class BezierPPM:
             for row in reader:
                 if len(row) == 0:
                     continue
-                elif "Shape_key" in row[0]:
-                    type = "Shape_key"
-                    name = row[0].replace("Shape_key_", "")
+                elif "Shape key" in row[0]:
+                    type = "Shape key"
+                    name = row[0].replace("Shape key ", "")
                     point = None
                     axis = None
                 elif "Scale" in row[0]:
@@ -496,9 +496,9 @@ class BezierPPM:
         obj = bpy.data.objects["Armature"]
         for parameter_name, parameter in self.__parameters.items():
             # shape keys
-            if "Shape_key" in parameter.keys():
+            if "Shape key" in parameter.keys():
                 bpy.data.shape_keys["Key"].key_blocks[parameter_name].value = (
-                    self.__parameters[parameter_name]["Shape_key"]
+                    self.__parameters[parameter_name]["Shape key"]
                 )
             else:
                 for point_name, point in parameter.items():
@@ -567,8 +567,8 @@ class BezierPPM:
 
         for parameter_name, parameter in self.__parameters.items():
             # shape keys
-            if "Shape_key" in parameter.keys():
-                self.__parameters[parameter_name]["Shape_key"] = (
+            if "Shape key" in parameter.keys():
+                self.__parameters[parameter_name]["Shape key"] = (
                     bpy.data.shape_keys["Key"].key_blocks[parameter_name].value
                 )
             else:
