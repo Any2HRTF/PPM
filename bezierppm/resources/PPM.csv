@@ -1,0 +1,162 @@
+Location Parent-Bendy X,0
+Location Parent-Bendy Y,0
+Location Parent-Bendy Z,0
+Rotation Parent-Bendy W,1
+Rotation Parent-Bendy X,0
+Rotation Parent-Bendy Y,0
+Rotation Parent-Bendy Z,0
+Scale Parent-Bendy X,1
+Scale Parent-Bendy Y,1
+Scale Parent-Bendy Z,1
+Shape key Antitragus-Crease,0
+Shape key Cavum conchae-Depth,0
+Shape key Cymba conchae-Depth,0
+Shape key Crus helicis-Prominence,0
+Shape key Upper helix-Depth,0
+Shape key Middle helix-Depth,0
+Shape key Lower helix-Depth,0
+Shape key Scapha-Depth,0
+Shape key Fossa triangularis-Depth,0
+Shape key Crus inferius anthelicis-Lower crease,0
+Shape key Crus inferius anthelicis-Upper crease,0
+Shape key Crus superius anthelicis-Lower crease,0
+Shape key Crus superius anthelicis-Upper crease,0
+Shape key Tragus-Upper dent,0
+Shape key Crus helicis-Upper dent,0
+Shape key Crus helicis-Lower dent,0
+Shape key Ear canal-Diameter,0
+Location Lobulus-Start X,0
+Location Lobulus-Start Y,0
+Location Lobulus-Start Z,0
+Rotation Lobulus-Start W,1
+Rotation Lobulus-Start X,0
+Rotation Lobulus-Start Y,0
+Rotation Lobulus-Start Z,0
+Location Lobulus-End X,0
+Location Lobulus-End Y,0
+Location Lobulus-End Z,0
+Rotation Lobulus-End W,1
+Rotation Lobulus-End X,0
+Rotation Lobulus-End Y,0
+Rotation Lobulus-End Z,0
+Location Helix low-Start X,0
+Location Helix low-Start Y,0
+Location Helix low-Start Z,0
+Rotation Helix low-Start W,1
+Rotation Helix low-Start X,0
+Rotation Helix low-Start Y,0
+Rotation Helix low-Start Z,0
+Location Helix low-End X,0
+Location Helix low-End Y,0
+Location Helix low-End Z,0
+Rotation Helix low-End W,1
+Rotation Helix low-End X,0
+Rotation Helix low-End Y,0
+Rotation Helix low-End Z,0
+Location Helix middle-Start X,0
+Location Helix middle-Start Y,0
+Location Helix middle-Start Z,0
+Rotation Helix middle-Start W,1
+Rotation Helix middle-Start X,0
+Rotation Helix middle-Start Y,0
+Rotation Helix middle-Start Z,0
+Location Helix middle-End X,0
+Location Helix middle-End Y,0
+Location Helix middle-End Z,0
+Rotation Helix middle-End W,1
+Rotation Helix middle-End X,0
+Rotation Helix middle-End Y,0
+Rotation Helix middle-End Z,0
+Location Helix up-Start X,0
+Location Helix up-Start Y,0
+Location Helix up-Start Z,0
+Rotation Helix up-Start W,1
+Rotation Helix up-Start X,0
+Rotation Helix up-Start Y,0
+Rotation Helix up-Start Z,0
+Location Helix up-End X,0
+Location Helix up-End Y,0
+Location Helix up-End Z,0
+Rotation Helix up-End W,1
+Rotation Helix up-End X,0
+Rotation Helix up-End Y,0
+Rotation Helix up-End Z,0
+Location Tragus-Start X,0
+Location Tragus-Start Y,0
+Location Tragus-Start Z,0
+Rotation Tragus-Start W,1
+Rotation Tragus-Start X,0
+Rotation Tragus-Start Y,0
+Rotation Tragus-Start Z,0
+Location Tragus-End X,0
+Location Tragus-End Y,0
+Location Tragus-End Z,0
+Rotation Tragus-End W,1
+Rotation Tragus-End X,0
+Rotation Tragus-End Y,0
+Rotation Tragus-End Z,0
+Location Antitragus-Start X,0
+Location Antitragus-Start Y,0
+Location Antitragus-Start Z,0
+Rotation Antitragus-Start W,1
+Rotation Antitragus-Start X,0
+Rotation Antitragus-Start Y,0
+Rotation Antitragus-Start Z,0
+Location Antitragus-End X,0
+Location Antitragus-End Y,0
+Location Antitragus-End Z,0
+Rotation Antitragus-End W,1
+Rotation Antitragus-End X,0
+Rotation Antitragus-End Y,0
+Rotation Antitragus-End Z,0
+Location Anthelix-Start X,0
+Location Anthelix-Start Y,0
+Location Anthelix-Start Z,0
+Rotation Anthelix-Start W,1
+Rotation Anthelix-Start X,0
+Rotation Anthelix-Start Y,0
+Rotation Anthelix-Start Z,0
+Location Anthelix-End X,0
+Location Anthelix-End Y,0
+Location Anthelix-End Z,0
+Rotation Anthelix-End W,1
+Rotation Anthelix-End X,0
+Rotation Anthelix-End Y,0
+Rotation Anthelix-End Z,0
+Location Crus inferius anthelicis-Start X,0
+Location Crus inferius anthelicis-Start Y,0
+Location Crus inferius anthelicis-Start Z,0
+Rotation Crus inferius anthelicis-Start W,1
+Rotation Crus inferius anthelicis-Start X,0
+Rotation Crus inferius anthelicis-Start Y,0
+Rotation Crus inferius anthelicis-Start Z,0
+Location Crus inferius anthelicis-End X,0
+Location Crus inferius anthelicis-End Y,0
+Location Crus inferius anthelicis-End Z,0
+Rotation Crus inferius anthelicis-End W,1
+Rotation Crus inferius anthelicis-End X,0
+Rotation Crus inferius anthelicis-End Y,0
+Rotation Crus inferius anthelicis-End Z,0
+Location Crus superius anthelicis-Start X,0
+Location Crus superius anthelicis-Start Y,0
+Location Crus superius anthelicis-Start Z,0
+Rotation Crus superius anthelicis-Start W,1
+Rotation Crus superius anthelicis-Start X,0
+Rotation Crus superius anthelicis-Start Y,0
+Rotation Crus superius anthelicis-Start Z,0
+Location Crus superius anthelicis-End X,0
+Location Crus superius anthelicis-End Y,0
+Location Crus superius anthelicis-End Z,0
+Rotation Crus superius anthelicis-End W,1
+Rotation Crus superius anthelicis-End X,0
+Rotation Crus superius anthelicis-End Y,0
+Rotation Crus superius anthelicis-End Z,0
+Scale Lobulus-Bendy,1
+Scale Helix low-Bendy,1
+Scale Helix middle-Bendy,1
+Scale Helix up-Bendy,1
+Scale Tragus-Bendy,1
+Scale Antitragus-Bendy,1
+Scale Anthelix-Bendy,1
+Scale Crus inferius anthelicis-Bendy,1
+Scale Crus superius anthelicis-Bendy,1

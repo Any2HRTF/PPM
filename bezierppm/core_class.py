@@ -385,18 +385,18 @@ class BezierPPM:
                 axis = None
             elif "Scale" in key:
                 type = "Scale"
-                name = "_".join(key.split("-")[0].split("_")[1:])
-                point = "_".join(key.split("-")[1].split("_"))
+                name =  " ".join(key.split("-")[0].split( " ")[1:])
+                point =  " ".join(key.split("-")[1].split( " "))
                 if "Parent" in key:
-                    axis = point.split("_")[-1]
-                    point = point.split("_")[0]
+                    axis = point.split( " ")[-1]
+                    point = point.split( " ")[0]
                 else:
                     axis = None
             else:
-                type = key.split("_")[0]
-                name = "_".join(key.split("-")[0].split("_")[1:])
-                point = "_".join(key.split("-")[1].split("_")[:-1])
-                axis = key.split("_")[-1]
+                type = key.split( " ")[0]
+                name =  " ".join(key.split("-")[0].split( " ")[1:])
+                point =  " ".join(key.split("-")[1].split( " ")[:-1])
+                axis = key.split( " ")[-1]
 
             value = float(value)
 
@@ -427,7 +427,7 @@ class BezierPPM:
     def __load_parameters_from_csv(self, csv_file=None) -> dict:
 
         if csv_file is None:
-            csv_file = f"{CURRENT_DIR}/resources/PPM_params.csv"
+            csv_file = f"{CURRENT_DIR}/resources/PPM.csv"
 
         with open(csv_file, newline="", encoding="utf-8") as csvfile:
             reader = csv.reader(csvfile)
@@ -443,18 +443,18 @@ class BezierPPM:
                     axis = None
                 elif "Scale" in row[0]:
                     type = "Scale"
-                    name = "_".join(row[0].split("-")[0].split("_")[1:])
-                    point = "_".join(row[0].split("-")[1].split("_"))
+                    name =  " ".join(row[0].split("-")[0].split( " ")[1:])
+                    point =  " ".join(row[0].split("-")[1].split( " "))
                     if "Parent" in row[0]:
-                        axis = point.split("_")[-1]
-                        point = point.split("_")[0]
+                        axis = point.split( " ")[-1]
+                        point = point.split( " ")[0]
                     else:
                         axis = None
                 elif "Rotation" in row[0] or "Location" in row[0]:
-                    type = row[0].split("_")[0]
-                    name = "_".join(row[0].split("-")[0].split("_")[1:])
-                    point = "_".join(row[0].split("-")[1].split("_")[:-1])
-                    axis = row[0].split("_")[-1]
+                    type = row[0].split( " ")[0]
+                    name =  " ".join(row[0].split("-")[0].split( " ")[1:])
+                    point =  " ".join(row[0].split("-")[1].split( " ")[:-1])
+                    axis = row[0].split( " ")[-1]
                 else:
                     # TODO: handle metadata
                     continue
@@ -494,7 +494,6 @@ class BezierPPM:
             self.__center_mesh_blender(reference_point=self.__reference_point)
 
         obj = bpy.data.objects["Armature"]
-
         for parameter_name, parameter in self.__parameters.items():
             # shape keys
             if "Shape_key" in parameter.keys():
@@ -684,7 +683,8 @@ class BezierPPM:
         # bpy.context.view_layer.objects.active = bpy.data.objects['Mesh']
 
         with redirect_stdout(io.StringIO()):
-            bpy.ops.export_mesh.ply(filepath=file, use_selection=True)
+#             bpy.ops.export_mesh.ply(filepath=file, use_selection=True)
+            bpy.ops.export_mesh.stl(filepath=file,filter_glob='*.ply', use_selection=True)
 
     def export_ply(self, file):
         """Exports the PPM as a PLY file.
@@ -857,7 +857,6 @@ class BezierPPM:
             if "light_power" not in kwargs.keys():
                 kwargs["light_power"] = 200000
             
-#             breakpoint()
             render(
                 dirpath=kwargs["dirpath"],
                 filename=kwargs["filename"],
@@ -968,11 +967,11 @@ if __name__ == "__main__":
     import os
     filedir = os.getcwd()
     p.set_parameter(name='Parent', type='Scale', value=(0.75, 1.5, 0.9), axis='ZXY')
-    p.export_stl(filedir+"/test")
-    p.set_parameter(name='Helix_up', point='Start', type='Location', value=(0.01,0.006), axis='ZX')
-    p.export_stl(filedir+"/test2")
+    p.export_ply(filedir+"/test")
+    p.set_parameter(name='Helix up', point='Start', type='Location', value=(0.01,0.006), axis='ZX')
+    p.export_ply(filedir+"/test2")
     q = (np.sqrt(2)/2, np.sqrt(2)/2, 0, 0)
     p.set_parameter(name='Parent', point='Bendy', type='Rotation', value=q, axis='WXYZ')    
-    p.export_stl(filedir+"/test3")
+    p.export_ply(filedir+"/test3")
     
-    p.render(filename="test4", dirpath=filedir, depth=True)
+#     p.render(filename="test4", dirpath=filedir, depth=True)
