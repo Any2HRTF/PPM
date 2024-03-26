@@ -132,3 +132,24 @@ def completeness(P, Q, threshhold=1.) -> np.float32:
         
     return 1 - distances[distances > threshhold].shape[0] / distances.shape[0]
         
+def chamger_distance(P, Q) -> np.float32:
+    """ Computes the chamfer distance given two point clouds P and Q.
+
+    Parameters
+    ----------
+    P: BezierPPM or np.ndarray
+    Q: BezierPPM or np.ndarray
+
+    Returns
+    -------
+    np.ndarray
+        chamfer distance
+    """
+
+    P_points = _get_point_cloud(P)
+    Q_points = _get_point_cloud(Q)
+    
+    distances_direction1 = minimal_distances(P, Q)
+    distances_direction2 = minimal_distances(Q, P)
+
+    return np.mean(distances_direction1) + np.mean(distances_direction2)
