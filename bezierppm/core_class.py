@@ -119,7 +119,13 @@ class BezierPPM:
         from_dict=None,
         backend="blender",
     ):
-
+        self.metadata = {
+            "Model": "BezierPPM",
+            "Version": "",
+            "APIName": "",
+            "APIVersion": "",
+            "Author": "",
+        }
         if from_blender_file != None and from_csv_file != None:
             raise Exception("Either load from blender file or from csv file.")
 
@@ -391,9 +397,6 @@ class BezierPPM:
                 point =  object.split(' ')[0]
                 if not name == "Parent" and type == "Scale":
                     axis = None
-            else:
-                # TODO: handle metadata
-                continue
             value = float(value)
 
             if type == "Scale":
@@ -444,7 +447,15 @@ class BezierPPM:
                     if not name == "Parent" and type == "Scale":
                         axis = None
                 else:
-                    # TODO: handle metadata
+                    # TODO: implement checks
+                    if key == "General-APIVersion":
+                        self.metadata["APIVersion"] = value
+                    elif key == "General-Version":
+                        self.metadata["Version"] = value
+                    elif key == "General-Author":
+                        self.metadata["Author"] = value
+                    elif key == "General-APIName":
+                        self.metadata["APIName"] = value
                     continue
                 value = float(value)
 
@@ -745,6 +756,8 @@ class BezierPPM:
         export_dict = self.get_parameter_dict()
 
         with open(file, "w", newline="") as csvfile:
+            for key, value in self.metadata.items():
+                csvfile.write(f"General-{key},{value}\n")
             for key, value in export_dict.items():
                 csvfile.write(f"{key},{value:e}\n")
 
@@ -955,16 +968,18 @@ if __name__ == "__main__":
     import os
     filedir = os.getcwd()
     
-    p.export_csv(file=filedir+"/parameters.csv")
-    parameter_dict = p.get_parameter_dict()
-    p = BezierPPM(from_dict=parameter_dict)
-    p.export_csv(file=filedir+"/parameters copy.csv")
-    p.set_parameter(name='Parent', type='Scale', value=(0.75, 1.5, 0.9), axis='ZXY')
-    p.export_ply(file=filedir+"/test")
-    p.set_parameter(name='Helix up', point='Start', type='Location', value=(0.01,0.006), axis='ZX')
-    p.export_stl(file=filedir+"/test2")
-    q = (np.sqrt(2)/2, np.sqrt(2)/2, 0, 0)
-    p.set_parameter(name='Parent', point='Bendy', type='Rotation', value=q, axis='WXYZ')    
-    p.export_stl(file=filedir+"/test3")
+    p.metadata["Author"] = "James Bond"
     
-    p.render(file=filedir+"/test4", depth=True)
+    p.export_csv(file=filedir+"/parameters.csv")
+#     parameter_dict = p.get_parameter_dict()
+#     p = BezierPPM(from_dict=parameter_dict)
+#     p.export_csv(file=filedir+"/parameters copy.csv")
+#     p.set_parameter(name='Parent', type='Scale', value=(0.75, 1.5, 0.9), axis='ZXY')
+#     p.export_ply(file=filedir+"/test")
+#     p.set_parameter(name='Helix up', point='Start', type='Location', value=(0.01,0.006), axis='ZX')
+#     p.export_stl(file=filedir+"/test2")
+#     q = (np.sqrt(2)/2, np.sqrt(2)/2, 0, 0)
+#     p.set_parameter(name='Parent', point='Bendy', type='Rotation', value=q, axis='WXYZ')    
+#     p.export_stl(file=filedir+"/test3")
+#     
+#     p.render(file=filedir+"/test4", depth=True)
