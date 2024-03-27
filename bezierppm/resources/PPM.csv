@@ -1,3 +1,8 @@
+General-Model, BezierPPM
+General-Version, 3.0
+General-API, PyBezierPPM
+General-APIVersion, 3.0-b4
+General-Author, The PyBezierPPM Autors
 Bendy bone-Parent-Location X,0
 Bendy bone-Parent-Location Y,0
 Bendy bone-Parent-Location Z,0
