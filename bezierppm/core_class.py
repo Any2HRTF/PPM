@@ -148,14 +148,14 @@ class BezierPPM:
         self.type_ = type
 
 
-    def __load_blender_file(self, file_path):
+    def __load_blender_file(self, filepath):
         logfile = tempfile.mktemp()
         open(logfile, "a").close()
         old = os.dup(sys.stdout.fileno())
         sys.stdout.flush()
         os.close(sys.stdout.fileno())
         fd = os.open(logfile, os.O_WRONLY)
-        bpy.ops.wm.open_mainfile(filepath=file_path)
+        bpy.ops.wm.open_mainfile(filepath=filepath)
         # disable output redirection
         os.close(fd)
         os.dup(old)
