@@ -212,7 +212,7 @@ class BezierPPM:
         for parameter_name, parameter in self.__parameters.items():
             # shape keys
             if "Shape key" in parameter.keys():
-                export_dict[f"Shape key {parameter_name}"] = self.__parameters[
+                export_dict[f"Shape-{parameter_name}-Weight"] = self.__parameters[
                     parameter_name
                 ]["Shape key"]
             else:
@@ -222,21 +222,21 @@ class BezierPPM:
                         if "Parent" in parameter_name:
                             for axis, axis_value in point["Scale"].items():
                                 export_dict[
-                                    f"Scale {parameter_name}-{point_name} {axis}"
+                                    f"{point_name} bone-{parameter_name}-Scale {axis}"
                                 ] = self.__parameters[parameter_name][point_name][
                                     "Scale"
                                 ][
                                     axis
                                 ]
                         else:
-                            export_dict[f"Scale {parameter_name}-{point_name}"] = (
+                            export_dict[f"{point_name} bone-{parameter_name}-Scale All"] = (
                                 self.__parameters[parameter_name][point_name]["Scale"]
                             )
                     # rotation
                     if "Rotation" in point.keys():
                         for axis, axis_value in point["Rotation"].items():
                             export_dict[
-                                f"Rotation {parameter_name}-{point_name} {axis}"
+                                f"{point_name} bone-{parameter_name}-Rotation {axis}"
                             ] = self.__parameters[parameter_name][point_name][
                                 "Rotation"
                             ][
@@ -246,7 +246,7 @@ class BezierPPM:
                     if "Location" in point.keys():
                         for axis, axis_value in point["Location"].items():
                             export_dict[
-                                f"Location {parameter_name}-{point_name} {axis}"
+                                f"{point_name} bone-{parameter_name}-Location {axis}"
                             ] = self.__parameters[parameter_name][point_name][
                                 "Location"
                             ][
@@ -378,26 +378,22 @@ class BezierPPM:
     def __load_parameters_from_dict(self, parameter_dict: dict) -> dict:
         parameters = {}
         for key, value in parameter_dict.items():
-            if "Shape key" in key:
+            if len(key) == key:
+                continue
+            elif "Shape" in key:
                 type = "Shape key"
-                name = key.replace("Shape key ", "")
+                name = '-'.join(key.split('-')[1:-1])
                 point = None
                 axis = None
-            elif "Scale" in key:
-                type = "Scale"
-                name =  " ".join(key.split("-")[0].split( " ")[1:])
-                point =  " ".join(key.split("-")[1].split( " "))
-                if "Parent" in key:
-                    axis = point.split( " ")[-1]
-                    point = point.split( " ")[0]
-                else:
+            elif "Rotation" in key or "Location" in key or "Scale" in key:
+                object, name, function = key.split('-')
+                type, axis = function.split(' ')
+                point =  object.split(' ')[0]
+                if not name == "Parent" and type == "Scale":
                     axis = None
             else:
-                type = key.split( " ")[0]
-                name =  " ".join(key.split("-")[0].split( " ")[1:])
-                point =  " ".join(key.split("-")[1].split( " ")[:-1])
-                axis = key.split( " ")[-1]
-
+                # TODO: handle metadata
+                continue
             value = float(value)
 
             if type == "Scale":
@@ -433,32 +429,24 @@ class BezierPPM:
             reader = csv.reader(csvfile)
             parameters = {}
 
-            for row in reader:
-                if len(row) == 0:
+            for key, value in reader:
+                if len(key) == key:
                     continue
-                elif "Shape key" in row[0]:
+                elif "Shape" in key:
                     type = "Shape key"
-                    name = row[0].replace("Shape key ", "")
+                    name = '-'.join(key.split('-')[1:-1])
                     point = None
                     axis = None
-                elif "Scale" in row[0]:
-                    type = "Scale"
-                    name =  " ".join(row[0].split("-")[0].split( " ")[1:])
-                    point =  " ".join(row[0].split("-")[1].split( " "))
-                    if "Parent" in row[0]:
-                        axis = point.split( " ")[-1]
-                        point = point.split( " ")[0]
-                    else:
+                elif "Rotation" in key or "Location" in key or "Scale" in key:
+                    object, name, function = key.split('-')
+                    type, axis = function.split(' ')
+                    point =  object.split(' ')[0]
+                    if not name == "Parent" and type == "Scale":
                         axis = None
-                elif "Rotation" in row[0] or "Location" in row[0]:
-                    type = row[0].split( " ")[0]
-                    name =  " ".join(row[0].split("-")[0].split( " ")[1:])
-                    point =  " ".join(row[0].split("-")[1].split( " ")[:-1])
-                    axis = row[0].split( " ")[-1]
                 else:
                     # TODO: handle metadata
                     continue
-                value = float(row[1])
+                value = float(value)
 
                 if type == "Scale":
                     pass
@@ -967,6 +955,10 @@ if __name__ == "__main__":
     import os
     filedir = os.getcwd()
     
+    p.export_csv(file=filedir+"/parameters.csv")
+    parameter_dict = p.get_parameter_dict()
+    p = BezierPPM(from_dict=parameter_dict)
+    p.export_csv(file=filedir+"/parameters copy.csv")
     p.set_parameter(name='Parent', type='Scale', value=(0.75, 1.5, 0.9), axis='ZXY')
     p.export_ply(file=filedir+"/test")
     p.set_parameter(name='Helix up', point='Start', type='Location', value=(0.01,0.006), axis='ZX')
