@@ -4,7 +4,7 @@ Python interface to a parametric pinna model based on cubic Bézier curves (Bezi
 
 ## Requirement
 
-Python 3.10 is required to use the software. It is recommended to setup a environment using e.g. conda.
+Python 3.11 is required to use the software. It is recommended to setup a environment using e.g. conda.
 
 ## Installation
 
