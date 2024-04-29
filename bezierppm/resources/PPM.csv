@@ -10,9 +10,9 @@ Bendy bone-Parent-Rotation W,1
 Bendy bone-Parent-Rotation X,0
 Bendy bone-Parent-Rotation Y,0
 Bendy bone-Parent-Rotation Z,0
-Bendy bone-Parent-Scale X,0
-Bendy bone-Parent-Scale Y,0
-Bendy bone-Parent-Scale Z,0
+Bendy bone-Parent-Scale X,1
+Bendy bone-Parent-Scale Y,1
+Bendy bone-Parent-Scale Z,1
 Shape-Antitragus-Crease-Weight,0
 Shape-Cavum conchae-Depth-Weight,0
 Shape-Cymba conchae-Depth-Weight,0

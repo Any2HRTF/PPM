@@ -10,7 +10,7 @@ import bmesh
 import mathutils
 import numpy as np
 
-from .render_helpers import render
+from render_helpers import render
 
 def euler_to_quaternion(euler_matrix: np.array, sequence: str = "ZYX") -> np.array:
     """Transforms a rotation matrix into a quaternion.
@@ -516,7 +516,6 @@ class BezierPPM:
                                         )
                                     )
                                 ] = axis_value
-
                         else:
                             obj.pose.bones[parameter_name + "-" + point_name].scale[
                                 0
@@ -964,22 +963,5 @@ class BezierPPM:
 
 if __name__ == "__main__":
 
-    p = BezierPPM()
-    import os
-    filedir = os.getcwd()
-    
-    p.metadata["Author"] = "James Bond"
-    
-    p.export_csv(file=filedir+"/parameters.csv")
-#     parameter_dict = p.get_parameter_dict()
-#     p = BezierPPM(from_dict=parameter_dict)
-#     p.export_csv(file=filedir+"/parameters copy.csv")
-#     p.set_parameter(name='Parent', type='Scale', value=(0.75, 1.5, 0.9), axis='ZXY')
-#     p.export_ply(file=filedir+"/test")
-#     p.set_parameter(name='Helix up', point='Start', type='Location', value=(0.01,0.006), axis='ZX')
-#     p.export_stl(file=filedir+"/test2")
-#     q = (np.sqrt(2)/2, np.sqrt(2)/2, 0, 0)
-#     p.set_parameter(name='Parent', point='Bendy', type='Rotation', value=q, axis='WXYZ')    
-#     p.export_stl(file=filedir+"/test3")
-#     
-#     p.render(file=filedir+"/test4", depth=True)
+    ppm = BezierPPM()
+    print(ppm.points)
