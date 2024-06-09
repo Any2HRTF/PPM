@@ -11,3 +11,5 @@ __pycache__
 
 *.vscode
 test_render.py
+
+BezierPPMEnvironment/
