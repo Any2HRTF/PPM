@@ -674,32 +674,6 @@ class BezierPPM:
         else:
             raise NotImplementedError
 
-    def __export_ply_blender(self, file):
-
-        bpy.ops.object.select_all(action="DESELECT")
-        bpy.data.objects["Mesh"].select_set(True)
-        # bpy.context.view_layer.objects.active = bpy.data.objects['Mesh']
-
-        with redirect_stdout(io.StringIO()):
-#             bpy.ops.export_mesh.ply(filepath=file, use_selection=True)
-            bpy.ops.export_mesh.stl(filepath=file,filter_glob='*.ply', use_selection=True)
-
-    def export_ply(self, file):
-        """Exports the PPM as a PLY file.
-
-        Parameters
-        ----------
-        file : str
-            Path to the PLY file.
-        """
-        if file[-4:] != ".ply":
-            file += ".ply"
-        if self.backend == "blender":
-            self.__set_parameters_in_blender()
-            self.__export_ply_blender(file)
-        else:
-            raise NotImplementedError
-
     def __export_stl_blender(self, file):
 
         bpy.ops.object.select_all(action="DESELECT")
