@@ -4,14 +4,14 @@ Python interface to a parametric pinna model based on cubic Bézier curves (Bezi
 
 ## Requirement
 
-Python 3.11 is required to use the software. It is recommended to setup a environment using e.g. conda.
+Python 3.11 is required to use the software.
 
 ## Installation
 
 Get the pre-built Python wheel from the [releases](https://github.com/Any2HRTF/PPM/releases/latest) page and install it using pip:
 
 ```bash
-pip install /path/to/wheel.whl
+$ pip install /path/to/wheel.whl
 ```
 
 ## Usage
@@ -65,11 +65,10 @@ pmod.set_parameter(name='Ear_canal-Diameter', type='Shape_key', value=(-1))
 
 ### Export Options
 
-The module offers the possibility to export the PPM mesh in 'ply' and 'stl' format using the methods `export_ply` and `export_stl`, respectively.
+The module offers the possibility to export the PPM mesh in 'stl' format using the method `export_stl`.
 The currently set PPM parameters can be exported to a 'csv' file using the method `export_csv`.
 
 ```python
-ppm.export_ply('ppm.ply')
 ppm.export_stl('ppm.stl')
 ppm.export_csv('ppm.csv')
 ```
