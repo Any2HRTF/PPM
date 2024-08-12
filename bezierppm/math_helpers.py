@@ -1,4 +1,6 @@
 import numpy as np
+from scipy.spatial import cKDTree
+from .core_class import get_pinna_regions
 
 def _get_point_cloud(P) -> np.ndarray:
     """ Returns the point cloud of P.
@@ -19,6 +21,22 @@ def _get_point_cloud(P) -> np.ndarray:
         return np.array(P, dtype=np.float32)
     else:
         raise TypeError('P must be of type PPM or np.ndarray')
+    
+def distances_for_pinna_regions(P, Q) -> dict:
+        
+    if P.__class__.__name__ != 'BezierPPM' or Q.__class__.__name__ != 'BezierPPM':
+        raise TypeError('P and Q must be of type BezierPPM')
+    
+    materials = get_pinna_regions()
+
+    out = {}
+
+    for material in materials:
+        region_points_p= P.get_vertices_assigned_to_material(material)
+        region_points_q = Q.get_vertices_assigned_to_material(material)
+        out[material] = point_wise_distances(region_points_p, region_points_q)
+
+    return out
 
 def minimal_distances(P, Q,) -> np.ndarray:
     """ Computes the minimal distances between two point clouds P and Q.
@@ -38,9 +56,12 @@ def minimal_distances(P, Q,) -> np.ndarray:
     P_points = _get_point_cloud(P)
     Q_points = _get_point_cloud(Q)
 
-    min_distances = np.zeros(P_points.shape[0], dtype=np.float32)
-    for idx_pred in range(min_distances.shape[0]):
-        min_distances[idx_pred] = np.sqrt(np.min(np.sum((P_points[idx_pred, :] - Q_points)**2, axis=1)))
+    # min_distances = np.zeros(P_points.shape[0], dtype=np.float32)
+    # for idx_pred in range(min_distances.shape[0]):
+    #     min_distances[idx_pred] = np.sqrt(np.min(np.sum((P_points[idx_pred, :] - Q_points)**2, axis=1)))
+
+    tree = cKDTree(Q_points)
+    min_distances = tree.query(P_points, workers=-1)[0]
 
     return min_distances
 
