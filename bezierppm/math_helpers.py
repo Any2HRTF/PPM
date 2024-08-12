@@ -36,9 +36,10 @@ def distances_for_pinna_regions(P, Q, skip_input_check=False) -> dict:
         region_points_p= P.get_vertices_assigned_to_material(material)
         if skip_input_check:
             region_points_q = Q
+            out[material] = minimal_distances(region_points_p, region_points_q)
         else:
             region_points_q = Q.get_vertices_assigned_to_material(material)
-        out[material] = point_wise_distances(region_points_p, region_points_q)
+            out[material] = point_wise_distances(region_points_p, region_points_q)
 
     return out
 
