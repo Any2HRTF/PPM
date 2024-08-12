@@ -22,10 +22,11 @@ def _get_point_cloud(P) -> np.ndarray:
     else:
         raise TypeError('P must be of type PPM or np.ndarray')
     
-def distances_for_pinna_regions(P, Q) -> dict:
-        
-    if P.__class__.__name__ != 'BezierPPM' or Q.__class__.__name__ != 'BezierPPM':
-        raise TypeError('P and Q must be of type BezierPPM')
+def distances_for_pinna_regions(P, Q, skip_input_check=False) -> dict:
+    
+    if not skip_input_check:
+        if P.__class__.__name__ != 'BezierPPM' or Q.__class__.__name__ != 'BezierPPM':
+            raise TypeError('P and Q must be of type BezierPPM')
     
     materials = get_pinna_regions()
 
