@@ -1,3 +1,4 @@
-bpy
+bpy==4.1
+scipy
 numpy
 matplotlib

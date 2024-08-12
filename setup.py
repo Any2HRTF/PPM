@@ -1,6 +1,6 @@
 from setuptools import setup
 
-version = '3.0-rc1'
+version = '3.0-rc2'
 
 setup(
     name='PyBezierPPM',
@@ -18,8 +18,9 @@ setup(
     python_requires='==3.11.*',
     zip_safe=False,
     install_requires=[
-        "numpy",
         "bpy==4.1",
+        "numpy",
+        "scipy",
         "matplotlib",
     ],
     classifiers=[
