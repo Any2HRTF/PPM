@@ -3,7 +3,7 @@ import io
 import os
 import sys
 import tempfile
-import itertools
+import pickle
 from contextlib import redirect_stdout
 
 import bpy
@@ -935,52 +935,21 @@ class BezierPPM:
 
         return center_of_mass
 
-    def get_vertices_assigned_to_material(self, material_name="Conchae"):
-
-        self.__set_parameters_in_blender()
-        # context = bpy.context
-        obj = bpy.data.objects["Mesh"]
-        mesh = obj.data
-        vertices = []
-
-        for f in mesh.polygons:  # iterate over faces
-            slot = obj.material_slots[f.material_index]
-            mat = slot.material
-            if mat is not None:
-                if mat.name == material_name:
-                    for i in range(len(f.vertices)):
-                        vertices.append(list(obj.data.vertices[f.vertices[i]].co))
-
-        vertices.sort()
-        vertices=list(k for k,_ in itertools.groupby(vertices))
+    def get_region_vertices(self):
+        with open(f'{CURRENT_DIR}/resources/pinna_regions.pickle', 'rb') as handle:
+            region_indices = pickle.load(handle)
         
-        return np.stack(vertices)
+        export = {}
+        export['Frontside'] = []
 
-def get_pinna_regions():
-    logfile = tempfile.mktemp()
-    open(logfile, "a").close()
-    old = os.dup(sys.stdout.fileno())
-    sys.stdout.flush()
-    os.close(sys.stdout.fileno())
-    fd = os.open(logfile, os.O_WRONLY)
-    bpy.ops.wm.open_mainfile(filepath=f"{CURRENT_DIR}/resources/PPM.blend")
-    # disable output redirection
-    os.close(fd)
-    os.dup(old)
-    os.close(old)
-    bpy.ops.object.mode_set(mode="OBJECT")
+        for region, indices in region_indices.items():
+            export[region] = self.points[indices]
+            if region != 'Backside':
+                export['Frontside'].append(export[region])
 
-    obj = bpy.data.objects["Mesh"]
-    mesh = obj.data
-    materials = []
+        export['Frontside'] = np.concat(export['Frontside'])
 
-    for f in mesh.polygons:  # iterate over faces
-        slot = obj.material_slots[f.material_index]
-        mat = slot.material
-        if mat is not None:
-            materials.append(mat.name)      
-
-    return list(set(materials))
+        return export
 
 if __name__ == "__main__":
 
