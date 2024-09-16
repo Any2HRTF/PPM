@@ -12,7 +12,7 @@ setup(
     license_files = ('LICENSE',),
     packages=['bezierppm'],
     package_data={
-        'bezierppm': ['resources/*.csv', 'resources/*.blend'],
+        'bezierppm': ['resources/*.csv', 'resources/*.blend', 'resources/*.pickle'],
     },
     include_package_data=True,
     python_requires='==3.11.*',
