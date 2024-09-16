@@ -950,6 +950,22 @@ class BezierPPM:
         export['Frontside'] = np.concat(export['Frontside'])
 
         return export
+    
+    def get_region_indices(self):
+        with open(f'{CURRENT_DIR}/resources/pinna_regions.pickle', 'rb') as handle:
+            region_indices = pickle.load(handle)
+        
+        export = {}
+        export['Frontside'] = []
+
+        for region, indices in region_indices.items():
+            export[region] = indices
+            if region != 'Backside':
+                export['Frontside'].append(export[region])
+
+        export['Frontside'] = np.concat(export['Frontside'])
+
+        return export
 
 if __name__ == "__main__":
 
