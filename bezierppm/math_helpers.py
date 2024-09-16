@@ -1,6 +1,5 @@
 import numpy as np
 from scipy.spatial import cKDTree
-from .core_class import get_pinna_regions
 
 def _get_point_cloud(P) -> np.ndarray:
     """ Returns the point cloud of P.
@@ -22,24 +21,33 @@ def _get_point_cloud(P) -> np.ndarray:
     else:
         raise TypeError('P must be of type PPM or np.ndarray')
     
-def distances_for_pinna_regions(P, Q, skip_input_check=False) -> dict:
-    
-    if not skip_input_check:
-        if P.__class__.__name__ != 'BezierPPM' or Q.__class__.__name__ != 'BezierPPM':
-            raise TypeError('P and Q must be of type BezierPPM')
-    
-    materials = get_pinna_regions()
+def distances_for_pinna_regions(P, Q) -> dict:
+    """ Computes the distances between two point clouds P and Q for each region.
+    P and Q can be of type PPM or np.ndarray. If P and Q are of type PPM then the point wise distances are returned
 
+    Parameters
+    ----------
+    P : PPM
+    Q : PPM or np.ndarray
+
+    Returns
+    -------
+    dict
+        Minimal distances between P and Q for each region.
+    """
+    
     out = {}
 
-    for material in materials:
-        region_points_p= P.get_vertices_assigned_to_material(material)
-        if skip_input_check:
-            region_points_q = Q
-            out[material] = minimal_distances(region_points_p, region_points_q)
-        else:
-            region_points_q = Q.get_vertices_assigned_to_material(material)
-            out[material] = point_wise_distances(region_points_p, region_points_q)
+    if P.__class__.__name__ == 'BezierPPM' and Q.__class__.__name__ == 'BezierPPM':
+        dict_p = P.get_region_vertices()
+        dict_q = Q.get_region_vertices()
+
+        for material in dict_p.keys():
+            out[material] = point_wise_distances(dict_p[material], dict_q[material])
+    else:
+        dict_p = P.get_region_vertices()
+        for material in dict_p.keys():
+            out[material] = minimal_distances(dict_p[material], Q) 
 
     return out
 
