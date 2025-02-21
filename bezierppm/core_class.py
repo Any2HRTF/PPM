@@ -947,7 +947,7 @@ class BezierPPM:
             if region != 'Backside':
                 export['Frontside'].append(export[region])
 
-        export['Frontside'] = np.concat(export['Frontside'])
+        export['Frontside'] = np.concatenate(export['Frontside'])
 
         return export
     
@@ -963,7 +963,7 @@ class BezierPPM:
             if region != 'Backside':
                 export['Frontside'].append(export[region])
 
-        export['Frontside'] = np.concat(export['Frontside'])
+        export['Frontside'] = list(np.concatenate(export['Frontside']))
 
         return export
 
