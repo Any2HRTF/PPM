@@ -1,6 +1,6 @@
 # PyBezierPPM
 
-Python interface to a parametric pinna model based on cubic Bézier curves (BezierPPM) [1]. 
+Python interface to a parametric pinna model based on cubic Bézier curves (BezierPPM). 
 
 ## Requirement
 
