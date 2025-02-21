@@ -41,7 +41,7 @@ ppm.center_mesh(reference_point='center_of_mass')
 To see the currently set parameters, use the `print` function.
 ```python
 print(ppm)
-print(ppm.parameters['Helix_up']['Start']['Location'])
+print(ppm.parameters['Helix up']['Start']['Location'])
 ```
 
 Set the BezierPPM parameters using the method `set_parameter`.
@@ -53,14 +53,14 @@ Set the BezierPPM parameters using the method `set_parameter`.
 ppm.set_parameter(name='Parent', type='Scale', value=(0.75, 1.5, 0.0), axis='ZXY')
 
 # Translate 'Helix_up' (start point) 
-ppm.set_parameter(name='Helix_up', point='Start', type='Location', value=(1,0.6), axis='ZX')
+ppm.set_parameter(name='Helix up', point='Start', type='Location', value=(1,0.6), axis='ZX')
 
 # Rotate 'Parent' by 90 degrees around the X-axis via a quaternion
 q = (np.sqrt(2)/2, np.sqrt(2)/2, 0, 0)
 ppm.set_parameter(name='Parent', point='Bendy', type='Rotation', value=q, axis='WXYZ')
 
 # Modify the shape key 'Ear_canal-Diameter'
-pmod.set_parameter(name='Ear_canal-Diameter', type='Shape_key', value=(-1))
+pmod.set_parameter(name='Ear canal-Diameter', type='Shape key', value=(-1))
 ```
 
 ### Export Options
@@ -83,7 +83,7 @@ points = ppm.points
 The method `render` can be used to render the PPM instance as 'png' and optionally 'exr' (OpenEXR) file in Blender.
 
 ```python
-ppm.render(dirpath="/path/to/render/file/location", filename="filename", resolution=512)
+ppm.render(file="/path/to/render/file/location/filename", resolution=512)
 ```
 
 ### Math Helpers
