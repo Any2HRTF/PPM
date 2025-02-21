@@ -27,18 +27,13 @@ jobs:
       run: pipx install uv
     - name: Build dist
       run: uv build
-    - run: ls ./dist
-    - name: Get python package version
-      id: get_version
-      run: |
-        cd dist
-        echo ::set-output name=WHEEL::$(ls *.whl)
-    - name: Upload release binary
-      uses: actions/upload-release-asset@v1.0.2
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        upload_url: ${{ steps.get_release.outputs.upload_url }}
-        asset_path: ${{ github.workspace }}/dist/${{ steps.get_version.outputs.WHEEL }}
-        asset_name: ${{ steps.get_version.outputs.WHEEL }}
-        asset_content_type: application/zip
+    - name: Upload artifact signatures to GitHub Release
+          env:
+            GITHUB_TOKEN: ${{ github.token }}
+          # Upload to GitHub Release using the `gh` CLI.
+          # `dist/` contains the built packages, and the
+          # sigstore-produced signatures and certificates.
+          run: >-
+            gh release upload
+            "$GITHUB_REF_NAME" dist/**
+            --repo "$GITHUB_REPOSITORY"
