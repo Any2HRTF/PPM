@@ -132,12 +132,16 @@ This software is licensed under the EUPL-1.2 License. See the [LICENSE](LICENSE.
 Please cite the following paper if you use this code in your work:
 
 ```bibtex
-@inproceedings{,
-  title={},
-  author={},
-  booktitle={},
-  year={},
-  url={}
+@article{,
+  title={Parametric model of the human pinna based on Bézier curves and concave deformations},
+  journal = {Computers in Biology and Medicine},
+  volume = {188},
+  pages = {109817},
+  year = {2025},
+  issn = {0010-4825},
+  doi = {https://doi.org/10.1016/j.compbiomed.2025.109817},
+  url = {https://www.sciencedirect.com/science/article/pii/S0010482525001672},
+  author = {Felix Perfler and Florian Pausch and Katharina Pollack and Nicki Holighaus and Piotr Majdak},
 }
 ```
 
