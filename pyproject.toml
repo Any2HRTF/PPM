@@ -1,0 +1,15 @@
+[project]
+name = "PyBezierPPM"
+version = "3.0"
+description = "Python PPM module."
+readme = "README.md"
+requires-python = "==3.11.*"
+dependencies = [
+        "bpy==4.3",
+        "numpy<2.0",
+        "scipy",
+        "matplotlib",
+]
+
+[tool.setuptools.package-data]
+    bezierppm = ['resources/*.csv', 'resources/*.blend', 'resources/*.pickle']

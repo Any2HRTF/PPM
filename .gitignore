@@ -13,3 +13,7 @@ __pycache__
 test_render.py
 
 .BezierPPM/
+
+uv.lock
+.python-version
+test.py

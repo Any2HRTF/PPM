@@ -312,9 +312,11 @@ class BezierPPM:
                 "type must be one of Shape key, Scale, Rotation, Location"
             )
 
-        if point == "Shape key":
+        if type == "Shape key":
             if len(value) > 1:
                 raise Exception("value must be a single float value")
+            if self.type_(value) == tuple:
+                value = value[0]
             self.__parameters[name][type] = value
         elif type == "Scale":
             if point in ["Start", "End"]:
@@ -497,9 +499,7 @@ class BezierPPM:
         for parameter_name, parameter in self.__parameters.items():
             # shape keys
             if "Shape key" in parameter.keys():
-                bpy.data.shape_keys["Key"].key_blocks[parameter_name].value = (
-                    self.__parameters[parameter_name]["Shape key"]
-                )
+                bpy.data.shape_keys["Key"].key_blocks[parameter_name].value = self.__parameters[parameter_name]["Shape key"]
             else:
                 for point_name, point in parameter.items():
                     # scale
@@ -681,7 +681,7 @@ class BezierPPM:
         bpy.data.objects["Mesh"].select_set(True)
 
         with redirect_stdout(io.StringIO()):
-            bpy.ops.export_mesh.stl(filepath=file, use_selection=True)
+            bpy.ops.wm.stl_export(filepath=file)
 
     def export_stl(self, file):
         """Exports the PPM as a STL file.
