@@ -134,8 +134,8 @@ Please cite the following paper if you use this code in your work:
 * Perfler F.; Pausch F.; Pollack K.; Holighaus N.; Majdak P. (**2025**) Parametric model of the human pinna based on Bézier curves and concave deformations. _Computers in Biology and Medicine_ 188: 109817. DOI: [10.1016/j.compbiomed.2025.109817](https://doi.org/10.1016/j.compbiomed.2025.109817).
 
 ```bibtex
-@article{Perfler2025
-  title={Parametric model of the human pinna based on Bézier curves and concave deformations},
+@article{Perfler2025,
+  title = {Parametric model of the human pinna based on Bézier curves and concave deformations},
   author = {Felix Perfler and Florian Pausch and Katharina Pollack and Nicki Holighaus and Piotr Majdak},
   journal = {Computers in Biology and Medicine},
   volume = {188},
