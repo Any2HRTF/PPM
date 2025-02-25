@@ -133,6 +133,7 @@ Please cite the following paper if you use this code in your work:
 
 ```bibtex
 @article{Perfler2025,
+  author = {Felix Perfler and Florian Pausch and Katharina Pollack and Nicki Holighaus and Piotr Majdak},
   title={Parametric model of the human pinna based on Bézier curves and concave deformations},
   journal = {Computers in Biology and Medicine},
   volume = {188},
@@ -141,7 +142,6 @@ Please cite the following paper if you use this code in your work:
   issn = {0010-4825},
   doi = {https://doi.org/10.1016/j.compbiomed.2025.109817},
   url = {https://www.sciencedirect.com/science/article/pii/S0010482525001672},
-  author = {Felix Perfler and Florian Pausch and Katharina Pollack and Nicki Holighaus and Piotr Majdak},
 }
 ```
 
