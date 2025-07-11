@@ -8,7 +8,7 @@ Python 3.11 is required to use the software.
 
 ## Installation
 
-Get the pre-built Python wheel from the [releases](https://github.com/Any2HRTF/PPM/releases/latest) page or install latest version using pip:
+Get the pre-built Python wheel from the [releases](https://github.com/Any2HRTF/PPM/releases) page or install latest version using pip:
 
 ```bash
 pip install pybezierppm@git+https://github.com/Any2HRTF/PPM
