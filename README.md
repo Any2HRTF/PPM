@@ -1,6 +1,6 @@
 # PyBezierPPM
 
-Python interface to a parametric pinna model based on cubic Bézier curves (BezierPPM). 
+Parametric pinna model based on cubic Bézier curves (BezierPPM). 
 
 ## Requirement
 
@@ -8,10 +8,10 @@ Python 3.11 is required to use the software.
 
 ## Installation
 
-Get the pre-built Python wheel from the [releases](https://github.com/Any2HRTF/PPM/releases/latest) page and install it using pip:
+Get the pre-built Python wheel from the [releases](https://github.com/Any2HRTF/PPM/releases/latest) page or install latest version using pip:
 
 ```bash
-$ pip install /path/to/wheel.whl
+pip install pybezierppm@git+https://github.com/Any2HRTF/PPM
 ```
 
 ## Usage
@@ -45,7 +45,6 @@ print(ppm.parameters['Helix up']['Start']['Location'])
 ```
 
 Set the BezierPPM parameters using the method `set_parameter`.
-
 
 
 ```python
@@ -95,7 +94,7 @@ from bezierppm import BezierPPM
 from bezierppm.math_helpers import minimal_distances, hausdorff_distance
 
 p1 = BezierPPM()
-p2 = BezierPPM(from_csv='path/to/file.csv')
+p2 = BezierPPM(from_csv_file='path/to/file.csv')
 
 # returns an array of the minimal distances between the points of p1 and p2
 distances = minimal_distances(p1, p2)
@@ -113,7 +112,7 @@ from bezierppm import BezierPPM
 from bezierppm.plotting_helpers import plot_distances
 
 p1 = BezierPPM()
-p2 = BezierPPM(from_csv='path/to/file.csv')
+p2 = BezierPPM(from_csv_file='path/to/file.csv')
 
 plot_distances(p1, p2)
 ```
